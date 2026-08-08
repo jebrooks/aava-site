@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { featuredBoards, legacyUrl } from '../data/site';
+---
+
+<BaseLayout
+  title="Gourmet Charcuterie Boards"
+  description="Explore handcrafted cheese and charcuterie boards for gatherings and special occasions, available for delivery in Northern Virginia."
+  image="/images/hero-charcuterie.webp"
+>
+  <PageHero
+    image="/images/hero-charcuterie.webp"
+    title="Charcuterie"
+    description="Beautifully arranged boards crafted to elevate any occasion, big or small."
+  >
+    <Button href="#menu" variant="light">Explore our menu</Button>
+  </PageHero>
+
+  <section class="section">
+    <div class="container--narrow section-heading">
+      <p class="eyebrow">From casual gatherings to elegant affairs</p>
+      <h2>Designed to be served, shared, and savored.</h2>
+      <p class="lede">
+        Each board is thoughtfully composed with high-quality ingredients and seasonal touches to
+        suit your guest count and style. Crafted from the heart, our boards bring flavor, beauty,
+        and a little joy to every gathering.
+      </p>
+      <p><strong>Available for delivery in Northern Virginia.</strong></p>
+    </div>
+  </section>
+
+  <nav class="section section--tight section--cream" id="menu" aria-label="Charcuterie menu sections">
+    <div class="container">
+      <p class="eyebrow center">Explore our boards</p>
+      <ul class="menu-jump">
+        <li><a href="#quick-pick">Quick Pick</a></li>
+        <li><a href="#signature">Signature Boards</a></li>
+        <li><a href="#special-occasions">Special Occasions</a></li>
+        <li><a href="#build-your-own">Build Your Own</a></li>
+        <li><a href={legacyUrl('/custom-board-request-form')}>Custom Requests</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="section" id="quick-pick">
+    <div class="container split">
+      <div class="split__media">
+        <img
+          src="/images/board-quick-pick.webp"
+          alt="Quick Pick charcuterie board"
+          width="1000"
+          height="750"
+          loading="lazy"
+        />
+      </div>
+      <div class="split__content">
+        <p class="eyebrow">In a hurry?</p>
+        <h2>Try our Quick Pick.</h2>
+        <p class="lede">
+          Leave the selections to us. We’ll create a crowd-pleasing mix of artisan cheeses, cured
+          meats, fruit, and accompaniments using the best ingredients available.
+        </p>
+        <Button href={legacyUrl('/charcuterie-menu/p/chefs-choice-charcuterie')} external>Order Quick Pick</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cream" id="signature" aria-labelledby="signature-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Tried-and-true favorites</p>
+        <h2 id="signature-heading">Signature Boards</h2>
+        <p>
+          Our favorite combinations showcase popular flavors and pairings. Choose a vegetarian
+          board or one with meat, in sizes made for sharing.
+        </p>
+      </div>
+      <div class="product-grid">
+        {featuredBoards.map((board) => (
+          <a class="product-card" href={legacyUrl(board.href)} target="_blank" rel="noreferrer">
+            <img src={board.image} alt={board.name} width="1000" height="1000" loading="lazy" />
+            <div class="product-card__body">
+              <h3>{board.name}</h3>
+              <p>View board →</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="board-options">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Made for your gathering</p>
+        <h2 id="board-options">Not seeing exactly what you need?</h2>
+        <p>Let’s build it together.</p>
+      </div>
+      <div class="option-grid">
+        <article class="option-card" id="special-occasions">
+          <p class="eyebrow">Celebrate</p>
+          <h3>Special Occasions</h3>
+          <p>Mark a milestone, shower, or themed gathering with thoughtful details designed to match the moment.</p>
+          <Button href={legacyUrl('/custom-board-request-form')} variant="text" external>Design your board</Button>
+        </article>
+        <article class="option-card" id="build-your-own">
+          <p class="eyebrow">Choose every bite</p>
+          <h3>Build Your Own</h3>
+          <p>Select the cheeses, meats, and accompaniments you love, priced clearly by party size.</p>
+          <Button href={legacyUrl('/charcuterie-menu/build-your-own-boards')} variant="text" external>Start building</Button>
+        </article>
+        <article class="option-card">
+          <p class="eyebrow">Something unique</p>
+          <h3>Custom Request</h3>
+          <p>Planning for a larger group, dietary need, or creative theme? Tell us what you have in mind.</p>
+          <Button href={legacyUrl('/custom-board-request-form')} variant="text" external>Request a custom board</Button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--burgundy home-gift">
+    <div class="container home-gift__inner">
+      <p class="eyebrow eyebrow--light">Not sure what to choose?</p>
+      <h2>Give the gift of charcuterie.</h2>
+      <p class="lede">A digital gift certificate lets them choose the board and occasion that feels just right.</p>
+      <Button href={legacyUrl('/charcuterie-menu/p/gift-certificate')} variant="light" external>Give a digital gift certificate</Button>
+    </div>
+  </section>
+</BaseLayout>

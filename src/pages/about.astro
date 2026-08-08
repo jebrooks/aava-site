@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+---
+
+<BaseLayout
+  title="About Us"
+  description="Meet Colleen and Jim, the founders of All ABoard VA, and learn about their passion for Virginia wine country, hospitality, and memorable gatherings."
+  image="/images/about-founders.webp"
+>
+  <section class="about-hero">
+    <div class="container about-hero__inner">
+      <div class="about-hero__copy">
+        <p class="eyebrow">Who we are</p>
+        <h1>Rooted in a love for Virginia.</h1>
+        <p class="lede">
+          We’re Colleen and Jim—hosts, food lovers, and enthusiastic guides to the countryside we
+          call home.
+        </p>
+        <div class="button-row">
+          <Button href="/experiences">Explore our tours</Button>
+          <Button href="/contact" variant="secondary">Get in touch</Button>
+        </div>
+      </div>
+      <div class="about-hero__art">
+        <img
+          src="/images/about-founders.webp"
+          alt="All ABoard VA founders Colleen and Jim"
+          width="1500"
+          height="1125"
+        />
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container--narrow">
+      <p class="eyebrow center">Our story</p>
+      <h2 class="center">Beautiful places. Wonderful flavors. Time together.</h2>
+      <p class="lede">
+        We started All ABoard VA with a passion for the beauty and rich history of the Virginia
+        countryside and the unique experiences offered by the many fine wineries nestled within.
+        That passion moved us to curate winery tours and charcuterie experiences that provide the
+        backdrop for celebrating a special occasion, spending quality time with friends and
+        family, or simply exploring something new and beautiful.
+      </p>
+      <p class="lede">
+        Our mission is simple: to create unforgettable experiences that leave our guests savoring
+        every moment. It is our sincere hope that you’ll enjoy it as much as we do.
+      </p>
+      <p class="lede center"><em>So, let’s get started. All ABoard!</em></p>
+    </div>
+  </section>
+
+  <section class="section section--cream" aria-labelledby="values-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">What guides us</p>
+        <h2 id="values-heading">Hospitality with heart.</h2>
+        <p>Every tour and every board is shaped by four values.</p>
+      </div>
+      <div class="values-grid">
+        <article class="value-card">
+          <h3>Quality</h3>
+          <p>Thoughtful details, standout partners, and ingredients we’re proud to serve.</p>
+        </article>
+        <article class="value-card">
+          <h3>Authenticity</h3>
+          <p>Warm, genuine hospitality and experiences that feel personal rather than packaged.</p>
+        </article>
+        <article class="value-card">
+          <h3>Connection</h3>
+          <p>Time and space to enjoy the place, the flavor, and the people beside you.</p>
+        </article>
+        <article class="value-card">
+          <h3>Inclusivity</h3>
+          <p>A welcoming seat at the table—and on the bus—for every guest.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--burgundy center">
+    <div class="container--narrow">
+      <p class="eyebrow eyebrow--light">Let’s plan something memorable</p>
+      <h2>Wine country or charcuterie?</h2>
+      <p class="lede">Choose an adventure, find the perfect board, or reach out and let us help.</p>
+      <div class="button-row button-row--center">
+        <Button href="/experiences" variant="light">Plan a tour</Button>
+        <Button href="/charcuterie" variant="light">Explore charcuterie</Button>
+        <Button href="/contact" variant="light">Contact us</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

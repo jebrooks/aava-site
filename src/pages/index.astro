@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { legacyUrl } from '../data/site';
+
+const press = [
+  {
+    title: 'Northern Virginia Magazine',
+    image: '/images/press-nova.webp',
+    href: 'https://northernvirginiamag.com/things-to-do/2026/03/16/9-themed-tours-to-explore-northern-virginia/',
+  },
+  {
+    title: 'The Alimond Show',
+    image: '/images/press-alimond.webp',
+    href: 'https://alimondphotography.com/colleen-brooks/',
+  },
+  {
+    title: 'ARLnow',
+    image: '/images/press-arlnow.webp',
+    href: 'https://www.arlnow.com/announcements/new-arlington-based-business-offers-curated-small-group-wine-tours-to-virginia-wine-country-1139/',
+  },
+];
+---
+
+<BaseLayout>
+  <PageHero
+    image="/images/hero-home.webp"
+    title="Wine tours. Tasty boards. Lasting memories."
+    description="Thoughtfully curated experiences made for slowing down, connecting, and savoring Virginia."
+  >
+    <div class="button-row">
+      <Button href="/experiences" variant="light">Book your tour</Button>
+      <Button href="/charcuterie" variant="light">Explore our menu</Button>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container--narrow section-heading">
+      <p class="eyebrow">Welcome aboard</p>
+      <h2>Let us help you celebrate the everyday and the extraordinary.</h2>
+      <p class="lede">
+        We create unforgettable escapes—from Virginia wine country adventures to beautifully
+        crafted cheese and charcuterie boards—where every taste and every moment is meant to be
+        savored. Whether you’re celebrating, exploring, or gathering with friends, we handle the
+        details so you can unwind and enjoy.
+      </p>
+      <p class="lede"><em>We welcome you. All ABoard!</em></p>
+    </div>
+  </section>
+
+  <section class="section section--cream" aria-labelledby="ways-to-celebrate">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Made for memorable days</p>
+        <h2 id="ways-to-celebrate">Choose your way to celebrate</h2>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <img src="/images/icon-wine.webp" alt="" width="500" height="918" loading="lazy" />
+          <h3>Curated Wine Tours</h3>
+          <p>Handpicked wineries, relaxed pacing, and an experienced host to make the day feel effortless.</p>
+          <Button href="/experiences" variant="text">Plan your tour</Button>
+        </article>
+
+        <article class="feature-card">
+          <img src="/images/icon-cheese.webp" alt="" width="500" height="495" loading="lazy" />
+          <h3>Gourmet Charcuterie</h3>
+          <p>Beautiful boards tailored to your gathering, guest count, tastes, and dietary preferences.</p>
+          <Button href="/charcuterie" variant="text">Explore the menu</Button>
+        </article>
+
+        <article class="feature-card">
+          <img src="/images/icon-bus.webp" alt="" width="500" height="528" loading="lazy" />
+          <h3>Stress-Free Travel</h3>
+          <p>Ride in comfort while we plan the route, coordinate the details, and keep your day moving.</p>
+          <Button href="/experience-guide" variant="text">Ride in comfort</Button>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--burgundy home-gift">
+    <div class="container home-gift__inner">
+      <p class="eyebrow eyebrow--light">Give an experience</p>
+      <h2>Looking for a thoughtful gift?</h2>
+      <p class="lede">
+        Let them choose the day, the destination, or the perfect board with an All ABoard VA digital
+        gift certificate.
+      </p>
+      <div class="button-row button-row--center">
+        <Button href={legacyUrl('/charcuterie-menu/p/gift-certificate')} variant="light" external>
+          Give a digital gift certificate
+        </Button>
+        <Button href={legacyUrl('/gift')} variant="light" external>Learn more</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="press-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">In the press</p>
+        <h2 id="press-heading">Sharing the story behind All ABoard VA</h2>
+        <p>Recent features from around Northern Virginia.</p>
+      </div>
+      <div class="press-grid">
+        {press.map((item) => (
+          <a class="press-card" href={item.href} target="_blank" rel="noreferrer">
+            <img src={item.image} alt="" width="750" height="563" loading="lazy" />
+            <div>
+              <h3>{item.title}</h3>
+              <p>Read the feature →</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--mist">
+    <div class="container split">
+      <div class="split__media art-frame">
+        <img
+          src="/images/about-founders.webp"
+          alt="All ABoard VA founders Colleen and Jim"
+          width="1500"
+          height="1125"
+          loading="lazy"
+        />
+      </div>
+      <div class="split__content">
+        <p class="eyebrow">About us</p>
+        <h2>Rooted in Virginia, made for connection.</h2>
+        <p class="lede">
+          Inspired by the beauty and history of Virginia, great flavors, and memorable moments, we
+          create elevated, down-to-earth experiences for groups big and small—with heart, taste,
+          and fun.
+        </p>
+        <Button href="/about">Meet Colleen & Jim</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container quote-block">
+      <blockquote>
+        “A chance to relax among friends, savor some nice flavors, and take in the beauty of the
+        moment is a gift.”
+      </blockquote>
+      <cite>Colleen & Jim, All ABoard VA LLC</cite>
+    </div>
+  </section>
+</BaseLayout>

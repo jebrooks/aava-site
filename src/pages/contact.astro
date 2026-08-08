@@ -1,0 +1,119 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { site } from '../data/site';
+
+const contactEndpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
+---
+
+<BaseLayout
+  title="Contact Us"
+  description="Contact All ABoard VA about Virginia wine tours, charcuterie boards, custom experiences, or an existing order."
+>
+  <PageHero
+    image="/images/hero-home.webp"
+    title="Contact Us"
+    description="Have questions or an idea for your perfect day? We’d love to hear from you."
+    compact
+  />
+
+  <section class="section section--cream">
+    <div class="container contact-layout">
+      <div class="contact-details">
+        <p class="eyebrow">We’re here to help</p>
+        <h2>How may we help you?</h2>
+        <p>
+          Tell us what you’re planning and we’ll be in touch directly. You can also reach us by
+          email or phone.
+        </p>
+        <ul class="contact-list">
+          <li><strong>Email</strong><br /><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><strong>Phone</strong><br /><a href={site.phoneHref}>{site.phoneDisplay}</a></li>
+          <li><strong>Mailing address</strong><br />{site.address}</li>
+        </ul>
+        <p class="form-help">Please note: we do not have a physical storefront.</p>
+        <img class="contact-flourish" src="/images/flourish-left.webp" alt="" width="1000" height="1167" loading="lazy" />
+      </div>
+
+      <form
+        class="contact-form"
+        action={contactEndpoint || `mailto:${site.email}`}
+        method={contactEndpoint ? 'post' : 'get'}
+        data-mailto-fallback={contactEndpoint ? undefined : 'true'}
+        data-email={site.email}
+      >
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="first-name">First name</label>
+            <input id="first-name" name="firstName" type="text" autocomplete="given-name" required />
+          </div>
+          <div class="form-field">
+            <label for="last-name">Last name</label>
+            <input id="last-name" name="lastName" type="text" autocomplete="family-name" required />
+          </div>
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+          </div>
+          <div class="form-field">
+            <label for="phone">Phone <span aria-hidden="true">(optional)</span></label>
+            <input id="phone" name="phone" type="tel" autocomplete="tel" />
+          </div>
+          <div class="form-field form-field--full">
+            <label for="topic">What can we help with?</label>
+            <select id="topic" name="topic" required>
+              <option value="">Select one</option>
+              <option>Wine tour</option>
+              <option>Charcuterie board</option>
+              <option>Custom experience</option>
+              <option>Existing booking or order</option>
+              <option>Something else</option>
+            </select>
+          </div>
+          <div class="form-field form-field--full">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" required></textarea>
+          </div>
+          <div class="visually-hidden" aria-hidden="true">
+            <label for="company">Company</label>
+            <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
+          </div>
+          <div class="form-field form-field--full">
+            <button class="button" type="submit">Send inquiry</button>
+          </div>
+        </div>
+        <p class="form-help">
+          {contactEndpoint
+            ? 'Your information will be sent securely through our contact form provider.'
+            : 'Until a form provider is connected, submitting opens a pre-filled message in your email app.'}
+        </p>
+        <p class="form-status" aria-live="polite" data-form-status></p>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const fallbackForm = document.querySelector<HTMLFormElement>('[data-mailto-fallback="true"]');
+
+  fallbackForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const data = new FormData(fallbackForm);
+    const email = fallbackForm.dataset.email;
+    const status = fallbackForm.querySelector<HTMLElement>('[data-form-status]');
+
+    const name = `${data.get('firstName') || ''} ${data.get('lastName') || ''}`.trim();
+    const subject = `Website inquiry: ${data.get('topic') || 'General question'}`;
+    const body = [
+      `Name: ${name}`,
+      `Email: ${data.get('email') || ''}`,
+      `Phone: ${data.get('phone') || 'Not provided'}`,
+      `Topic: ${data.get('topic') || ''}`,
+      '',
+      String(data.get('message') || ''),
+    ].join('\n');
+
+    if (status) status.textContent = 'Opening your email app…';
+    window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  });
+</script>

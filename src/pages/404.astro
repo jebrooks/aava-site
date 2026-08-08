@@ -1,0 +1,18 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/Button.astro';
+---
+
+<BaseLayout title="Page Not Found" noindex>
+  <section class="not-found">
+    <div class="container--narrow">
+      <p class="eyebrow">404</p>
+      <h1>We took a wrong turn.</h1>
+      <p class="lede">The page you’re looking for may have moved, but there’s still plenty to explore.</p>
+      <div class="button-row button-row--center">
+        <Button href="/">Return home</Button>
+        <Button href="/experiences" variant="secondary">Explore tours</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

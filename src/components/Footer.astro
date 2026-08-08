@@ -1,0 +1,44 @@
+---
+import { legacyUrl, site } from '../data/site';
+
+const utilityLinks = [
+  { href: legacyUrl('/booking-updates'), label: 'Booking Updates' },
+  { href: '/charcuterie', label: 'Charcuterie' },
+  { href: legacyUrl('/gift'), label: 'Gift Certificates' },
+  { href: '/about', label: 'About' },
+  { href: legacyUrl('/press'), label: 'Press' },
+  { href: '/experience-guide', label: 'Experience Guide' },
+  { href: '/contact', label: 'Contact' },
+  { href: legacyUrl('/terms-conditions'), label: 'Terms & Conditions' },
+  { href: legacyUrl('/frequently-asked-questions'), label: 'FAQs' },
+];
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <img src="/images/logo-full.webp" alt="All ABoard VA" width="1000" height="602" loading="lazy" />
+      <p>Wine tours. Tasty boards. Lasting memories.</p>
+    </div>
+
+    <div class="footer-contact">
+      <p class="eyebrow">Let’s stay connected</p>
+      <a href={`mailto:${site.email}`}>{site.email}</a>
+      <a href={site.phoneHref}>{site.phoneDisplay}</a>
+      <div class="social-links" aria-label="Social media links">
+        {site.social.map((item) => (
+          <a href={item.href} target="_blank" rel="noreferrer">{item.label}</a>
+        ))}
+      </div>
+    </div>
+
+    <nav class="footer-nav" aria-label="Footer navigation">
+      {utilityLinks.map((item) => <a href={item.href}>{item.label}</a>)}
+    </nav>
+  </div>
+
+  <div class="footer-legal">
+    <p>© {new Date().getFullYear()} All ABoard VA LLC. All rights reserved.</p>
+    <p>{site.address} · Mailing address only; no physical storefront.</p>
+  </div>
+</footer>

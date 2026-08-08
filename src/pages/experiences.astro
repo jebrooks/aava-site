@@ -1,0 +1,155 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { legacyUrl } from '../data/site';
+
+const tourTypes = [
+  {
+    tag: 'Meet new people',
+    title: 'Public Tour',
+    copy: 'A shared small-group experience through Virginia wine country for solo explorers, couples, and groups.',
+    bullets: ['Up to 10 total guests', 'Curated winery visits', 'Transportation and a fresh sandwich', 'Charcuterie available as an add-on'],
+    price: 'Starting at $125 per person',
+  },
+  {
+    tag: 'Your group only',
+    title: 'Private Tour',
+    copy: 'An exclusive experience with personalized service, flexible timing, and the whole vehicle reserved for you.',
+    bullets: ['Up to 10 guests', 'Everything included in a public tour', 'Private vehicle for your group', 'More flexibility throughout the day'],
+    price: 'Starting at $1,250 per group',
+  },
+  {
+    tag: 'Made for you',
+    title: 'Customized Tour',
+    copy: 'A fully tailored private day for birthdays, bachelorettes, corporate outings, and one-of-a-kind occasions.',
+    bullets: ['Custom winery itinerary', 'Optional lunch and photo stops', 'Charcuterie available', 'Designed around your celebration'],
+    price: 'Custom pricing',
+  },
+];
+---
+
+<BaseLayout
+  title="Virginia Wine Tour Experiences"
+  description="Explore public, private, and customized small-group winery tours through Virginia wine country."
+  image="/images/hero-experiences.webp"
+>
+  <PageHero
+    image="/images/hero-experiences.webp"
+    title="Experiences"
+    description="Slow down, unwind, and savor Virginia wine country—one winery, one handcrafted board, and one special moment at a time."
+  >
+    <div class="button-row">
+      <Button href={legacyUrl('/experiences#choose-region')} variant="light" external>Find a tour</Button>
+      <Button href={legacyUrl('/request-tour')} variant="light" external>Let us build your booking</Button>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container split">
+      <div class="split__content">
+        <p class="eyebrow">Join us for something special</p>
+        <h2>Every great experience starts with connection.</h2>
+        <p class="lede">
+          At All ABoard VA, we believe in connection—to a place, to a flavor, and to one another.
+          Every tour is crafted with intention so you can relax into the day and return home
+          refreshed, with your heart full.
+        </p>
+      </div>
+      <div>
+        <ul class="check-list">
+          <li>Intimate, small-group tours designed to feel personal and unrushed</li>
+          <li>Handpicked wineries chosen for their charm, scenery, and standout wines</li>
+          <li>Travel-friendly charcuterie boards packed with local flavor</li>
+          <li>A warm, experienced host to guide the day</li>
+          <li>Rotating seasonal themes, concert nights, and special adventures</li>
+        </ul>
+        <p class="note"><strong>Please note:</strong> all tour guests must be 21 or older.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cream" aria-labelledby="three-steps">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Plan your experience</p>
+        <h2 id="three-steps">Your perfect day in three easy steps</h2>
+        <p>Choose your date, tour type, and something delicious to enjoy along the way.</p>
+      </div>
+      <div class="step-grid">
+        <article class="step-card">
+          <span class="step-card__number">1</span>
+          <h3>Pick a date or region</h3>
+          <p>Start with a day that works for you, or explore availability across our Virginia wine regions.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-card__number">2</span>
+          <h3>Choose your tour</h3>
+          <p>Join a public group, reserve the bus for a private outing, or request a fully customized day.</p>
+        </article>
+        <article class="step-card">
+          <span class="step-card__number">3</span>
+          <h3>Add a snack</h3>
+          <p>A fresh sandwich is included, and an All ABoard Bites charcuterie board makes a delicious upgrade.</p>
+        </article>
+      </div>
+      <div class="button-row button-row--center" style="margin-top: 2.5rem;">
+        <Button href={legacyUrl('/experiences#choose-region')} external>Choose a date or region</Button>
+        <Button href={legacyUrl('/winery-experience-selector-tool')} variant="secondary" external>Try the region selector</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tour-types">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Tour types</p>
+        <h2 id="tour-types">Your experience, your way.</h2>
+      </div>
+      <div class="tour-grid">
+        {tourTypes.map((tour) => (
+          <article class="tour-card">
+            <p class="tour-card__tag">{tour.tag}</p>
+            <h3>{tour.title}</h3>
+            <p>{tour.copy}</p>
+            <ul>{tour.bullets.map((bullet) => <li>{bullet}</li>)}</ul>
+            <p class="price">{tour.price}</p>
+          </article>
+        ))}
+      </div>
+      <div class="button-row button-row--center" style="margin-top: 2.5rem;">
+        <Button href={legacyUrl('/custom-tour-request-for-estimate')} external>Request a custom estimate</Button>
+        <Button href="/experience-guide" variant="secondary">Read the experience guide</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--burgundy">
+    <div class="container split">
+      <div class="split__content">
+        <p class="eyebrow eyebrow--light">Something to savor</p>
+        <h2>Add All ABoard Bites to your day.</h2>
+        <p class="lede">
+          Travel-friendly artisan cheese and charcuterie boards are available for groups of 2–10.
+          We’ll email after booking to confirm your selections and preferences.
+        </p>
+        <Button href="/charcuterie" variant="light">Explore the full menu</Button>
+      </div>
+      <div class="split__media">
+        <img src="/images/board-quick-pick.webp" alt="An All ABoard VA charcuterie board" width="1000" height="750" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section center">
+    <div class="container--narrow">
+      <p class="eyebrow">Ready to ride?</p>
+      <h2>Virginia wine country is waiting.</h2>
+      <p class="lede">Choose an available tour or tell us what you’re dreaming up. We’ll handle the details.</p>
+      <div class="button-row button-row--center">
+        <Button href={legacyUrl('/experiences#choose-region')} external>Book now</Button>
+        <Button href={legacyUrl('/frequently-asked-questions')} variant="secondary" external>Read the FAQs</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

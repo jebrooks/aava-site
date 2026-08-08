@@ -1,0 +1,79 @@
+---
+import { legacyUrl, site } from '../data/site';
+
+const pathname = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? pathname === href : pathname.startsWith(href);
+---
+
+<a class="skip-link" href="#main-content">Skip to content</a>
+
+<div class="announcement">
+  <a href="/charcuterie">
+    <span aria-hidden="true">♥</span>
+    Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.
+    <strong>Order now</strong>
+  </a>
+</div>
+
+<header class="site-header" data-header>
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="All ABoard VA home">
+      <img src="/images/logo-mark.webp" alt="" width="1000" height="602" />
+    </a>
+
+    <button
+      class="menu-toggle"
+      type="button"
+      aria-label="Open navigation"
+      aria-controls="primary-navigation"
+      aria-expanded="false"
+      data-menu-toggle
+    >
+      <span></span><span></span>
+    </button>
+
+    <nav class="primary-nav" id="primary-navigation" aria-label="Primary navigation" data-menu>
+      <ul>
+        {site.nav.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+      <a class="cart-link" href={legacyUrl('/cart')} aria-label="Open shopping cart on our current store">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H7" />
+          <circle cx="10" cy="20" r="1.2" /><circle cx="18" cy="20" r="1.2" />
+        </svg>
+        <span>Cart</span>
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const header = document.querySelector('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-menu]');
+
+  function closeMenu() {
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.setAttribute('aria-label', 'Open navigation');
+    header?.removeAttribute('data-menu-open');
+  }
+
+  toggle?.addEventListener('click', () => {
+    const willOpen = toggle.getAttribute('aria-expanded') !== 'true';
+    toggle.setAttribute('aria-expanded', String(willOpen));
+    toggle.setAttribute('aria-label', willOpen ? 'Close navigation' : 'Open navigation');
+    header?.toggleAttribute('data-menu-open', willOpen);
+  });
+
+  menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 860) closeMenu();
+  });
+</script>

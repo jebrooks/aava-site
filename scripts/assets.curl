@@ -1,0 +1,88 @@
+--fail
+--location
+--silent
+--show-error
+--create-dirs
+--parallel
+--parallel-max 6
+
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/b1b39389-018d-49a1-83ec-bc5b0566dd86/AllABoardVA-LOGO-BLACK-no-text.png?format=1500w"
+output = "public/images/logo-mark.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/30ee0ea6-62dd-4b1c-9307-fffd16f5f632/AllABoard-LOGO-BLACK.png?format=1500w"
+output = "public/images/logo-full.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/c66cb399-0ec5-471e-9f11-bddd655f998e/favicon.ico?format=100w"
+output = "public/favicon.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/f387c7c6-0c09-41db-8c44-1649585c8ae6/0_1-HERO-homepage-graphics-Resized.jpg?format=2500w"
+output = "public/images/hero-home.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/a8e0e2c3-2a11-4daf-a094-fd87189f282a/0_2-HERO-experience-graphics-Resized.jpg?format=2500w"
+output = "public/images/hero-experiences.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/f526f6cd-4f7b-4b74-83e9-46b1bb1b40f3/0_3-HERO-chacuterie-graphics-Resized.jpg?format=2500w"
+output = "public/images/hero-charcuterie.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/5368ead9-a68f-44d6-afe0-3916546bced7/0_4+AAB+AboutUs+new.png?format=1500w"
+output = "public/images/about-founders.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/4a803807-5589-4738-afe0-07c004a49daf/Franc_AllABoard-for_white-6x7inch-LEFT.png?format=1000w"
+output = "public/images/flourish-left.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/f9cca9c7-8605-450e-ae55-5e21351cdb99/Franc_AllABoard-for_white-6x7inch-RIGHT.png?format=1000w"
+output = "public/images/flourish-right.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/73fa75d7-4b7d-45c9-b904-142a70b96c86/AllABoard-LOGO-element-wine-glass-BLACK.png?format=500w"
+output = "public/images/icon-wine.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/726da521-0cca-45eb-91c8-d7aaff1307df/AllABoard-LOGO-element-buss-BLACK.png?format=500w"
+output = "public/images/icon-bus.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/0c072550-e2c4-4b61-8ae4-a00f43d115f0/AllABoard-LOGO-element-cheese-BLACK.png?format=500w"
+output = "public/images/icon-cheese.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/adff37b4-3631-492a-83e7-bc8f58185471/screenshot_NoVaMag_9+themed+tours+to+explore+NOVA_article_2026_03_16.png?format=750w"
+output = "public/images/press-nova.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/05ab3a34-7336-41d8-9e36-1103cc308d82/blog+article+podcast_2026_03_17.png?format=750w"
+output = "public/images/press-alimond.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/823ccd64-8659-48ce-bd14-64917b60a0af/image_ARLNOW+announcement_allaboardva_2026_02_26.png?format=750w"
+output = "public/images/press-arlnow.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/5acb8a2a-162b-4805-a69b-f1dfcd14fb38/2_1%2Btour%2Bbus%2B%25281%2529.png?format=1000w"
+output = "public/images/board-quick-pick.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/1acb4bb9-9ee3-4bbb-8702-b6b3f2ba9cb4/IMG_5283.jpg?format=1000w"
+output = "public/images/board-american.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/a98637fa-0a36-4ac4-a782-6885e8674abf/IMG_2948%252B%2525281%252529.jpg?format=1000w"
+output = "public/images/board-bright-bold.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/af5fbd98-b8b4-4c20-9aa7-f8eb0cfc0211/IMG_5396.jpeg?format=1000w"
+output = "public/images/board-mediterranean.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/7a0632f6-c7ca-4e91-a557-bba1a40681ce/IMG_1230.jpeg?format=1000w"
+output = "public/images/board-gold.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/e3a19939-2374-4d6f-9d57-e1d2bb2991bb/brunch_2025_01_11_9.jpg?format=1000w"
+output = "public/images/board-brunch.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/28eb4168-1902-41be-8bb0-7447a37f3700/IMG_1280.jpeg?format=1000w"
+output = "public/images/board-holy-smoke.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/900d9902-ea05-4ad8-8d29-49a6ff6fcb09/IMG_1751.jpeg?format=1000w"
+output = "public/images/board-plant-based.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/4a01e996-f43a-4859-b1d0-251078dd7e1f/AllABoardVA_Bus_driver-side_2025_10_01.jpg?format=1200w"
+output = "public/images/bus-driver.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/fa0f0ede-fb94-4960-8efb-b8ac212cbe97/AllABoardVA_Bus_front_2025_10_01.jpg?format=1200w"
+output = "public/images/bus-front.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/d3aa5e6c-b30d-450d-b72b-537654b3c209/AllABoardVA_Bus_passenger-side_2025_10_01.jpg?format=1200w"
+output = "public/images/bus-passenger.webp"
+next
+url = "https://images.squarespace-cdn.com/content/v1/67f98f516505ef3777f2de9a/c6d640b0-ff18-4ace-a142-d0547925260b/AllABoardVA_Bus_back_2025_10_01.jpg?format=1200w"
+output = "public/images/bus-back.webp"

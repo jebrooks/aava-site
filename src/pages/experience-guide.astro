@@ -1,0 +1,190 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Button from '../components/Button.astro';
+import { legacyUrl } from '../data/site';
+
+const tours = [
+  {
+    title: 'Public Tour',
+    bestFor: 'Solo travelers, couples, and small groups who enjoy meeting others.',
+    group: 'Up to 10 total guests',
+    price: '$125–$175 per person, depending on region',
+  },
+  {
+    title: 'Private Tour',
+    bestFor: 'Friends, families, and colleagues looking for a more intimate day.',
+    group: 'Your group of up to 10',
+    price: '$1,250–$1,750 for the vehicle',
+  },
+  {
+    title: 'Customized Tour',
+    bestFor: 'Special occasions and groups with a particular itinerary in mind.',
+    group: 'Determined with your custom plan',
+    price: 'Custom estimate',
+  },
+];
+---
+
+<BaseLayout
+  title="Your Experience Guide"
+  description="Pickup details, tour types, pricing, vehicle information, policies, and everything else you need to plan an All ABoard VA wine tour."
+  image="/images/bus-driver.webp"
+>
+  <PageHero
+    image="/images/bus-driver.webp"
+    position="center 58%"
+    title="Your Experience Guide"
+    description="From pickup details to pricing—everything you need to plan your perfect day."
+    compact
+  >
+    <Button href="/experiences" variant="light">Find your tour</Button>
+  </PageHero>
+
+  <section class="section section--cream">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Sit back, relax, and enjoy the ride</p>
+        <h2>Your complete planning resource.</h2>
+        <p class="lede">
+          Learn what’s included, review pickup and timing details, understand ride etiquette, and
+          know what to expect throughout the day.
+        </p>
+      </div>
+      <nav class="guide-nav" aria-label="Experience guide sections">
+        <a href="#tour-types">Tour types at a glance</a>
+        <a href="#ride-comfort">Ride in comfort</a>
+        <a href="#pickup">Pickup made easy</a>
+        <a href="#timing">What to expect</a>
+        <a href="#etiquette">Ride etiquette & liability</a>
+        <a href="#policies">Policies & waivers</a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="section" id="tour-types" aria-labelledby="tour-types-heading">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Compare your options</p>
+        <h2 id="tour-types-heading">Tour types at a glance</h2>
+      </div>
+      <div class="tour-grid">
+        {tours.map((tour) => (
+          <article class="tour-card">
+            <h3>{tour.title}</h3>
+            <p><strong>Best for:</strong> {tour.bestFor}</p>
+            <p><strong>Group size:</strong> {tour.group}</p>
+            <p class="price">{tour.price}</p>
+          </article>
+        ))}
+      </div>
+      <p class="note" style="margin-top: 2rem;">
+        Wine tasting fees are additional. Most tours include transportation, curated winery visits,
+        a fresh sandwich, bottled water, and space to store wine purchases for the ride home.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section--mist" id="ride-comfort">
+    <div class="container">
+      <div class="section-heading">
+        <p class="eyebrow">Your ride</p>
+        <h2>Travel in style and comfort.</h2>
+        <p>Our small-group vehicle keeps the day intimate, relaxed, and easy to navigate.</p>
+      </div>
+      <div class="bus-gallery">
+        <img src="/images/bus-driver.webp" alt="All ABoard VA tour vehicle, driver side" width="1200" height="900" loading="lazy" />
+        <img src="/images/bus-front.webp" alt="All ABoard VA tour vehicle, front view" width="1200" height="900" loading="lazy" />
+        <img src="/images/bus-passenger.webp" alt="All ABoard VA tour vehicle, passenger side" width="1200" height="900" loading="lazy" />
+        <img src="/images/bus-back.webp" alt="All ABoard VA tour vehicle, back view" width="1200" height="900" loading="lazy" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="pickup">
+    <div class="container info-columns">
+      <div>
+        <p class="eyebrow">Public tours</p>
+        <h2>Pickup made easy.</h2>
+        <p>Public tour pickup and drop-off locations are selected based on your tour region and may include:</p>
+        <ul class="check-list">
+          <li>Northside Social, Clarendon</li>
+          <li>Ballston Metro</li>
+          <li>Mosaic District, Merrifield</li>
+          <li>Tysons or Reston Metro</li>
+          <li>Fairfax Corner</li>
+        </ul>
+      </div>
+      <div>
+        <p class="eyebrow">Private & custom tours</p>
+        <h2>Meet where it works.</h2>
+        <p>
+          Choose one of our standard locations or coordinate a convenient pickup in Arlington,
+          Falls Church, Fairfax, Northern Fauquier, or Loudoun. Final timing is confirmed before
+          your tour.
+        </p>
+        <p class="note">
+          Depending on your region, pickup can range from approximately 8:30–10:15 AM. Your exact
+          details arrive by email before departure.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--cream" id="timing">
+    <div class="container split">
+      <div class="split__content">
+        <p class="eyebrow">What to expect</p>
+        <h2>A full day in wine country.</h2>
+        <p class="lede">
+          Tours typically last 8–11 hours depending on the selected region. Most routes visit three
+          handpicked wineries, with scenic drive times kept as comfortable as possible.
+        </p>
+        <ul class="check-list">
+          <li>Pickup details emailed before the tour</li>
+          <li>Three curated winery visits on most routes</li>
+          <li>Time to taste, relax, shop, and enjoy the scenery</li>
+          <li>A comfortable ride back with your wine purchases</li>
+        </ul>
+      </div>
+      <div class="split__content" id="etiquette">
+        <p class="eyebrow">Ride etiquette & liability</p>
+        <h2>A thoughtful ride for everyone.</h2>
+        <p>
+          We ask guests to treat one another, the host, and our winery partners with kindness and
+          respect. Celebratory energy is welcome; excessive intoxication and loud or unruly
+          behavior are not. Think cozy countryside, not party bus.
+        </p>
+        <p><strong>All guests must be 21 or older and sign a liability waiver before the tour.</strong></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="policies">
+    <div class="container info-columns">
+      <div>
+        <p class="eyebrow">Before you book</p>
+        <h2>Policies & waivers</h2>
+        <p>Review the current details for cancellations, tastings, food, and travel.</p>
+      </div>
+      <ul class="policy-list">
+        <li><a href={legacyUrl('/cancellation-policy')} target="_blank" rel="noreferrer">Cancellation Policy →</a></li>
+        <li><a href={legacyUrl('/tasting-fee-policy')} target="_blank" rel="noreferrer">Tasting Fee Policy →</a></li>
+        <li><a href={legacyUrl('/tour-waiver-release')} target="_blank" rel="noreferrer">Tour Waiver & Release →</a></li>
+        <li><a href={legacyUrl('/food-purchase-consumption-waiver')} target="_blank" rel="noreferrer">Food Purchase Waiver →</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--burgundy center">
+    <div class="container--narrow">
+      <p class="eyebrow eyebrow--light">Your ride is just beginning</p>
+      <h2>All ABoard!</h2>
+      <p class="lede">Find your date and region, or ask us to build a tour around your group.</p>
+      <div class="button-row button-row--center">
+        <Button href={legacyUrl('/experiences#choose-region')} variant="light" external>Find a tour</Button>
+        <Button href={legacyUrl('/custom-tour-request-for-estimate')} variant="light" external>Request a custom estimate</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
