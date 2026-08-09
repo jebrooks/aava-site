@@ -72,29 +72,58 @@ const CART_FIELDS = `#graphql
   }
 `;
 
-export async function listCharcuterieProducts(first = 50) {
-  const data = await storefrontGraphql<{
-    collection: { title: string; description: string; products: { nodes: ShopifyProduct[] } } | null;
-  }>(
-    `${PRODUCT_FIELDS}
-    query CharcuterieCollection($handle: String!, $first: Int!) {
-      collection(handle: $handle) {
-        title
-        description
-        products(first: $first, sortKey: MANUAL) { nodes { ...ProductFields } }
-      }
-    }`,
-    { handle: SHOPIFY_COLLECTION_HANDLE, first },
-  );
+export async function listCharcuterieProducts(pageSize = 50) {
+  const products: ShopifyProduct[] = [];
+  let collectionDetails: { title: string; description: string } | null = null;
+  let after: string | null = null;
+  const first = Math.min(Math.max(pageSize, 1), 250);
 
-  if (!data.collection) {
-    throw new ShopifyApiError(
-      `Shopify collection “${SHOPIFY_COLLECTION_HANDLE}” was not found.`,
-      404,
+  do {
+    const data: {
+      collection: {
+        title: string;
+        description: string;
+        products: {
+          nodes: ShopifyProduct[];
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        };
+      } | null;
+    } = await storefrontGraphql(
+      `${PRODUCT_FIELDS}
+      query CharcuterieCollection($handle: String!, $first: Int!, $after: String) {
+        collection(handle: $handle) {
+          title
+          description
+          products(first: $first, after: $after, sortKey: MANUAL) {
+            nodes { ...ProductFields }
+            pageInfo { hasNextPage endCursor }
+          }
+        }
+      }`,
+      { handle: SHOPIFY_COLLECTION_HANDLE, first, after },
     );
-  }
 
-  return data.collection;
+    if (!data.collection) {
+      throw new ShopifyApiError(
+        `Shopify collection “${SHOPIFY_COLLECTION_HANDLE}” was not found.`,
+        404,
+      );
+    }
+
+    collectionDetails ||= {
+      title: data.collection.title,
+      description: data.collection.description,
+    };
+    products.push(...data.collection.products.nodes);
+    after = data.collection.products.pageInfo.hasNextPage
+      ? data.collection.products.pageInfo.endCursor
+      : null;
+    if (data.collection.products.pageInfo.hasNextPage && !after) {
+      throw new ShopifyApiError('Shopify did not return a cursor for the next catalog page.');
+    }
+  } while (after);
+
+  return { ...collectionDetails!, products: { nodes: products } };
 }
 
 export async function getProductByHandle(handle: string) {

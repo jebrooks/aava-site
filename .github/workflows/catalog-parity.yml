@@ -1,0 +1,45 @@
+name: Catalog parity
+
+on:
+  pull_request:
+    branches:
+      - main
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalog-parity-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog-parity:
+    name: Catalog parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PUBLIC_SHOPIFY_STORE_DOMAIN: ${{ vars.PUBLIC_SHOPIFY_STORE_DOMAIN }}
+      SHOPIFY_API_VERSION: ${{ vars.SHOPIFY_API_VERSION }}
+      SHOPIFY_CHARCUTERIE_COLLECTION_HANDLE: ${{ vars.SHOPIFY_CHARCUTERIE_COLLECTION_HANDLE }}
+      SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${{ secrets.SHOPIFY_STOREFRONT_ACCESS_TOKEN }}
+
+    steps:
+      - name: Check out the pull request
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the site
+        run: npm run build
+
+      - name: Compare Shopify with the rendered catalog
+        run: npm run check:catalog
