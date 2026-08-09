@@ -16,7 +16,11 @@ const imageWidth = image?.width || DEFAULT_PRODUCT_IMAGE.width;
 const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
 ---
 
-<a class="product-card" href={`/charcuterie-menu/p/${product.handle}`}>
+<a
+  class="product-card"
+  href={`/charcuterie-menu/p/${product.handle}`}
+  data-product-handle={product.handle}
+>
   <div class="product-card__media">
     <img
       src={imageSrc}

@@ -13,7 +13,7 @@ npm install
 npm run dev
 ```
 
-Astro will print the local URL, normally `http://localhost:4321`.
+The local URL is fixed at `http://127.0.0.1:4330`.
 
 Run the production checks and Vercel build output with:
 
