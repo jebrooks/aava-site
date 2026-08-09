@@ -1,6 +1,7 @@
 ---
 import { formatMoney } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
+import { DEFAULT_PRODUCT_IMAGE } from '../lib/product-image';
 
 interface Props {
   product: ShopifyProduct;
@@ -9,20 +10,22 @@ interface Props {
 const { product } = Astro.props;
 const firstVariant = product.variants.nodes[0];
 const image = product.featuredImage;
+const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;
+const imageAlt = image?.altText || (image ? product.title : DEFAULT_PRODUCT_IMAGE.alt);
+const imageWidth = image?.width || DEFAULT_PRODUCT_IMAGE.width;
+const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
 ---
 
 <a class="product-card" href={`/charcuterie-menu/p/${product.handle}`}>
-  {image ? (
+  <div class="product-card__media">
     <img
-      src={image.url}
-      alt={image.altText || product.title}
-      width={image.width || 1000}
-      height={image.height || 1000}
+      src={imageSrc}
+      alt={imageAlt}
+      width={imageWidth}
+      height={imageHeight}
       loading="lazy"
     />
-  ) : (
-    <div class="product-card__placeholder" aria-hidden="true">AAVA</div>
-  )}
+  </div>
   <div class="product-card__body">
     <h3>{product.title}</h3>
     <p class="product-card__price">

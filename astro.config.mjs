@@ -6,4 +6,13 @@ export default defineConfig({
   output: 'server',
   adapter: vercel(),
   trailingSlash: 'never',
+  server: {
+    host: '127.0.0.1',
+    port: 4330,
+  },
+  vite: {
+    server: {
+      strictPort: true,
+    },
+  },
 });

@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getProductByHandle, formatMoney } from '../../../lib/shopify/storefront';
 import { isShopifyConfigured } from '../../../lib/shopify/config';
 import type { ShopifyProduct } from '../../../lib/shopify/types';
+import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
 
 export const prerender = false;
 
@@ -22,6 +23,10 @@ if (isShopifyConfigured()) {
 
 if (!product) Astro.response.status = errorMessage ? 503 : 404;
 const image = product?.featuredImage;
+const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;
+const imageAlt = image?.altText || (image ? product?.title : DEFAULT_PRODUCT_IMAGE.alt);
+const imageWidth = image?.width || DEFAULT_PRODUCT_IMAGE.width;
+const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
 const variants = product?.variants.nodes || [];
 const initialVariant = variants.find((variant) => variant.availableForSale) || variants[0];
 const productSchema = product && initialVariant ? {
@@ -46,7 +51,7 @@ const productSchema = product && initialVariant ? {
 <BaseLayout
   title={product?.title || 'Product unavailable'}
   description={product?.description || errorMessage || 'This charcuterie product could not be found.'}
-  image={image?.url || '/images/hero-charcuterie.webp'}
+  image={imageSrc}
   noindex={!product}
 >
   {productSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(productSchema)} />}
@@ -54,16 +59,12 @@ const productSchema = product && initialVariant ? {
     <section class="section product-detail">
       <div class="container product-detail__grid">
         <div class="product-gallery">
-          {image ? (
-            <img
-              src={image.url}
-              alt={image.altText || product.title}
-              width={image.width || 1200}
-              height={image.height || 1200}
-            />
-          ) : (
-            <div class="product-card__placeholder" aria-hidden="true">AAVA</div>
-          )}
+          <img
+            src={imageSrc}
+            alt={imageAlt}
+            width={imageWidth}
+            height={imageHeight}
+          />
         </div>
         <div class="product-detail__content">
           <p class="eyebrow">Handcrafted charcuterie</p>
