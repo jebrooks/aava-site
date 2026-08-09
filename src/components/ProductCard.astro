@@ -1,0 +1,33 @@
+---
+import { formatMoney } from '../lib/shopify/storefront';
+import type { ShopifyProduct } from '../lib/shopify/types';
+
+interface Props {
+  product: ShopifyProduct;
+}
+
+const { product } = Astro.props;
+const firstVariant = product.variants.nodes[0];
+const image = product.featuredImage;
+---
+
+<a class="product-card" href={`/charcuterie-menu/p/${product.handle}`}>
+  {image ? (
+    <img
+      src={image.url}
+      alt={image.altText || product.title}
+      width={image.width || 1000}
+      height={image.height || 1000}
+      loading="lazy"
+    />
+  ) : (
+    <div class="product-card__placeholder" aria-hidden="true">AAVA</div>
+  )}
+  <div class="product-card__body">
+    <h3>{product.title}</h3>
+    <p class="product-card__price">
+      {firstVariant ? `From ${formatMoney(firstVariant.price)}` : 'View board'}
+    </p>
+    {!product.availableForSale && <p class="stock-status">Currently unavailable</p>}
+  </div>
+</a>

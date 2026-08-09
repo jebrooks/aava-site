@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
+---
+
+<BaseLayout
+  title="Request a Custom Charcuterie Board"
+  description="Tell All ABoard VA about your gathering and receive a custom charcuterie quote and secure invoice."
+  image="/images/hero-charcuterie.webp"
+>
+  {turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+  <section class="section custom-request-page">
+    <div class="container--narrow">
+      <div class="section-heading">
+        <p class="eyebrow">Designed for your gathering</p>
+        <h1>Request a custom board</h1>
+        <p class="lede">Share the details below. We’ll confirm availability and email a Shopify invoice after pricing your request.</p>
+      </div>
+
+      <form class="request-form" data-custom-request-form>
+        <div class="form-grid">
+          <label><span>Name</span><input name="name" autocomplete="name" required maxlength="120" /></label>
+          <label><span>Email</span><input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
+          <label><span>Phone</span><input name="phone" type="tel" autocomplete="tel" required maxlength="40" /></label>
+          <label><span>Requested date</span><input name="requestedDate" type="date" required /></label>
+          <label class="form-grid__wide"><span>Delivery address</span><input name="address" autocomplete="street-address" required maxlength="300" /></label>
+          <label><span>ZIP code</span><input name="zip" inputmode="numeric" autocomplete="postal-code" required maxlength="10" /></label>
+          <label><span>Guest count</span><input name="guestCount" type="number" min="1" max="1000" required /></label>
+          <label><span>Budget, if known</span><input name="budget" maxlength="100" placeholder="Example: $250–$350" /></label>
+          <label><span>Theme or occasion</span><input name="theme" maxlength="500" /></label>
+          <label class="form-grid__wide"><span>Dietary restrictions</span><textarea name="dietaryRestrictions" rows="3" maxlength="1000"></textarea></label>
+          <label class="form-grid__wide"><span>Anything else we should know?</span><textarea name="notes" rows="5" maxlength="2000"></textarea></label>
+          <label class="honeypot" aria-hidden="true"><span>Company website</span><input name="company" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        {turnstileSiteKey && <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>}
+        <label class="consent-field">
+          <input name="consent" type="checkbox" required />
+          <span>I agree that All ABoard VA may contact me about this request.</span>
+        </label>
+        <button class="button button--primary" type="submit">Send request</button>
+        <p class="form-status" data-request-status role="status"></p>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-custom-request-form]');
+  const status = document.querySelector<HTMLElement>('[data-request-status]');
+  const requestedDate = form?.elements.namedItem('requestedDate') as HTMLInputElement | null;
+  if (requestedDate) {
+    const localToday = new Date();
+    localToday.setMinutes(localToday.getMinutes() - localToday.getTimezoneOffset());
+    requestedDate.min = localToday.toISOString().slice(0, 10);
+  }
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Sending your request…';
+    const data = new FormData(form);
+    const payload: Record<string, FormDataEntryValue | number> = Object.fromEntries(data.entries());
+    payload.turnstileToken = String(data.get('cf-turnstile-response') || '');
+    payload.guestCount = Number(data.get('guestCount'));
+    try {
+      const response = await fetch('/api/custom-board-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Your request could not be sent.');
+      form.reset();
+      if (status) status.textContent = `Thank you. Your request ${result.reference || ''} is now in our queue.`;
+    } catch (error) {
+      if (status) status.textContent = error instanceof Error ? error.message : 'Your request could not be sent.';
+      if (button) button.disabled = false;
+    }
+  });
+</script>

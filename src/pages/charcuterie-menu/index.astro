@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Button from '../../components/Button.astro';
+import { isShopifyConfigured } from '../../lib/shopify/config';
+import { listCharcuterieProducts } from '../../lib/shopify/storefront';
+import type { ShopifyProduct } from '../../lib/shopify/types';
+
+let products: ShopifyProduct[] = [];
+let catalogError = '';
+if (isShopifyConfigured()) {
+  try {
+    products = (await listCharcuterieProducts()).products.nodes;
+  } catch (error) {
+    catalogError = error instanceof Error ? error.message : 'The catalog is temporarily unavailable.';
+  }
+}
+---
+
+<BaseLayout
+  title="Charcuterie Menu"
+  description="Shop handcrafted charcuterie boards for scheduled delivery in Northern Virginia."
+  image="/images/hero-charcuterie.webp"
+>
+  <PageHero
+    image="/images/hero-charcuterie.webp"
+    title="Charcuterie Menu"
+    description="Choose a board, select your size, and reserve a local delivery window."
+  />
+
+  <section class="section">
+    <div class="container">
+      {products.length ? (
+        <div class="product-grid product-grid--catalog">
+          {products.map((product) => <ProductCard product={product} />)}
+        </div>
+      ) : (
+        <div class="commerce-notice">
+          <p class="eyebrow">Catalog setup in progress</p>
+          <h2>Our online menu will be available here.</h2>
+          <p>{catalogError || 'Connect this site to Shopify to publish the active charcuterie catalog.'}</p>
+          <div class="button-row button-row--center">
+            <Button href="/charcuterie">Explore our boards</Button>
+            <Button href="/custom-board-request" variant="secondary">Request a custom board</Button>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+</BaseLayout>

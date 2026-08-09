@@ -1,0 +1,21 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/custom-board-request-form",
+      "destination": "/custom-board-request",
+      "permanent": true
+    },
+    {
+      "source": "/charcuterie-menu/build-your-own-boards",
+      "destination": "/charcuterie-menu",
+      "permanent": true
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/materialize-delivery",
+      "schedule": "15 5 * * *"
+    }
+  ]
+}

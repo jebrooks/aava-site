@@ -1,0 +1,312 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Your Cart"
+  description="Review your charcuterie order and select a Northern Virginia delivery window."
+  noindex
+>
+  <section class="section cart-page">
+    <div class="container">
+      <div class="section-heading cart-page__heading">
+        <p class="eyebrow">Your order</p>
+        <h1>Cart</h1>
+      </div>
+
+      <div class="cart-layout" data-cart-app>
+        <div class="cart-panel">
+          <div data-cart-lines aria-live="polite">
+            <p>Loading your cart…</p>
+          </div>
+        </div>
+
+        <aside class="cart-summary">
+          <h2>Delivery and checkout</h2>
+          <form class="delivery-form" data-delivery-form>
+            <label>
+              <span>Delivery ZIP code</span>
+              <div class="field-row">
+                <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" required />
+                <button class="button button--secondary" type="button" data-load-slots>Check dates</button>
+              </div>
+            </label>
+            <label data-slot-field hidden>
+              <span>Available delivery window</span>
+              <select name="slot" data-slot-select required></select>
+            </label>
+            <button class="button button--secondary" type="submit" data-save-slot hidden>
+              Reserve this window
+            </button>
+            <p class="form-status" data-delivery-status role="status"></p>
+          </form>
+
+          <div class="selected-delivery" data-selected-delivery hidden></div>
+          <dl class="cart-totals">
+            <div><dt>Subtotal</dt><dd data-subtotal>—</dd></div>
+            <div><dt>Total before delivery/tax</dt><dd data-total>—</dd></div>
+          </dl>
+          <p class="cart-summary__note">Delivery fees, discounts, and applicable taxes are calculated securely by Shopify.</p>
+          <button class="button button--primary checkout-button" type="button" data-checkout disabled>
+            Continue to secure checkout
+          </button>
+          <p class="form-status" data-cart-status role="status"></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import type { DeliverySlot, ShopifyCart, CartLine } from '../lib/shopify/types';
+
+  const CART_ID_KEY = 'aava-shopify-cart-id';
+  const CART_COUNT_KEY = 'aava-shopify-cart-count';
+  const linesRoot = document.querySelector<HTMLElement>('[data-cart-lines]');
+  const subtotal = document.querySelector<HTMLElement>('[data-subtotal]');
+  const total = document.querySelector<HTMLElement>('[data-total]');
+  const checkout = document.querySelector<HTMLButtonElement>('[data-checkout]');
+  const cartStatus = document.querySelector<HTMLElement>('[data-cart-status]');
+  const deliveryForm = document.querySelector<HTMLFormElement>('[data-delivery-form]');
+  const zipInput = deliveryForm?.elements.namedItem('zip') as HTMLInputElement | null;
+  const loadSlots = document.querySelector<HTMLButtonElement>('[data-load-slots]');
+  const slotField = document.querySelector<HTMLElement>('[data-slot-field]');
+  const slotSelect = document.querySelector<HTMLSelectElement>('[data-slot-select]');
+  const saveSlot = document.querySelector<HTMLButtonElement>('[data-save-slot]');
+  const deliveryStatus = document.querySelector<HTMLElement>('[data-delivery-status]');
+  const selectedDelivery = document.querySelector<HTMLElement>('[data-selected-delivery]');
+  let currentCart: ShopifyCart | null = null;
+
+  const money = (value: { amount: string; currencyCode: string }) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: value.currencyCode })
+      .format(Number(value.amount));
+  const isDeliveryLine = (line: CartLine) =>
+    line.merchandise.product.handle.startsWith('delivery-slot-');
+  const customerQuantity = (cart: ShopifyCart) => cart.lines.nodes
+    .filter((line) => !isDeliveryLine(line))
+    .reduce((sum, line) => sum + line.quantity, 0);
+
+  function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    return node;
+  }
+
+  async function cartRequest(body: Record<string, unknown>) {
+    const response = await fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'The cart could not be updated.');
+    return result.cart as ShopifyCart;
+  }
+
+  function renderLine(line: CartLine) {
+    const row = element('article', 'cart-line');
+    if (line.merchandise.image) {
+      const image = element('img');
+      image.src = line.merchandise.image.url;
+      image.alt = line.merchandise.image.altText || line.merchandise.product.title;
+      image.width = 180;
+      image.height = 180;
+      row.append(image);
+    }
+    const content = element('div', 'cart-line__content');
+    const title = element('h3');
+    const link = element('a');
+    link.href = `/charcuterie-menu/p/${line.merchandise.product.handle}`;
+    link.textContent = line.merchandise.product.title;
+    title.append(link);
+    content.append(title);
+    if (line.merchandise.title !== 'Default Title') {
+      const variant = element('p', 'cart-line__variant');
+      variant.textContent = line.merchandise.title;
+      content.append(variant);
+    }
+    const controls = element('div', 'cart-line__controls');
+    const label = element('label');
+    label.textContent = 'Quantity ';
+    const input = element('input');
+    input.type = 'number';
+    input.min = '0';
+    input.max = '50';
+    input.value = String(line.quantity);
+    input.inputMode = 'numeric';
+    input.addEventListener('change', async () => {
+      try {
+        input.disabled = true;
+        renderCart(await cartRequest({
+          action: 'update', cartId: currentCart?.id, lineId: line.id, quantity: Number(input.value),
+        }));
+      } catch (error) {
+        if (cartStatus) cartStatus.textContent = error instanceof Error ? error.message : 'Update failed.';
+        input.disabled = false;
+      }
+    });
+    label.append(input);
+    const remove = element('button', 'text-button');
+    remove.type = 'button';
+    remove.textContent = 'Remove';
+    remove.addEventListener('click', async () => {
+      try {
+        renderCart(await cartRequest({ action: 'remove', cartId: currentCart?.id, lineId: line.id }));
+      } catch (error) {
+        if (cartStatus) cartStatus.textContent = error instanceof Error ? error.message : 'Remove failed.';
+      }
+    });
+    controls.append(label, remove);
+    content.append(controls);
+    const price = element('p', 'cart-line__price');
+    price.textContent = money(line.cost.totalAmount);
+    row.append(content, price);
+    return row;
+  }
+
+  function renderCart(cart: ShopifyCart) {
+    currentCart = cart;
+    localStorage.setItem(CART_ID_KEY, cart.id);
+    const quantity = customerQuantity(cart);
+    localStorage.setItem(CART_COUNT_KEY, String(quantity));
+    window.dispatchEvent(new CustomEvent('aava:cart-updated', { detail: { ...cart, totalQuantity: quantity } }));
+    linesRoot?.replaceChildren();
+    const customerLines = cart.lines.nodes.filter((line) => !isDeliveryLine(line));
+    const needsDelivery = customerLines.some((line) => line.merchandise.requiresShipping);
+    if (!customerLines.length) {
+      const empty = element('div', 'empty-cart');
+      const heading = element('h2');
+      heading.textContent = 'Your cart is empty.';
+      const link = element('a', 'button button--primary');
+      link.href = '/charcuterie-menu';
+      link.textContent = 'Browse the menu';
+      empty.append(heading, link);
+      linesRoot?.append(empty);
+    } else {
+      customerLines.forEach((line) => linesRoot?.append(renderLine(line)));
+    }
+    if (subtotal) subtotal.textContent = money(cart.cost.subtotalAmount);
+    if (total) total.textContent = money(cart.cost.totalAmount);
+
+    const slotLine = cart.lines.nodes.find(isDeliveryLine);
+    const attrs = Object.fromEntries(cart.attributes.map((attribute) => [attribute.key, attribute.value]));
+    if (slotLine && selectedDelivery) {
+      selectedDelivery.hidden = false;
+      selectedDelivery.replaceChildren();
+      const label = element('strong');
+      label.textContent = 'Reserved delivery window';
+      const detail = element('p');
+      detail.textContent = `${attrs['Delivery date'] || ''} · ${attrs['Delivery window'] || slotLine.merchandise.title} · ZIP ${attrs['Delivery ZIP'] || ''}`;
+      selectedDelivery.append(label, detail);
+      if (zipInput && attrs['Delivery ZIP']) zipInput.value = attrs['Delivery ZIP'];
+    } else if (selectedDelivery) {
+      selectedDelivery.hidden = true;
+    }
+    if (checkout) checkout.disabled = !customerLines.length ||
+      (needsDelivery && (!slotLine || !slotLine.merchandise.availableForSale));
+    if (cartStatus) cartStatus.textContent = customerLines.length && needsDelivery && !slotLine
+      ? 'Choose a delivery window before checkout.'
+      : '';
+  }
+
+  async function loadCart() {
+    const id = localStorage.getItem(CART_ID_KEY);
+    if (!id) {
+      renderCart({
+        id: '', checkoutUrl: '', totalQuantity: 0, attributes: [], lines: { nodes: [] },
+        cost: {
+          subtotalAmount: { amount: '0', currencyCode: 'USD' },
+          totalAmount: { amount: '0', currencyCode: 'USD' },
+        },
+      });
+      return;
+    }
+    try {
+      const response = await fetch(`/api/cart?id=${encodeURIComponent(id)}`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Cart not found.');
+      renderCart(result.cart);
+    } catch (error) {
+      localStorage.removeItem(CART_ID_KEY);
+      if (linesRoot) linesRoot.textContent = error instanceof Error ? error.message : 'Could not load the cart.';
+    }
+  }
+
+  loadSlots?.addEventListener('click', async () => {
+    const zip = zipInput?.value.trim() || '';
+    if (deliveryStatus) deliveryStatus.textContent = 'Checking available windows…';
+    loadSlots.disabled = true;
+    try {
+      const response = await fetch(`/api/delivery/availability?zip=${encodeURIComponent(zip)}`);
+      const result = await response.json() as { eligible?: boolean; slots?: DeliverySlot[]; error?: string };
+      if (!response.ok) throw new Error(result.error || 'Availability could not be loaded.');
+      if (!result.eligible) throw new Error('That ZIP code is outside our local-delivery area.');
+      const open = (result.slots || []).filter((slot) => slot.available);
+      if (!open.length) throw new Error('No delivery windows are currently available for that ZIP code.');
+      slotSelect?.replaceChildren();
+      open.forEach((slot) => {
+        const option = document.createElement('option');
+        option.value = slot.key;
+        option.textContent = `${slot.date} — ${slot.label}`;
+        option.dataset.variantId = slot.variantId;
+        option.dataset.date = slot.date;
+        option.dataset.label = slot.label;
+        slotSelect?.append(option);
+      });
+      if (slotField) slotField.hidden = false;
+      if (saveSlot) saveSlot.hidden = false;
+      if (deliveryStatus) deliveryStatus.textContent = 'Choose the window that works best.';
+    } catch (error) {
+      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Availability failed.';
+      if (slotField) slotField.hidden = true;
+      if (saveSlot) saveSlot.hidden = true;
+    } finally {
+      loadSlots.disabled = false;
+    }
+  });
+
+  deliveryForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentCart?.id || !slotSelect?.value) return;
+    const selectedOption = slotSelect.selectedOptions[0];
+    if (!selectedOption?.dataset.variantId) return;
+    if (saveSlot) saveSlot.disabled = true;
+    if (deliveryStatus) deliveryStatus.textContent = 'Reserving your delivery window…';
+    try {
+      renderCart(await cartRequest({
+        action: 'setDelivery',
+        cartId: currentCart.id,
+        zip: zipInput?.value,
+        variantId: selectedOption.dataset.variantId,
+        slotKey: slotSelect.value,
+      }));
+      if (deliveryStatus) deliveryStatus.textContent = 'Delivery window added to your order.';
+    } catch (error) {
+      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Reservation failed.';
+    } finally {
+      if (saveSlot) saveSlot.disabled = false;
+    }
+  });
+
+  checkout?.addEventListener('click', () => {
+    if (!currentCart?.id) return;
+    checkout.disabled = true;
+    if (cartStatus) cartStatus.textContent = 'Validating your cart…';
+    fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'checkout', cartId: currentCart.id }),
+    })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Checkout is not ready.');
+        window.location.assign(result.checkoutUrl);
+      })
+      .catch((error) => {
+        if (cartStatus) cartStatus.textContent = error instanceof Error ? error.message : 'Checkout is not ready.';
+        checkout.disabled = false;
+      });
+  });
+
+  void loadCart();
+</script>

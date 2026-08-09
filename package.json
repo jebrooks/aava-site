@@ -7,15 +7,23 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
-    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check"
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "shopify:setup": "node --env-file=.env scripts/shopify/setup.mjs",
+    "shopify:normalize": "node scripts/shopify/normalize-squarespace.mjs",
+    "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs"
   },
   "dependencies": {
+    "@astrojs/vercel": "11.0.5",
     "@fontsource-variable/montserrat": "5.3.0",
     "@fontsource/marcellus": "5.3.0",
     "astro": "7.2.0"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@types/node": "^26.2.0",
     "typescript": "6.0.3"
+  },
+  "overrides": {
+    "path-to-regexp": "6.3.0"
   }
 }

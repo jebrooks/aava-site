@@ -3,6 +3,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import { legacyUrl } from '../data/site';
+import { isShopifyConfigured } from '../lib/shopify/config';
+import { listCharcuterieProducts } from '../lib/shopify/storefront';
+import type { ShopifyProduct } from '../lib/shopify/types';
+
+let giftCard: ShopifyProduct | undefined;
+if (isShopifyConfigured()) {
+  try {
+    giftCard = (await listCharcuterieProducts()).products.nodes.find((product) =>
+      product.productType.toLowerCase().includes('gift') || product.tags.includes('gift-card'));
+  } catch (error) {
+    console.error('Unable to load the Shopify gift-card product.', error);
+  }
+}
 
 const press = [
   {
@@ -90,10 +103,14 @@ const press = [
         gift certificate.
       </p>
       <div class="button-row button-row--center">
-        <Button href={legacyUrl('/charcuterie-menu/p/gift-certificate')} variant="light" external>
+        <Button
+          href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : legacyUrl('/charcuterie-menu/p/gift-certificate')}
+          variant="light"
+          external={!giftCard}
+        >
           Give a digital gift certificate
         </Button>
-        <Button href={legacyUrl('/gift')} variant="light" external>Learn more</Button>
+        <Button href="/charcuterie-menu" variant="light">Explore the menu</Button>
       </div>
     </div>
   </section>

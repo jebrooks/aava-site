@@ -1,5 +1,5 @@
 ---
-import { legacyUrl, site } from '../data/site';
+import { site } from '../data/site';
 
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
@@ -43,12 +43,12 @@ const isActive = (href: string) =>
           </li>
         ))}
       </ul>
-      <a class="cart-link" href={legacyUrl('/cart')} aria-label="Open shopping cart on our current store">
+      <a class="cart-link" href="/cart" aria-label="Open shopping cart">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H7" />
           <circle cx="10" cy="20" r="1.2" /><circle cx="18" cy="20" r="1.2" />
         </svg>
-        <span>Cart</span>
+        <span>Cart</span><span class="cart-count" data-cart-count hidden>0</span>
       </a>
     </nav>
   </div>
@@ -76,4 +76,17 @@ const isActive = (href: string) =>
   window.addEventListener('resize', () => {
     if (window.innerWidth >= 860) closeMenu();
   });
+</script>
+
+<script>
+  const count = document.querySelector<HTMLElement>('[data-cart-count]');
+  function setCartCount(value: number) {
+    if (!count) return;
+    count.textContent = String(value);
+    count.hidden = value < 1;
+  }
+  setCartCount(Number(localStorage.getItem('aava-shopify-cart-count') || 0));
+  window.addEventListener('aava:cart-updated', ((event: CustomEvent) => {
+    setCartCount(Number(event.detail?.totalQuantity || 0));
+  }) as EventListener);
 </script>

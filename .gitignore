@@ -1,8 +1,14 @@
 node_modules/
 dist/
 .astro/
+.vercel/
 .DS_Store
 .env
 .env.*
 !.env.example
 npm-debug.log*
+
+# Commerce exports can contain customer, pricing, or liability data. Keep them out of Git.
+migration-private/
+squarespace-*.csv
+*.normalized.json

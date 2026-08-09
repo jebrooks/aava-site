@@ -10,7 +10,10 @@ Audit date: 2026-08-08
 - Added page titles, descriptions, canonical URLs, social metadata, structured business data,
   robots rules, sitemap, keyboard focus styles, reduced-motion support, and a 404 page.
 - Added an email fallback for the contact form and environment-based integration seams.
-- Kept the build fully static and hosting-provider neutral.
+- Began with a hosting-neutral static build, then adopted the Vercel adapter for trusted commerce
+  endpoints and server-rendered Shopify routes.
+- Added a headless Shopify storefront, cart proxy, Vercel server runtime, delivery-slot inventory,
+  custom-board draft orders, webhook verification, and catalog migration tooling.
 
 ## Public-site inventory
 
@@ -23,18 +26,17 @@ The source sitemap contains 124 URLs:
 - Policies, FAQs, press, gift, launch, and campaign pages
 - A handful of apparent older or duplicate routes that should be reviewed before cutover
 
-This first pass migrates the six public-facing content pages that define the main site experience.
-It does not pretend that static HTML can replace inventory, payments, availability, transactional
-email, form storage, or signed waivers.
+The local implementation now covers the public content pages plus the active-charcuterie commerce
+surface. Shopify and Vercel configuration, live catalog import, fulfillment rules, gift-certificate
+reconciliation, and end-to-end payment tests must still be completed before cutover.
 
 ## Temporary integration boundary
 
 Calls to `legacyUrl()` in `src/` deliberately send visitors to the live Squarespace site for:
 
 - Winery tour availability and booking requests
-- Charcuterie products, options, delivery details, cart, and checkout
-- Gift certificates
-- Custom tour and custom board request forms
+- Charcuterie links only when Shopify is not yet configured or a mapped product is absent
+- Custom tour requests
 - FAQs, current policies, and waivers
 - Press and booking-update utility pages
 
@@ -46,12 +48,12 @@ rg "legacyUrl" src
 
 Do not point `PUBLIC_LEGACY_SITE_URL` at the new production domain during DNS cutover. Replace each
 legacy workflow first or use a separately reachable legacy hostname; otherwise those links can
-loop back to the new static site.
+loop back to the new site.
 
 ## Decisions needed before full cutover
 
-1. **Commerce:** choose the system that will own products, size variants, delivery fields,
-   inventory, taxes, discounts, gift certificates, payments, and order email.
+1. **Commerce:** Shopify is selected; create the store/custom app and validate imported active
+   products, inventory, taxes, discounts, gift cards, payments, and order email.
 2. **Tours:** decide whether availability is inventory-backed commerce, a scheduling platform, or a
    purpose-built booking flow. Preserve public/private/custom pricing behavior and minimum group
    rules.
@@ -61,9 +63,8 @@ loop back to the new static site.
    the signup forms.
 5. **Content scope:** identify which duplicate, seasonal, launch, and custom-order URLs should be
    migrated, archived, or redirected.
-6. **Hosting:** choose the static host after the integration model is known. If integrations need
-   server-side endpoints, confirm that the host supports the required functions or use a separate
-   API service.
+6. **Hosting:** Vercel is selected; configure production environment variables, cron security,
+   webhook URLs, logs, and preview/production domains.
 
 ## Recommended cutover sequence
 
@@ -85,7 +86,7 @@ loop back to the new static site.
 
 - Keep current URL slugs wherever practical.
 - Add permanent redirects for every retired or renamed path.
-- Expand `public/sitemap.xml` to include the final canonical routes.
+- Validate the dynamic `/sitemap.xml` route against the final canonical product routes.
 - Add the selected analytics and consent configuration only after reviewing privacy requirements.
 
 ### 4. Rehearse the launch

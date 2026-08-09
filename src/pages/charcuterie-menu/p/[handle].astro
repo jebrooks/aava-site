@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getProductByHandle, formatMoney } from '../../../lib/shopify/storefront';
+import { isShopifyConfigured } from '../../../lib/shopify/config';
+import type { ShopifyProduct } from '../../../lib/shopify/types';
+
+export const prerender = false;
+
+const handle = Astro.params.handle || '';
+let product: ShopifyProduct | null = null;
+let errorMessage = '';
+if (isShopifyConfigured()) {
+  try {
+    product = await getProductByHandle(handle);
+    if (product?.tags.includes('delivery-slot') || product?.productType === 'Delivery Slot') {
+      product = null;
+    }
+  } catch (error) {
+    errorMessage = error instanceof Error ? error.message : 'This product is temporarily unavailable.';
+  }
+}
+
+if (!product) Astro.response.status = errorMessage ? 503 : 404;
+const image = product?.featuredImage;
+const variants = product?.variants.nodes || [];
+const initialVariant = variants.find((variant) => variant.availableForSale) || variants[0];
+const productSchema = product && initialVariant ? {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: product.title,
+  description: product.description,
+  image: product.images.nodes.map((item) => item.url),
+  offers: {
+    '@type': 'AggregateOffer',
+    priceCurrency: initialVariant.price.currencyCode,
+    lowPrice: Math.min(...variants.map((variant) => Number(variant.price.amount))),
+    highPrice: Math.max(...variants.map((variant) => Number(variant.price.amount))),
+    offerCount: variants.length,
+    availability: product.availableForSale
+      ? 'https://schema.org/InStock'
+      : 'https://schema.org/OutOfStock',
+  },
+} : null;
+---
+
+<BaseLayout
+  title={product?.title || 'Product unavailable'}
+  description={product?.description || errorMessage || 'This charcuterie product could not be found.'}
+  image={image?.url || '/images/hero-charcuterie.webp'}
+  noindex={!product}
+>
+  {productSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(productSchema)} />}
+  {product && initialVariant ? (
+    <section class="section product-detail">
+      <div class="container product-detail__grid">
+        <div class="product-gallery">
+          {image ? (
+            <img
+              src={image.url}
+              alt={image.altText || product.title}
+              width={image.width || 1200}
+              height={image.height || 1200}
+            />
+          ) : (
+            <div class="product-card__placeholder" aria-hidden="true">AAVA</div>
+          )}
+        </div>
+        <div class="product-detail__content">
+          <p class="eyebrow">Handcrafted charcuterie</p>
+          <h1>{product.title}</h1>
+          <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>
+          {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
+          <div class="product-description" set:html={product.descriptionHtml} />
+
+          <form class="product-form" data-product-form data-variants={JSON.stringify(variants)}>
+            {variants.length > 1 ? (
+              <label>
+                <span>Choose an option</span>
+                <select name="variant" data-variant-select>
+                  {variants.map((variant) => (
+                    <option value={variant.id} disabled={!variant.availableForSale} selected={variant.id === initialVariant.id}>
+                      {variant.title} — {formatMoney(variant.price)}{!variant.availableForSale ? ' — Sold out' : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : (
+              <input type="hidden" name="variant" value={initialVariant.id} data-variant-select />
+            )}
+            <label>
+              <span>Quantity</span>
+              <input name="quantity" type="number" min="1" max="50" value="1" inputmode="numeric" />
+            </label>
+            <button class="button button--primary" type="submit" disabled={!initialVariant.availableForSale}>
+              {initialVariant.availableForSale ? 'Add to cart' : 'Currently unavailable'}
+            </button>
+            <p class="form-status" data-form-status role="status"></p>
+          </form>
+
+          <div class="product-facts">
+            {product.ingredients?.value && <p><strong>Ingredients:</strong> {product.ingredients.value}</p>}
+            {product.allergens?.value && <p><strong>Allergens:</strong> {product.allergens.value}</p>}
+            {product.dietaryLabels?.value && <p><strong>Dietary notes:</strong> {product.dietaryLabels.value}</p>}
+          </div>
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section class="section">
+      <div class="container--narrow commerce-notice">
+        <p class="eyebrow">Product unavailable</p>
+        <h1>We couldn’t load this board.</h1>
+        <p>{errorMessage || 'The product may have moved or is no longer offered.'}</p>
+        <a class="button button--primary" href="/charcuterie-menu">Return to the menu</a>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+{product && (
+  <script>
+    import type { Money, ProductVariant } from '../../../lib/shopify/types';
+
+    const form = document.querySelector<HTMLFormElement>('[data-product-form]');
+    const variantSelect = document.querySelector<HTMLSelectElement | HTMLInputElement>('[data-variant-select]');
+    const price = document.querySelector<HTMLElement>('[data-product-price]');
+    const status = document.querySelector<HTMLElement>('[data-form-status]');
+    const variants = JSON.parse(form?.getAttribute('data-variants') || '[]') as ProductVariant[];
+    const money = (value: Money) => new Intl.NumberFormat('en-US', {
+      style: 'currency', currency: value.currencyCode,
+    }).format(Number(value.amount));
+
+    variantSelect?.addEventListener('change', () => {
+      const variant = variants.find((item) => item.id === variantSelect.value);
+      if (variant && price) price.textContent = money(variant.price);
+    });
+
+    form?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submittedForm = event.currentTarget as HTMLFormElement;
+      const data = new FormData(submittedForm);
+      const button = submittedForm.querySelector<HTMLButtonElement>('button[type="submit"]');
+      if (!button) return;
+      button.disabled = true;
+      if (status) status.textContent = 'Adding your board…';
+      try {
+        const response = await fetch('/api/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'add',
+            cartId: localStorage.getItem('aava-shopify-cart-id'),
+            merchandiseId: data.get('variant'),
+            quantity: Number(data.get('quantity')),
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not add this item.');
+        localStorage.setItem('aava-shopify-cart-id', result.cart.id);
+        localStorage.setItem('aava-shopify-cart-count', String(result.cart.totalQuantity));
+        window.dispatchEvent(new CustomEvent('aava:cart-updated', { detail: result.cart }));
+        window.location.assign('/cart');
+      } catch (error) {
+        if (status) status.textContent = error instanceof Error ? error.message : 'Could not add this item.';
+        button.disabled = false;
+      }
+    });
+  </script>
+)}

@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import { site } from '../data/site';
 
+export const prerender = true;
 const contactEndpoint = import.meta.env.PUBLIC_CONTACT_FORM_ENDPOINT?.trim();
 ---
 

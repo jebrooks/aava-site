@@ -2,7 +2,24 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
+import ProductCard from '../components/ProductCard.astro';
 import { featuredBoards, legacyUrl } from '../data/site';
+import { isShopifyConfigured } from '../lib/shopify/config';
+import { listCharcuterieProducts } from '../lib/shopify/storefront';
+import type { ShopifyProduct } from '../lib/shopify/types';
+
+let shopifyProducts: ShopifyProduct[] = [];
+if (isShopifyConfigured()) {
+  try {
+    shopifyProducts = (await listCharcuterieProducts()).products.nodes;
+  } catch (error) {
+    console.error('Unable to load the Shopify charcuterie collection.', error);
+  }
+}
+const quickPick = shopifyProducts.find((product) =>
+  product.handle === 'chefs-choice-charcuterie' || product.tags.includes('quick-pick'));
+const giftCard = shopifyProducts.find((product) =>
+  product.productType.toLowerCase().includes('gift') || product.tags.includes('gift-card'));
 ---
 
 <BaseLayout
@@ -39,7 +56,7 @@ import { featuredBoards, legacyUrl } from '../data/site';
         <li><a href="#signature">Signature Boards</a></li>
         <li><a href="#special-occasions">Special Occasions</a></li>
         <li><a href="#build-your-own">Build Your Own</a></li>
-        <li><a href={legacyUrl('/custom-board-request-form')}>Custom Requests</a></li>
+        <li><a href="/custom-board-request">Custom Requests</a></li>
       </ul>
     </div>
   </nav>
@@ -62,7 +79,7 @@ import { featuredBoards, legacyUrl } from '../data/site';
           Leave the selections to us. We’ll create a crowd-pleasing mix of artisan cheeses, cured
           meats, fruit, and accompaniments using the best ingredients available.
         </p>
-        <Button href={legacyUrl('/charcuterie-menu/p/chefs-choice-charcuterie')} external>Order Quick Pick</Button>
+        <Button href={quickPick ? `/charcuterie-menu/p/${quickPick.handle}` : legacyUrl('/charcuterie-menu/p/chefs-choice-charcuterie')} external={!quickPick}>Order Quick Pick</Button>
       </div>
     </div>
   </section>
@@ -77,17 +94,28 @@ import { featuredBoards, legacyUrl } from '../data/site';
           board or one with meat, in sizes made for sharing.
         </p>
       </div>
-      <div class="product-grid">
-        {featuredBoards.map((board) => (
-          <a class="product-card" href={legacyUrl(board.href)} target="_blank" rel="noreferrer">
-            <img src={board.image} alt={board.name} width="1000" height="1000" loading="lazy" />
-            <div class="product-card__body">
-              <h3>{board.name}</h3>
-              <p>View board →</p>
-            </div>
-          </a>
-        ))}
-      </div>
+      {shopifyProducts.length ? (
+        <div class="product-grid">
+          {shopifyProducts.slice(0, 8).map((product) => <ProductCard product={product} />)}
+        </div>
+      ) : (
+        <div class="product-grid">
+          {featuredBoards.map((board) => (
+            <a class="product-card" href={legacyUrl(board.href)} target="_blank" rel="noreferrer">
+              <img src={board.image} alt={board.name} width="1000" height="1000" loading="lazy" />
+              <div class="product-card__body">
+                <h3>{board.name}</h3>
+                <p>View board →</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+      {shopifyProducts.length > 0 && (
+        <div class="button-row button-row--center catalog-cta">
+          <Button href="/charcuterie-menu">Shop the full menu</Button>
+        </div>
+      )}
     </div>
   </section>
 
@@ -103,19 +131,19 @@ import { featuredBoards, legacyUrl } from '../data/site';
           <p class="eyebrow">Celebrate</p>
           <h3>Special Occasions</h3>
           <p>Mark a milestone, shower, or themed gathering with thoughtful details designed to match the moment.</p>
-          <Button href={legacyUrl('/custom-board-request-form')} variant="text" external>Design your board</Button>
+          <Button href="/custom-board-request" variant="text">Design your board</Button>
         </article>
         <article class="option-card" id="build-your-own">
           <p class="eyebrow">Choose every bite</p>
           <h3>Build Your Own</h3>
           <p>Select the cheeses, meats, and accompaniments you love, priced clearly by party size.</p>
-          <Button href={legacyUrl('/charcuterie-menu/build-your-own-boards')} variant="text" external>Start building</Button>
+          <Button href="/charcuterie-menu" variant="text">Start building</Button>
         </article>
         <article class="option-card">
           <p class="eyebrow">Something unique</p>
           <h3>Custom Request</h3>
           <p>Planning for a larger group, dietary need, or creative theme? Tell us what you have in mind.</p>
-          <Button href={legacyUrl('/custom-board-request-form')} variant="text" external>Request a custom board</Button>
+          <Button href="/custom-board-request" variant="text">Request a custom board</Button>
         </article>
       </div>
     </div>
@@ -126,7 +154,11 @@ import { featuredBoards, legacyUrl } from '../data/site';
       <p class="eyebrow eyebrow--light">Not sure what to choose?</p>
       <h2>Give the gift of charcuterie.</h2>
       <p class="lede">A digital gift certificate lets them choose the board and occasion that feels just right.</p>
-      <Button href={legacyUrl('/charcuterie-menu/p/gift-certificate')} variant="light" external>Give a digital gift certificate</Button>
+      <Button
+        href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : legacyUrl('/charcuterie-menu/p/gift-certificate')}
+        variant="light"
+        external={!giftCard}
+      >Give a digital gift certificate</Button>
     </div>
   </section>
 </BaseLayout>
