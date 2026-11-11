@@ -9,6 +9,7 @@ const staticPaths = [
   '/experiences',
   '/charcuterie',
   '/charcuterie-menu',
+  '/charcuterie-menu/build-your-own',
   '/custom-board-request',
   '/experience-guide',
   '/about',
