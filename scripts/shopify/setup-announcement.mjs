@@ -1,71 +1,74 @@
 import { adminGraphql, assertUserErrors } from './lib.mjs';
 
 const type = 'announcement_banner';
-const description = 'Website header banner. Create entries for scheduled announcements. Dates include the full day in America/New_York. Overlaps prefer the latest start date, then the most recently edited entry.';
-const existing = await adminGraphql(`query {
-  metaobjectDefinitionByType(type: "announcement_banner") { id description }
-  metaobjectByHandle(handle: { type: "announcement_banner", handle: "default" }) { id }
+const description = 'Scheduled website announcements. Format Content with inline links, bold, and italics. Dates include full Eastern days. Overlaps prefer latest start date, then latest edit.';
+const fields = [
+  { name: 'Name', key: 'message', type: 'single_line_text_field', required: true, description: 'Administrative name to identify this announcement. Only Content appears on the site.' },
+  { name: 'Content', key: 'content', type: 'rich_text_field', required: true, description: 'Banner text. Add formatting and inline links using the editor.' },
+  { name: 'Enabled', key: 'enabled', type: 'boolean', required: true },
+  { name: 'Start date', key: 'start_date', type: 'date', description: 'Optional first day, from midnight Eastern Time.' },
+  { name: 'End date', key: 'end_date', type: 'date', description: 'Optional last day, through 11:59 PM Eastern Time.' },
+];
+
+async function updateDefinition(id, changes) {
+  const result = await adminGraphql(`mutation UpdateBannerDefinition($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+    metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+      metaobjectDefinition { id } userErrors { field message }
+    }
+  }`, { id, definition: changes });
+  assertUserErrors(result.metaobjectDefinitionUpdate, 'Updating announcement definition');
+}
+
+const { metaobjectDefinitionByType: existing } = await adminGraphql(`query {
+  metaobjectDefinitionByType(type: "announcement_banner") { id fieldDefinitions { key } }
 }`);
-
-if (!existing.metaobjectDefinitionByType) {
-  const result = await adminGraphql(
-    `mutation CreateAnnouncementDefinition($definition: MetaobjectDefinitionCreateInput!) {
-      metaobjectDefinitionCreate(definition: $definition) {
-        metaobjectDefinition { id }
-        userErrors { field message }
-      }
-    }`,
-    { definition: {
-      name: 'Announcement banner',
-      type,
-      description,
-      displayNameKey: 'message',
-      fieldDefinitions: [
-        { name: 'Enabled', key: 'enabled', type: 'boolean', required: true, description: 'Turn off to hide the banner regardless of dates.' },
-        { name: 'Message', key: 'message', type: 'single_line_text_field', required: true },
-        { name: 'Link label', key: 'link_label', type: 'single_line_text_field', description: 'Underlined call to action, such as Order now.' },
-        { name: 'Link URL', key: 'link_url', type: 'single_line_text_field', description: 'An internal path such as /charcuterie, or a full https:// URL. Leave blank for a text-only banner.' },
-        { name: 'Start date', key: 'start_date', type: 'date', description: 'First day to display, starting at midnight Eastern Time. Optional.' },
-        { name: 'End date', key: 'end_date', type: 'date', description: 'Last day to display, through 11:59 PM Eastern Time. Optional; must be on or after the start date.' },
-      ],
-    } },
-  );
-  assertUserErrors(result.metaobjectDefinitionCreate, 'Creating announcement banner definition');
-} else if (existing.metaobjectDefinitionByType.description !== description) {
-  const result = await adminGraphql(
-    `mutation UpdateAnnouncementDescription($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
-      metaobjectDefinitionUpdate(id: $id, definition: $definition) {
-        metaobjectDefinition { id }
-        userErrors { field message }
-      }
-    }`,
-    { id: existing.metaobjectDefinitionByType.id, definition: { description } },
-  );
-  assertUserErrors(result.metaobjectDefinitionUpdate, 'Updating announcement banner instructions');
-}
-
-if (!existing.metaobjectByHandle) {
-  const result = await adminGraphql(
-    `mutation CreateAnnouncement($metaobject: MetaobjectCreateInput!) {
-      metaobjectCreate(metaobject: $metaobject) {
-        metaobject { id handle }
-        userErrors { field message }
-      }
-    }`,
-    { metaobject: { type, handle: 'default', fields: [
-      { key: 'enabled', value: 'true' },
-      { key: 'message', value: 'Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.' },
-      { key: 'link_label', value: 'Order now' },
-      { key: 'link_url', value: '/charcuterie' },
-    ] } },
-  );
-  assertUserErrors(result.metaobjectCreate, 'Creating announcement banner');
-}
-
-const verified = await adminGraphql(`query {
-  metaobjectByHandle(handle: { type: "announcement_banner", handle: "default" }) {
-    handle fields { key }
+if (!existing) {
+  const result = await adminGraphql(`mutation CreateBannerDefinition($definition: MetaobjectDefinitionCreateInput!) {
+    metaobjectDefinitionCreate(definition: $definition) {
+      metaobjectDefinition { id } userErrors { field message }
+    }
+  }`, { definition: { name: 'Announcement banner', type, description, displayNameKey: 'message', fieldDefinitions: fields } });
+  assertUserErrors(result.metaobjectDefinitionCreate, 'Creating announcement definition');
+} else {
+  const keys = new Set(existing.fieldDefinitions.map(field => field.key));
+  const missing = fields.filter(field => !keys.has(field.key));
+  if (missing.length) {
+    await updateDefinition(existing.id, { fieldDefinitions: missing.map(field => ({ create: { ...field, required: false } })) });
   }
-}`);
-if (!verified.metaobjectByHandle) throw new Error('Announcement banner verification failed.');
-console.log('Announcement banner ready: Shopify Admin → Content → Metaobjects → Announcement banner. Existing content was preserved.');
+  let after = null;
+  do {
+    const result = await adminGraphql(`query BannerEntries($after: String) {
+      metaobjects(type: "announcement_banner", first: 100, after: $after) {
+        nodes { id fields { key value } } pageInfo { hasNextPage endCursor }
+      }
+    }`, { after });
+    for (const entry of result.metaobjects.nodes) {
+      const values = Object.fromEntries(entry.fields.map(field => [field.key, field.value]));
+      if (values.content) continue;
+      const children = [{ type: 'text', value: values.message || 'Announcement' }];
+      if (values.link_url && values.link_label) children.push(
+        { type: 'text', value: ' ' },
+        { type: 'link', url: values.link_url, children: [{ type: 'text', value: values.link_label }] },
+      );
+      const content = JSON.stringify({ type: 'root', children: [{ type: 'paragraph', children }] });
+      const updated = await adminGraphql(`mutation MigrateBanner($id: ID!, $metaobject: MetaobjectUpdateInput!) {
+        metaobjectUpdate(id: $id, metaobject: $metaobject) {
+          metaobject { id fields { key value } } userErrors { field message }
+        }
+      }`, { id: entry.id, metaobject: { fields: [{ key: 'content', value: content }] } });
+      assertUserErrors(updated.metaobjectUpdate, 'Migrating announcement content');
+      if (!updated.metaobjectUpdate.metaobject?.fields.some(field => field.key === 'content' && field.value === content)) {
+        throw new Error('Rich content verification failed; legacy fields have not been removed.');
+      }
+    }
+    after = result.metaobjects.pageInfo.hasNextPage ? result.metaobjects.pageInfo.endCursor : null;
+  } while (after);
+  await updateDefinition(existing.id, {
+    description, displayNameKey: 'message',
+    fieldDefinitions: [
+      ...fields.map(({ type: _type, ...field }) => ({ update: field })),
+      ...['link_label', 'link_url'].filter(key => keys.has(key)).map(key => ({ delete: { key } })),
+    ],
+  });
+}
+console.log('Announcement banner ready: Name, rich-text Content, Enabled, Start date, End date.');

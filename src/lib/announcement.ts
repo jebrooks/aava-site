@@ -1,7 +1,7 @@
+import { escapeHtml, renderRichText } from './rich-text.ts';
+
 export interface Announcement {
-  message: string;
-  linkLabel: string;
-  linkUrl: string;
+  html: string;
 }
 
 export interface AnnouncementEntry {
@@ -25,9 +25,7 @@ export function selectAnnouncement(entries: AnnouncementEntry[], now = new Date(
 
 // Used only for local development without Shopify credentials.
 export const defaultAnnouncement: Announcement = {
-  message: 'Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.',
-  linkLabel: 'Order now',
-  linkUrl: '/charcuterie',
+  html: '<p>Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.</p>',
 };
 
 function validDate(value: string) {
@@ -40,8 +38,9 @@ export function activeAnnouncement(
   fields: Record<string, string>,
   now = new Date(),
 ): Announcement | null {
-  const message = fields.message?.trim();
-  if (fields.enabled !== 'true' || !message) return null;
+  const html = fields.content ? renderRichText(fields.content) :
+    (fields.message?.trim() ? `<p>${escapeHtml(fields.message.trim())}</p>` : null);
+  if (fields.enabled !== 'true' || !html) return null;
 
   const start = fields.start_date || '';
   const end = fields.end_date || '';
@@ -55,16 +54,5 @@ export function activeAnnouncement(
   const today = `${part('year')}-${part('month')}-${part('day')}`;
   if ((start && today < start) || (end && today > end)) return null;
 
-  const linkUrl = fields.link_url?.trim() || '';
-  // Allow internal paths and HTTPS links, including protection against URL normalization.
-  const safeLink = /^\/(?!\/)/.test(linkUrl) && !/[\\\s\u0000-\u001f]/.test(linkUrl);
-  let externalLink = false;
-  try {
-    externalLink = new URL(linkUrl).protocol === 'https:';
-  } catch { /* Relative paths are handled above. */ }
-  return {
-    message,
-    linkLabel: fields.link_label?.trim() || '',
-    linkUrl: safeLink || externalLink ? linkUrl : '',
-  };
+  return { html };
 }
