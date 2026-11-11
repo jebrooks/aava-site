@@ -8,6 +8,7 @@
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "check:catalog": "node scripts/check-catalog-parity.mjs",
     "shopify:setup": "node --env-file=.env scripts/shopify/setup.mjs",
     "shopify:normalize": "node scripts/shopify/normalize-squarespace.mjs",
     "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs"

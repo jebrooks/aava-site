@@ -45,7 +45,7 @@ Seed hidden slot products locally or after deployment:
 
 ```sh
 curl -H "Authorization: Bearer $CRON_SECRET" \
-  http://localhost:4321/api/cron/materialize-delivery
+  http://localhost:4330/api/cron/materialize-delivery
 ```
 
 Vercel repeats this daily for newly entering dates in the rolling horizon. Every date is a hidden,
@@ -104,6 +104,23 @@ after live sales without a fresh reconciliation.
   the business owner must approve the reconciliation before Squarespace redemption is disabled.
 
 ## 5. Verification and cutover
+
+### GitHub catalog parity gate
+
+The `Catalog parity` GitHub Actions workflow builds each pull request, queries every Storefront-visible
+product in the configured Shopify collection, renders `/charcuterie-menu`, and compares the exact
+product handles. Configure these repository values under **Settings → Secrets and variables →
+Actions**:
+
+- Secret: `SHOPIFY_STOREFRONT_ACCESS_TOKEN`
+- Variables: `PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_API_VERSION`, and
+  `SHOPIFY_CHARCUTERIE_COLLECTION_HANDLE`
+
+Run the same check locally with `npm run check:catalog`.
+
+After the workflow has completed once, create an active ruleset under **Settings → Rules →
+Rulesets** targeting the default branch. Require a pull request and the `Catalog parity` status
+check before merging. Vercel production deployments should continue to track only `main`.
 
 1. Run `npm run build`, deploy a Vercel preview, and use Shopify test mode.
 2. Reconcile product/variant/image/SKU/price/inventory counts against the approved export.
