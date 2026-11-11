@@ -96,12 +96,15 @@ agreed architecture.
 ## Updating content
 
 - The header announcement is managed in **Shopify Admin → Content → Metaobjects → Announcement
-  banner**. Edit the existing entry (handle `default`) to change its message, link label, link URL,
+  banner**. Create or edit entries to change the message, link label, link URL,
   enabled switch, and optional start/end dates. Both dates are inclusive, using Eastern Time
   (`America/New_York`); blank dates have no limit. An end date before the start date hides the banner.
   A blank link URL displays the message without a link. Use an internal path such as `/charcuterie`
   or a full HTTPS URL. Save edits; new page loads reflect changes within about a minute without a
   redeploy. Pages render on request so scheduling also applies to the marketing pages.
+  The site shows one eligible banner at a time. If entries overlap, the latest start date wins
+  (undated entries have lowest priority), then the most recently edited entry. Exact ties use
+  alphabetical handle order. Disabled, future, expired, and invalid entries are skipped.
   Run `npm run shopify:setup-announcement` once to create the definition and seed the current banner;
   rerunning preserves existing edits. It uses the existing Admin API credentials and metaobject
   read/write scopes. Missing, disabled, invalid, or unavailable Shopify banner content hides the

@@ -1,8 +1,9 @@
 import { adminGraphql, assertUserErrors } from './lib.mjs';
 
 const type = 'announcement_banner';
+const description = 'Website header banner. Create entries for scheduled announcements. Dates include the full day in America/New_York. Overlaps prefer the latest start date, then the most recently edited entry.';
 const existing = await adminGraphql(`query {
-  metaobjectDefinitionByType(type: "announcement_banner") { id }
+  metaobjectDefinitionByType(type: "announcement_banner") { id description }
   metaobjectByHandle(handle: { type: "announcement_banner", handle: "default" }) { id }
 }`);
 
@@ -17,7 +18,7 @@ if (!existing.metaobjectDefinitionByType) {
     { definition: {
       name: 'Announcement banner',
       type,
-      description: 'Website header banner. Edit the default entry. Dates include the full day in America/New_York; leave either date blank for no limit.',
+      description,
       displayNameKey: 'message',
       fieldDefinitions: [
         { name: 'Enabled', key: 'enabled', type: 'boolean', required: true, description: 'Turn off to hide the banner regardless of dates.' },
@@ -30,6 +31,17 @@ if (!existing.metaobjectDefinitionByType) {
     } },
   );
   assertUserErrors(result.metaobjectDefinitionCreate, 'Creating announcement banner definition');
+} else if (existing.metaobjectDefinitionByType.description !== description) {
+  const result = await adminGraphql(
+    `mutation UpdateAnnouncementDescription($id: ID!, $definition: MetaobjectDefinitionUpdateInput!) {
+      metaobjectDefinitionUpdate(id: $id, definition: $definition) {
+        metaobjectDefinition { id }
+        userErrors { field message }
+      }
+    }`,
+    { id: existing.metaobjectDefinitionByType.id, definition: { description } },
+  );
+  assertUserErrors(result.metaobjectDefinitionUpdate, 'Updating announcement banner instructions');
 }
 
 if (!existing.metaobjectByHandle) {
