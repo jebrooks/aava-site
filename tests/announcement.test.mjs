@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activeAnnouncement } from '../src/lib/announcement.ts';
+import { activeAnnouncement, selectAnnouncement } from '../src/lib/announcement.ts';
 
 const fields = {
   enabled: 'true', message: 'Seasonal offer', link_label: 'Order now', link_url: '/charcuterie',
@@ -13,6 +13,44 @@ test('single-day banner spans the entire Eastern date across the fall DST change
   assert.ok(at('2026-11-01T04:00:00Z'));
   assert.ok(at('2026-11-02T04:59:59Z'));
   assert.equal(at('2026-11-02T05:00:00Z'), null);
+});
+
+const entry = (handle, overrides = {}, updatedAt = '2026-11-11T12:00:00Z') => ({
+  handle, updatedAt,
+  fields: { enabled: 'true', message: handle, start_date: '', end_date: '', ...overrides },
+});
+const today = new Date('2026-11-11T19:00:00Z');
+
+test('selects the new scheduled entry when the original default has expired', () => {
+  const entries = [
+    entry('default', { end_date: '2026-11-10' }),
+    entry('test-banner', { start_date: '2026-11-11', end_date: '2026-11-12' }),
+  ];
+  assert.equal(selectAnnouncement(entries, today).message, 'test-banner');
+  assert.equal(selectAnnouncement(entries, new Date('2026-11-13T05:00:00Z')), null);
+});
+
+test('latest eligible start date wins over overlapping or undated entries', () => {
+  const entries = [
+    entry('undated'), entry('earlier', { start_date: '2026-11-01' }),
+    entry('latest', { start_date: '2026-11-11' }),
+    entry('future', { start_date: '2026-11-12' }),
+    entry('disabled', { start_date: '2026-11-11', enabled: 'false' }),
+    entry('invalid', { start_date: '2026-11-11', end_date: '2026-11-10' }),
+  ];
+  assert.equal(selectAnnouncement(entries, today).message, 'latest');
+  assert.equal(selectAnnouncement([...entries].reverse(), today).message, 'latest');
+  assert.equal(selectAnnouncement(entries, new Date('2026-10-01T12:00:00Z')).message, 'undated');
+});
+
+test('equal start dates prefer most recently edited, with stable ties independent of API order', () => {
+  const older = entry('older', {}, '2026-11-10T12:00:00Z');
+  const newer = entry('newer');
+  assert.equal(selectAnnouncement([older, newer], today).message, 'newer');
+  const tied = entry('a-tied');
+  assert.equal(selectAnnouncement([newer, tied], today).message, 'a-tied');
+  assert.equal(selectAnnouncement([tied, newer], today).message, 'a-tied');
+  assert.equal(selectAnnouncement([], today), null);
 });
 
 test('spring daylight saving transition uses local midnight for both boundaries', () => {

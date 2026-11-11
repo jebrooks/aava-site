@@ -4,6 +4,25 @@ export interface Announcement {
   linkUrl: string;
 }
 
+export interface AnnouncementEntry {
+  handle: string;
+  updatedAt: string;
+  fields: Record<string, string>;
+}
+
+export function selectAnnouncement(entries: AnnouncementEntry[], now = new Date()): Announcement | null {
+  const eligible = entries.flatMap((entry) => {
+    const announcement = activeAnnouncement(entry.fields, now);
+    return announcement ? [{ entry, announcement }] : [];
+  });
+  eligible.sort((a, b) =>
+    (b.entry.fields.start_date || '').localeCompare(a.entry.fields.start_date || '') ||
+    b.entry.updatedAt.localeCompare(a.entry.updatedAt) ||
+    a.entry.handle.localeCompare(b.entry.handle),
+  );
+  return eligible[0]?.announcement || null;
+}
+
 // Used only for local development without Shopify credentials.
 export const defaultAnnouncement: Announcement = {
   message: 'Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.',
