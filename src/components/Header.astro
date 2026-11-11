@@ -1,6 +1,8 @@
 ---
 import { site } from '../data/site';
+import { getAnnouncement } from '../lib/shopify/announcement';
 
+const announcement = await getAnnouncement();
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
   href === '/' ? pathname === href : pathname.startsWith(href);
@@ -8,13 +10,19 @@ const isActive = (href: string) =>
 
 <a class="skip-link" href="#main-content">Skip to content</a>
 
-<div class="announcement">
-  <a href="/charcuterie">
-    <span aria-hidden="true">♥</span>
-    Celebrate Women-Owned Businesses — nominate one you love and receive $20 off your next order.
-    <strong>Order now</strong>
-  </a>
-</div>
+{announcement && (
+  <div class="announcement">
+    {announcement.linkUrl ? (
+      <a href={announcement.linkUrl}>
+        <span aria-hidden="true">♥</span>{' '}
+        {announcement.message}{' '}
+        {announcement.linkLabel && <strong>{announcement.linkLabel}</strong>}
+      </a>
+    ) : (
+      <><span aria-hidden="true">♥</span>{' '}{announcement.message}</>
+    )}
+  </div>
+)}
 
 <header class="site-header" data-header>
   <div class="header-inner">
