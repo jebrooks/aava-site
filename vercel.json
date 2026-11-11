@@ -8,7 +8,7 @@
     },
     {
       "source": "/charcuterie-menu/build-your-own-boards",
-      "destination": "/charcuterie-menu",
+      "destination": "/charcuterie-menu/build-your-own",
       "permanent": true
     }
   ],

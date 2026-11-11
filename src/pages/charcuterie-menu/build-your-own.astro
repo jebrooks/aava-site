@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Button from '../../components/Button.astro';
+import configurations from '../../data/board-customizations.json';
+import { getProductByHandle } from '../../lib/shopify/storefront';
+import type { ShopifyProduct } from '../../lib/shopify/types';
+
+let products: ShopifyProduct[] = [];
+try {
+  products = (await Promise.all(Object.keys(configurations).map(getProductByHandle)))
+    .filter((product): product is ShopifyProduct => product !== null);
+} catch (error) {
+  console.error('Unable to load build-your-own boards.', error);
+  Astro.response.status = 503;
+}
+---
+
+<BaseLayout
+  title="Build Your Own Charcuterie Board"
+  description="Choose a Small or Large board, then select your cheeses, meats, and accompaniments."
+  image="/images/hero-charcuterie.webp"
+>
+  <PageHero
+    image="/images/hero-charcuterie.webp"
+    title="Build Your Own"
+    description="Choose your board size, then make it yours with your favorite cheeses, meats, and accompaniments."
+  />
+  <section class="section">
+    <div class="container">
+      {products.length ? (
+        <div class="product-grid product-grid--catalog">
+          {products.map(product => <ProductCard product={product} />)}
+        </div>
+      ) : (
+        <div class="commerce-notice">
+          <h2>Build-your-own boards are temporarily unavailable.</h2>
+          <p>Please try again later or contact us about your gathering.</p>
+          <Button href="/contact">Contact us</Button>
+        </div>
+      )}
+      <div class="button-row button-row--center">
+        <Button href="/charcuterie-menu" variant="secondary">Shop the full menu</Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
