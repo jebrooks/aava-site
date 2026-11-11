@@ -11,7 +11,8 @@
     "check:catalog": "node scripts/check-catalog-parity.mjs",
     "shopify:setup": "node --env-file=.env scripts/shopify/setup.mjs",
     "shopify:normalize": "node scripts/shopify/normalize-squarespace.mjs",
-    "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs"
+    "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs",
+    "test:boards": "node --experimental-strip-types --test tests/board-customization.test.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "11.0.5",

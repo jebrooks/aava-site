@@ -1,0 +1,66 @@
+---
+import { getBoardConfiguration } from '../lib/board-customization';
+interface Props { handle: string }
+const { handle } = Astro.props;
+const config = getBoardConfiguration(handle);
+const groups = config ? [
+  { key: 'cheeses', label: 'Cheeses', options: config.cheeses, max: config.maxCheeses },
+  { key: 'meats', label: 'Meats', options: config.meats, max: config.maxMeats },
+  { key: 'accompaniments', label: 'Accompaniments', options: config.accompaniments, max: config.maxAccompaniments },
+] : [];
+---
+{config && (
+  <div class="board-customizer" data-board-customizer>
+    <h2>Make it your own</h2>
+    <p>Select the ingredients for this board. To order a different combination, add another board separately.</p>
+    <fieldset class="board-preference">
+      <legend>Include meat?</legend>
+      <label><input type="radio" name="preference" value="With meat" checked /> With meat</label>
+      <label><input type="radio" name="preference" value="No meat" /> No meat</label>
+    </fieldset>
+    {groups.map(group => (
+      <fieldset class="board-ingredients" data-ingredient-group={group.key}>
+        <legend>{group.label}</legend>
+        <p id={`${group.key}-hint`} data-selection-count aria-live="polite">Choose 1–{group.max}. 0 selected.</p>
+        <details open={group.key !== 'accompaniments'}>
+          <summary>Choose {group.label.toLowerCase()}</summary>
+          <div class="board-ingredient-options">
+            {group.options.map(option => (
+              <label><input type="checkbox" name={group.key} value={option} aria-describedby={`${group.key}-hint`} /> <span>{option}</span></label>
+            ))}
+          </div>
+        </details>
+      </fieldset>
+    ))}
+  </div>
+)}
+
+<script>
+  import { getBoardConfiguration } from '../lib/board-customization';
+  const root = document.querySelector<HTMLElement>('[data-board-customizer]');
+  const handle = root?.closest<HTMLFormElement>('form')?.dataset.productHandle || '';
+  const config = getBoardConfiguration(handle);
+  function updateCounts() {
+    if (!root || !config) return;
+    const noMeat = root.querySelector<HTMLInputElement>('[name="preference"]:checked')?.value === 'No meat';
+    for (const group of root.querySelectorAll<HTMLFieldSetElement>('[data-ingredient-group]')) {
+      const key = group.dataset.ingredientGroup;
+      const meatHidden = key === 'meats' && noMeat;
+      group.hidden = meatHidden;
+      for (const input of group.querySelectorAll<HTMLInputElement>('input')) {
+        input.disabled = meatHidden;
+        if (meatHidden) input.checked = false;
+      }
+      const max = key === 'cheeses' ? (noMeat ? config.maxVegetarianCheeses : config.maxCheeses)
+        : key === 'meats' ? config.maxMeats : config.maxAccompaniments;
+      const count = group.querySelectorAll('input:checked').length;
+      const hint = group.querySelector<HTMLElement>('[data-selection-count]');
+      if (hint) {
+        hint.textContent = `Choose 1–${max}. ${count} selected.${count > max ? ' Remove extra selections to continue.' : ''}`;
+        hint.classList.toggle('selection-limit-exceeded', count > max);
+      }
+    }
+  }
+  root?.addEventListener('change', updateCounts);
+  updateCounts();
+</script>

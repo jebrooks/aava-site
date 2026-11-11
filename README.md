@@ -21,6 +21,8 @@ Run the production checks and Vercel build output with:
 npm run build
 ```
 
+Run the build-your-own selection validation tests with `npm run test:boards`.
+
 Use `npm run dev` for local route testing; the Vercel adapter does not provide a portable
 standalone preview server.
 
@@ -96,6 +98,12 @@ agreed architecture.
 - Shared company details and legacy integration URLs live in `src/data/site.ts`.
 - Page copy lives in the matching file under `src/pages/`.
 - Brand colors, typography, and layout rules live in `src/styles/global.css`.
+- Build-your-own ingredient lists and size limits live in `src/data/board-customizations.json`.
+  Update that file and redeploy to change the available selections. Each board's choices are
+  validated by the cart API and stored as Shopify cart-line attributes for checkout and fulfillment.
+  Small allows up to 2 cheeses and 1 meat, or 3 cheeses without meat; Large allows up to 3 cheeses
+  and 2 meats, or 5 cheeses without meat. Both allow up to 5 accompaniments. Customers must choose
+  at least one cheese and accompaniment, and at least one meat when selecting the meat option.
 - To refresh source images from the public Squarespace CDN, run `./scripts/fetch-assets.sh` and
   review the resulting binary changes before committing.
 
