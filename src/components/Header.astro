@@ -11,17 +11,7 @@ const isActive = (href: string) =>
 <a class="skip-link" href="#main-content">Skip to content</a>
 
 {announcement && (
-  <div class="announcement">
-    {announcement.linkUrl ? (
-      <a href={announcement.linkUrl}>
-        <span aria-hidden="true">♥</span>{' '}
-        {announcement.message}{' '}
-        {announcement.linkLabel && <strong>{announcement.linkLabel}</strong>}
-      </a>
-    ) : (
-      <><span aria-hidden="true">♥</span>{' '}{announcement.message}</>
-    )}
-  </div>
+  <div class="announcement" set:html={announcement.html} />
 )}
 
 <header class="site-header" data-header>

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { activeAnnouncement, selectAnnouncement } from '../src/lib/announcement.ts';
 
 const fields = {
-  enabled: 'true', message: 'Seasonal offer', link_label: 'Order now', link_url: '/charcuterie',
+  enabled: 'true', message: 'Seasonal offer',
   start_date: '2026-11-01', end_date: '2026-11-01',
 };
 const at = (timestamp, overrides = {}) => activeAnnouncement({ ...fields, ...overrides }, new Date(timestamp));
@@ -26,7 +26,7 @@ test('selects the new scheduled entry when the original default has expired', ()
     entry('default', { end_date: '2026-11-10' }),
     entry('test-banner', { start_date: '2026-11-11', end_date: '2026-11-12' }),
   ];
-  assert.equal(selectAnnouncement(entries, today).message, 'test-banner');
+  assert.equal(selectAnnouncement(entries, today).html, '<p>test-banner</p>');
   assert.equal(selectAnnouncement(entries, new Date('2026-11-13T05:00:00Z')), null);
 });
 
@@ -38,18 +38,18 @@ test('latest eligible start date wins over overlapping or undated entries', () =
     entry('disabled', { start_date: '2026-11-11', enabled: 'false' }),
     entry('invalid', { start_date: '2026-11-11', end_date: '2026-11-10' }),
   ];
-  assert.equal(selectAnnouncement(entries, today).message, 'latest');
-  assert.equal(selectAnnouncement([...entries].reverse(), today).message, 'latest');
-  assert.equal(selectAnnouncement(entries, new Date('2026-10-01T12:00:00Z')).message, 'undated');
+  assert.equal(selectAnnouncement(entries, today).html, '<p>latest</p>');
+  assert.equal(selectAnnouncement([...entries].reverse(), today).html, '<p>latest</p>');
+  assert.equal(selectAnnouncement(entries, new Date('2026-10-01T12:00:00Z')).html, '<p>undated</p>');
 });
 
 test('equal start dates prefer most recently edited, with stable ties independent of API order', () => {
   const older = entry('older', {}, '2026-11-10T12:00:00Z');
   const newer = entry('newer');
-  assert.equal(selectAnnouncement([older, newer], today).message, 'newer');
+  assert.equal(selectAnnouncement([older, newer], today).html, '<p>newer</p>');
   const tied = entry('a-tied');
-  assert.equal(selectAnnouncement([newer, tied], today).message, 'a-tied');
-  assert.equal(selectAnnouncement([tied, newer], today).message, 'a-tied');
+  assert.equal(selectAnnouncement([newer, tied], today).html, '<p>a-tied</p>');
+  assert.equal(selectAnnouncement([tied, newer], today).html, '<p>a-tied</p>');
   assert.equal(selectAnnouncement([], today), null);
 });
 
@@ -77,13 +77,11 @@ test('invalid dates and reversed ranges hide the banner', () => {
   ]) assert.equal(at('2026-11-01T12:00:00Z', dates), null);
 });
 
-test('banner links allow internal paths or HTTPS and reject executable or ambiguous URLs', () => {
-  for (const link_url of ['/charcuterie?offer=holiday#order', 'https://example.com/offer']) {
-    assert.equal(at('2026-11-01T12:00:00Z', { link_url }).linkUrl, link_url);
+test('rich content takes precedence over the administrative name, and invalid or blank rich content hides', () => {
+  const content = JSON.stringify({type: 'root', children: [{type: 'paragraph', children: [{type: 'text', value: 'Hello', bold: true}]}]});
+  assert.equal(at('2026-11-01T12:00:00Z', {content}).html, '<p><strong>Hello</strong></p>');
+  for (const content of ['not json', '{"type":"root","children":[]}', '{"type":"root","children":[{"type":"paragraph","children":[{"type":"text","value":" "}]}]}']) {
+    assert.equal(at('2026-11-01T12:00:00Z', {content}), null);
   }
-  for (const link_url of ['', 'javascript:alert(1)', '//example.com', '/\\example.com', '/\t/example.com', 'http://example.com']) {
-    const banner = at('2026-11-01T12:00:00Z', { link_url });
-    assert.equal(banner.linkUrl, '');
-    assert.equal(banner.message, fields.message);
-  }
+  assert.equal(at('2026-11-01T12:00:00Z', {message: '<script>bad</script>'}).html, '<p>&lt;script&gt;bad&lt;/script&gt;</p>');
 });

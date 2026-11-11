@@ -95,21 +95,19 @@ agreed architecture.
 
 ## Updating content
 
-- The header announcement is managed in **Shopify Admin → Content → Metaobjects → Announcement
-  banner**. Create or edit entries to change the message, link label, link URL,
-  enabled switch, and optional start/end dates. Both dates are inclusive, using Eastern Time
-  (`America/New_York`); blank dates have no limit. An end date before the start date hides the banner.
-  A blank link URL displays the message without a link. Use an internal path such as `/charcuterie`
-  or a full HTTPS URL. Save edits; new page loads reflect changes within about a minute without a
-  redeploy. Pages render on request so scheduling also applies to the marketing pages.
-  The site shows one eligible banner at a time. If entries overlap, the latest start date wins
-  (undated entries have lowest priority), then the most recently edited entry. Exact ties use
-  alphabetical handle order. Disabled, future, expired, and invalid entries are skipped.
-  Run `npm run shopify:setup-announcement` once to create the definition and seed the current banner;
-  rerunning preserves existing edits. It uses the existing Admin API credentials and metaobject
-  read/write scopes. Missing, disabled, invalid, or unavailable Shopify banner content hides the
-  banner; local development without Admin credentials shows the original message.
-  Run `npm run test:announcement` to check scheduling boundaries, including daylight saving time.
+- Manage announcements in **Shopify Admin → Content → Metaobjects → Announcement banner**.
+  Each entry has a **Name** for identification, **Content** with Shopify's rich-text editor,
+  an enabled switch, and optional start/end dates. Format Content with bold, italics, and links
+  anywhere in the text; the Name is not displayed. There are no separate link label/URL fields.
+  Both dates are inclusive in Eastern Time (`America/New_York`); blank dates have no limit.
+  Reversed dates hide the entry. When entries overlap, latest start date wins (undated entries
+  have lowest priority), then latest edit, then alphabetical handle order.
+  Changes appear on new page loads within about a minute without redeploying. Run
+  `npm run shopify:setup-announcement` to create or migrate the definition; existing messages
+  and links become rich text before the old link fields are removed. Existing rich content is
+  preserved. Missing, disabled, invalid, or unavailable configured content hides the banner.
+  Local development without Admin credentials uses a sample announcement.
+  Run `npm run test:announcement` for scheduling and safe rich-text rendering tests.
 - Shared company details and legacy integration URLs live in `src/data/site.ts`.
 - Page copy lives in the matching file under `src/pages/`.
 - Brand colors, typography, and layout rules live in `src/styles/global.css`.
