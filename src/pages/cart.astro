@@ -125,6 +125,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       variant.textContent = line.merchandise.title;
       content.append(variant);
     }
+    for (const attribute of line.attributes.filter(attribute =>
+      ['Board preference', 'Cheeses', 'Meats', 'Accompaniments'].includes(attribute.key)
+    )) {
+      const detail = element('p', 'cart-line__selection');
+      const label = element('strong');
+      label.textContent = `${attribute.key}: `;
+      detail.append(label, document.createTextNode(attribute.value));
+      content.append(detail);
+    }
     const controls = element('div', 'cart-line__controls');
     const label = element('label');
     label.textContent = 'Quantity ';

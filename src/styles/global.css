@@ -1520,6 +1520,86 @@ ol {
   width: 100%;
 }
 
+.board-customizer {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.board-customizer h2,
+.board-customizer p {
+  margin: 0;
+}
+
+.board-customizer > p,
+.board-ingredients > p {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.board-customizer fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.board-customizer fieldset[hidden] {
+  display: none;
+}
+
+.board-customizer legend {
+  padding-inline: 0.3rem;
+  font-weight: 700;
+}
+
+.board-customizer label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding-block: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.board-customizer input {
+  flex: 0 0 auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  padding: 0;
+  margin-top: 0.1rem;
+  accent-color: var(--ink);
+}
+
+.board-ingredients details {
+  margin-top: 0.7rem;
+}
+
+.board-ingredients summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.board-ingredient-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.15rem 1rem;
+  margin-top: 0.6rem;
+}
+
+.board-ingredients .selection-limit-exceeded {
+  color: #a32a25;
+}
+
+.cart-line__selection {
+  margin-block: 0.4rem;
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
 .product-facts {
   padding-top: 1.5rem;
   color: var(--ink-soft);

@@ -4,6 +4,7 @@ import { getProductByHandle, formatMoney } from '../../../lib/shopify/storefront
 import { isShopifyConfigured } from '../../../lib/shopify/config';
 import type { ShopifyProduct } from '../../../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
+import BoardCustomizer from '../../../components/BoardCustomizer.astro';
 
 export const prerender = false;
 
@@ -73,7 +74,7 @@ const productSchema = product && initialVariant ? {
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
-          <form class="product-form" data-product-form data-variants={JSON.stringify(variants)}>
+          <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
               <label>
                 <span>Choose an option</span>
@@ -88,6 +89,7 @@ const productSchema = product && initialVariant ? {
             ) : (
               <input type="hidden" name="variant" value={initialVariant.id} data-variant-select />
             )}
+            <BoardCustomizer handle={handle} />
             <label>
               <span>Quantity</span>
               <input name="quantity" type="number" min="1" max="50" value="1" inputmode="numeric" />
@@ -121,6 +123,7 @@ const productSchema = product && initialVariant ? {
 {product && (
   <script>
     import type { Money, ProductVariant } from '../../../lib/shopify/types';
+    import { boardAttributes, getBoardConfiguration } from '../../../lib/board-customization';
 
     const form = document.querySelector<HTMLFormElement>('[data-product-form]');
     const variantSelect = document.querySelector<HTMLSelectElement | HTMLInputElement>('[data-variant-select]');
@@ -145,6 +148,14 @@ const productSchema = product && initialVariant ? {
       button.disabled = true;
       if (status) status.textContent = 'Adding your board…';
       try {
+        const handle = submittedForm.dataset.productHandle || '';
+        const selections = getBoardConfiguration(handle) ? {
+          preference: data.get('preference'),
+          cheeses: data.getAll('cheeses'),
+          meats: data.getAll('meats'),
+          accompaniments: data.getAll('accompaniments'),
+        } : undefined;
+        boardAttributes(handle, selections);
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -153,6 +164,7 @@ const productSchema = product && initialVariant ? {
             cartId: localStorage.getItem('aava-shopify-cart-id'),
             merchandiseId: data.get('variant'),
             quantity: Number(data.get('quantity')),
+            selections,
           }),
         });
         const result = await response.json();

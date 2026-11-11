@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import { apiError, assertSameOrigin, json, readJson } from '../../lib/http';
 import { ShopifyApiError } from '../../lib/shopify/client';
 import { assertDeliverySlotAvailable } from '../../lib/shopify/schedule';
+import { boardAttributes, assertBoardLine } from '../../lib/board-customization';
 import {
   addCartLine,
   assertCatalogVariant,
@@ -60,12 +61,18 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'add') {
       const merchandiseId = id(body.merchandiseId, 'Variant ID');
       const amount = quantity(body.quantity || 1);
-      await assertCatalogVariant(merchandiseId);
+      const variant = await assertCatalogVariant(merchandiseId);
+      let attributes;
+      try {
+        attributes = boardAttributes(variant.product.handle, body.selections);
+      } catch (error) {
+        throw new ShopifyApiError((error as Error).message, 400);
+      }
       const suppliedCartId = typeof body.cartId === 'string' ? body.cartId : '';
       const current = suppliedCartId ? await getCart(id(suppliedCartId, 'Cart ID')) : null;
       const cart = current && !isCheckoutLocked(current)
-        ? await addCartLine(current.id, merchandiseId, amount)
-        : await createCart(merchandiseId, amount);
+        ? await addCartLine(current.id, merchandiseId, amount, attributes)
+        : await createCart(merchandiseId, amount, attributes);
       return json({ cart: publicCart(cart) });
     }
 
@@ -140,6 +147,13 @@ export const POST: APIRoute = async ({ request }) => {
         (line) => !line.merchandise.product.handle.startsWith('delivery-slot-'),
       );
       if (!catalogLines.length) throw new ShopifyApiError('Add an item before checkout.', 400);
+      for (const line of catalogLines) {
+        try {
+          assertBoardLine(line.merchandise.product.handle, line.attributes);
+        } catch {
+          throw new ShopifyApiError(`Choose ingredients for ${line.merchandise.product.title}. Remove this board and add it again with your selections.`, 400);
+        }
+      }
       const needsDelivery = catalogLines.some((line) => line.merchandise.requiresShipping);
       const slotLines = cart.lines.nodes.filter((line) =>
         line.merchandise.product.handle.startsWith('delivery-slot-')

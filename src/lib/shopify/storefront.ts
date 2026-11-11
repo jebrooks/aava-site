@@ -1,6 +1,7 @@
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
 import type { ShopifyCart, ShopifyProduct, ShopifyUserError } from './types';
+import type { LineAttribute } from '../board-customization';
 
 const PRODUCT_FIELDS = `#graphql
   fragment ProductFields on Product {
@@ -115,6 +116,7 @@ export async function assertCatalogVariant(variantId: string) {
       id: string;
       availableForSale: boolean;
       product: {
+        handle: string;
         tags: string[];
         collections: { nodes: Array<{ handle: string }> };
       };
@@ -126,7 +128,7 @@ export async function assertCatalogVariant(variantId: string) {
         ... on ProductVariant {
           id
           availableForSale
-          product { tags collections(first: 20) { nodes { handle } } }
+          product { handle tags collections(first: 20) { nodes { handle } } }
         }
       }
     }`,
@@ -173,7 +175,7 @@ export async function getCart(id: string) {
   return data.cart;
 }
 
-export async function createCart(merchandiseId: string, quantity: number) {
+export async function createCart(merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {
   const data = await storefrontGraphql<{ cartCreate: CartPayload }>(
     `${CART_FIELDS}
     mutation CreateCart($input: CartInput!) {
@@ -183,13 +185,13 @@ export async function createCart(merchandiseId: string, quantity: number) {
         warnings { message }
       }
     }`,
-    { input: { lines: [{ merchandiseId, quantity }] } },
+    { input: { lines: [{ merchandiseId, quantity, attributes }] } },
   );
 
   return checkedCart(data.cartCreate);
 }
 
-export async function addCartLine(id: string, merchandiseId: string, quantity: number) {
+export async function addCartLine(id: string, merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {
   const data = await storefrontGraphql<{ cartLinesAdd: CartPayload }>(
     `${CART_FIELDS}
     mutation AddCartLine($cartId: ID!, $lines: [CartLineInput!]!) {
@@ -199,7 +201,7 @@ export async function addCartLine(id: string, merchandiseId: string, quantity: n
         warnings { message }
       }
     }`,
-    { cartId: id, lines: [{ merchandiseId, quantity }] },
+    { cartId: id, lines: [{ merchandiseId, quantity, attributes }] },
   );
 
   return checkedCart(data.cartLinesAdd);
