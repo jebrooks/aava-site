@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
+import TourPlanner from '../components/TourPlanner.astro';
 import { legacyUrl } from '../data/site';
 
 export const prerender = false;
@@ -41,7 +42,7 @@ const tourTypes = [
     description="Slow down, unwind, and savor Virginia wine country—one winery, one handcrafted board, and one special moment at a time."
   >
     <div class="button-row">
-      <Button href={legacyUrl('/experiences#choose-region')} variant="light" external>Find a tour</Button>
+      <Button href="#plan-tour" variant="light">Find a tour</Button>
       <Button href={legacyUrl('/request-tour')} variant="light" external>Let us build your booking</Button>
     </div>
   </PageHero>
@@ -70,36 +71,7 @@ const tourTypes = [
     </div>
   </section>
 
-  <section class="section section--cream" aria-labelledby="three-steps">
-    <div class="container">
-      <div class="section-heading">
-        <p class="eyebrow">Plan your experience</p>
-        <h2 id="three-steps">Your perfect day in three easy steps</h2>
-        <p>Choose your date, tour type, and something delicious to enjoy along the way.</p>
-      </div>
-      <div class="step-grid">
-        <article class="step-card">
-          <span class="step-card__number">1</span>
-          <h3>Pick a date or region</h3>
-          <p>Start with a day that works for you, or explore availability across our Virginia wine regions.</p>
-        </article>
-        <article class="step-card">
-          <span class="step-card__number">2</span>
-          <h3>Choose your tour</h3>
-          <p>Join a public group, reserve the bus for a private outing, or request a fully customized day.</p>
-        </article>
-        <article class="step-card">
-          <span class="step-card__number">3</span>
-          <h3>Add a snack</h3>
-          <p>A fresh sandwich is included, and an All ABoard Bites charcuterie board makes a delicious upgrade.</p>
-        </article>
-      </div>
-      <div class="button-row button-row--center" style="margin-top: 2.5rem;">
-        <Button href={legacyUrl('/experiences#choose-region')} external>Choose a date or region</Button>
-        <Button href={legacyUrl('/winery-experience-selector-tool')} variant="secondary" external>Try the region selector</Button>
-      </div>
-    </div>
-  </section>
+  <TourPlanner source="experiences" />
 
   <section class="section" aria-labelledby="tour-types">
     <div class="container">
@@ -132,7 +104,7 @@ const tourTypes = [
         <h2>Add All ABoard Bites to your day.</h2>
         <p class="lede">
           Travel-friendly artisan cheese and charcuterie boards are available for groups of 2–10.
-          We’ll email after booking to confirm your selections and preferences.
+          Choose your board and preferences during booking. We’ll arrange your destinations and itinerary by phone.
         </p>
         <Button href="/charcuterie" variant="light">Explore the full menu</Button>
       </div>
@@ -148,7 +120,7 @@ const tourTypes = [
       <h2>Virginia wine country is waiting.</h2>
       <p class="lede">Choose an available tour or tell us what you’re dreaming up. We’ll handle the details.</p>
       <div class="button-row button-row--center">
-        <Button href={legacyUrl('/experiences#choose-region')} external>Book now</Button>
+        <Button href="#plan-tour">Book now</Button>
         <Button href={legacyUrl('/frequently-asked-questions')} variant="secondary" external>Read the FAQs</Button>
       </div>
     </div>
