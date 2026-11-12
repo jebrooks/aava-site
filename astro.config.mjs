@@ -4,7 +4,7 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://www.allaboardva.com',
   output: 'server',
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 300 }),
   trailingSlash: 'never',
   server: {
     host: '127.0.0.1',

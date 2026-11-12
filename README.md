@@ -122,3 +122,48 @@ agreed architecture.
 
 The images and copy in this repository were migrated from the existing All ABoard VA site and
 should only be used where the site owner has the necessary rights.
+
+## Tour availability and catalog sync
+
+Edit **Shopify Admin → Content → Metaobjects → Tour schedule → default**. The default is
+all weekdays, 3 minimum calendar days in advance, and a 6 calendar-month horizon, in Eastern
+Time. Enter blackout dates as `YYYY-MM-DD`, one per line; the parser imposes no date-count
+limit. Invalid dates stop the sync rather than silently opening blocked days. Prices are editable
+in USD; initial prices use the site's advertised $125 per seat and $1,250 for the whole bus.
+November 25–30, 2026 is initially blocked to match the Thanksgiving closure announcement.
+
+Each eligible date gets a `tour-seat-YYYY-MM-DD` product with 10 units and a
+`tour-bus-YYYY-MM-DD` bundle requiring all 10 units of that seat variant. Products require no
+shipping and are published to the configured Headless publication, outside the charcuterie
+collection. Shopify manages shared availability at checkout. Tags `tour` and `scheduled-tour`
+identify both types; `tour-seat` and `tour-bus` separate them in saved admin product views.
+The `scheduled-tour` tag and date/handle convention are reserved for the automation.
+
+The daily authenticated Vercel job is `/api/cron/materialize-tours`, scheduled at **03:00 UTC**
+(10 p.m. EST / 11 p.m. EDT). It anticipates the coming day's minimum-notice cutoff during the
+last two Eastern hours of the day, so boundary dates close before midnight, including when
+Vercel starts a daily invocation later in the scheduled hour. The horizon never exceeds six
+calendar months from the current Eastern date. Dates closer than the minimum, blocked dates,
+disabled weekdays, dates beyond a reduced horizon, and all dates when Enabled is off are
+**archived, not deleted**. Bookings and historical order data remain intact. Changing a schedule
+or blocking a booked day does not cancel or refund existing reservations.
+
+Syncs never reinitialize existing inventory, including sold-out or reactivated dates. Every bus
+bundle is verified against its date's seat variant before activation. Initial products remain
+Draft until the pair is verified. A compare-and-set Shopify metafield lease serializes concurrent
+syncs. Failures leave resumable products; an execution budget allows large initial backfills to
+resume on the next invocation. The job reports `pending` dates when another run is needed.
+
+The endpoint reuses `CRON_SECRET`, `SHOPIFY_DELIVERY_LOCATION_ID`, and
+`SHOPIFY_STOREFRONT_PUBLICATION_ID`. No new production secrets are needed.
+
+```sh
+npm run shopify:setup-tours          # Create definition/defaults; preserve existing settings
+npm run shopify:sync-tours -- --dry-run
+npm run shopify:sync-tours           # Apply immediately after editing the schedule
+npm run test:tours
+```
+
+Schedule edits take effect at the next job or manual sync. The initial six-month backfill can
+require several manual runs; repeat while the result reports `pending > 0` (CLI exit code 2).
+The website's existing tour booking links remain unchanged by this catalog-management feature.
