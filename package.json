@@ -14,7 +14,10 @@
     "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs",
     "test:boards": "node --experimental-strip-types --test tests/board-customization.test.mjs",
     "test:announcement": "node --experimental-strip-types --test tests/announcement.test.mjs tests/rich-text.test.mjs",
-    "shopify:setup-announcement": "node --env-file=.env scripts/shopify/setup-announcement.mjs"
+    "shopify:setup-announcement": "node --env-file=.env scripts/shopify/setup-announcement.mjs",
+    "shopify:setup-tours": "node --env-file=.env scripts/shopify/setup-tours.mjs",
+    "shopify:sync-tours": "node --env-file=.env --experimental-strip-types scripts/shopify/sync-tours.mjs",
+    "test:tours": "node --experimental-strip-types --test tests/tour-schedule.test.mjs tests/tour-sync.test.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "11.0.5",

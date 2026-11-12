@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/materialize-delivery",
       "schedule": "15 5 * * *"
+    },
+    {
+      "path": "/api/cron/materialize-tours",
+      "schedule": "0 3 * * *"
     }
   ]
 }
