@@ -1,3 +1,4 @@
+import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
 import type { ShopifyCart, ShopifyProduct, ShopifyUserError } from './types';
@@ -124,7 +125,7 @@ export async function listCharcuterieProducts(pageSize = 50) {
     }
   } while (after);
 
-  return { ...collectionDetails!, products: { nodes: products } };
+  return { ...collectionDetails!, products: { nodes: products.map(deliveryProduct).filter(p=>p.variants.nodes.length) } };
 }
 
 export async function getProductByHandle(handle: string) {
@@ -136,7 +137,12 @@ export async function getProductByHandle(handle: string) {
     { handle },
   );
 
-  return data.product;
+  return data.product ? deliveryProduct(data.product) : null;
+}
+function deliveryProduct(product: ShopifyProduct): ShopifyProduct {
+  const variants = product.variants.nodes.filter(v=>!isTourVariant(v)).map(v=>({...v,title:deliveryVariantTitle(v)}));
+  return {...product,availableForSale:variants.some(v=>v.availableForSale),
+    options:product.options.filter(o=>o.name!=='Fulfillment'),variants:{nodes:variants}};
 }
 
 export async function assertCatalogVariant(variantId: string) {
@@ -144,6 +150,7 @@ export async function assertCatalogVariant(variantId: string) {
     node: {
       id: string;
       availableForSale: boolean;
+      selectedOptions: Array<{name:string;value:string}>;
       product: {
         handle: string;
         tags: string[];
@@ -157,6 +164,7 @@ export async function assertCatalogVariant(variantId: string) {
         ... on ProductVariant {
           id
           availableForSale
+          selectedOptions {name value}
           product { handle tags collections(first: 20) { nodes { handle } } }
         }
       }
@@ -167,7 +175,7 @@ export async function assertCatalogVariant(variantId: string) {
   const isCatalogProduct = product?.collections.nodes.some(
     (collection) => collection.handle === SHOPIFY_COLLECTION_HANDLE,
   );
-  if (!data.node || !product || !isCatalogProduct || product.tags.includes('delivery-slot')) {
+  if (!data.node || !product || !isCatalogProduct || product.tags.includes('delivery-slot') || isTourVariant(data.node)) {
     throw new ShopifyApiError('That item is not part of the public charcuterie catalog.', 400);
   }
   if (!data.node.availableForSale) {

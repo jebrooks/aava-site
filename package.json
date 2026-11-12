@@ -17,12 +17,16 @@
     "shopify:setup-announcement": "node --env-file=.env scripts/shopify/setup-announcement.mjs",
     "shopify:setup-tours": "node --env-file=.env scripts/shopify/setup-tours.mjs",
     "shopify:sync-tours": "node --env-file=.env --experimental-strip-types scripts/shopify/sync-tours.mjs",
-    "test:tours": "node --experimental-strip-types --test tests/tour-schedule.test.mjs tests/tour-sync.test.mjs"
+    "test:tours": "node --experimental-strip-types --test tests/tour-schedule.test.mjs tests/tour-sync.test.mjs",
+    "test:booking": "node --experimental-strip-types --test tests/tour-booking.test.mjs tests/tour-board-sync.test.mjs",
+    "shopify:sync-tour-boards": "node --env-file=.env --experimental-strip-types scripts/shopify/sync-tour-boards.mjs",
+    "shopify:register-tour-webhooks": "node --env-file=.env scripts/shopify/register-tour-board-webhooks.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "11.0.5",
     "@fontsource-variable/montserrat": "5.3.0",
     "@fontsource/marcellus": "5.3.0",
+    "@vercel/functions": "3.9.1",
     "astro": "7.2.0"
   },
   "devDependencies": {

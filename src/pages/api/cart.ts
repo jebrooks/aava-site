@@ -1,3 +1,4 @@
+import { isTourVariant } from '../../lib/tour-fulfillment';
 import type { APIRoute } from 'astro';
 import { apiError, assertSameOrigin, json, readJson } from '../../lib/http';
 import { ShopifyApiError } from '../../lib/shopify/client';
@@ -148,6 +149,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
       if (!catalogLines.length) throw new ShopifyApiError('Add an item before checkout.', 400);
       for (const line of catalogLines) {
+        if (isTourVariant(line.merchandise)) throw new ShopifyApiError('On-tour boards must be booked with a tour.', 400);
         try {
           assertBoardLine(line.merchandise.product.handle, line.attributes);
         } catch {

@@ -1,0 +1,97 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PageHero from "../components/PageHero.astro";
+import Button from "../components/Button.astro";
+import TourPlanner from "../components/TourPlanner.astro";
+import { legacyUrl } from "../data/site";
+export const prerender = false;
+---
+
+<BaseLayout
+  title="Plan Your Wine Tour"
+  description="Choose a public or private Virginia wine tour, select a snack, and find an available date."
+  image="/images/hero-experiences.webp"
+  noindex
+>
+  <PageHero
+    image="/images/hero-experiences.webp"
+    title="Experiences"
+    description="Slow down, unwind, and savor Virginia wine country—one winery, one handcrafted board, and one special moment at a time."
+  >
+    <div class="button-row">
+      <Button href="#plan-tour" variant="light">
+        Find a tour
+      </Button>
+      <Button href={legacyUrl("/request-tour")} variant="light" external>
+        Let us build your booking
+      </Button>
+    </div>
+  </PageHero>
+  <section class="section">
+    <div class="container split">
+      <div class="split__content">
+        <p class="eyebrow">Join us for something special</p>
+        <h2>Every great experience starts with connection.</h2>
+        <p class="lede">
+          At All ABoard VA, we believe in connection—to a place, to a flavor,
+          and to one another. We’ll work out the destinations with you by phone,
+          then take care of the details so you can relax into the day.
+        </p>
+      </div>
+      <div>
+        <ul class="check-list">
+          <li>Intimate, small-group tours with up to 10 guests</li>
+          <li>Curated winery visits and a warm, experienced host</li>
+          <li>A fresh sandwich and bottled water included</li>
+          <li>
+            Our regular charcuterie catalog, available to add to your tour
+          </li>
+        </ul>
+        <p class="note">
+          Wine tasting fees are additional. All guests must be 21 or older.
+        </p>
+      </div>
+    </div>
+  </section>
+  <TourPlanner />
+  <section class="section section--burgundy">
+    <div class="container split">
+      <div class="split__content">
+        <p class="eyebrow eyebrow--light">Something to savor</p>
+        <h2>Add All ABoard Bites to your day.</h2>
+        <p class="lede">
+          Explore our handcrafted cheese and charcuterie boards, then add your
+          favorite to your tour at its regular catalog price.
+        </p>
+        <Button href="/charcuterie-menu" variant="light">
+          Explore the full menu
+        </Button>
+      </div>
+      <div class="split__media">
+        <img
+          src="/images/board-quick-pick.webp"
+          alt="An All ABoard VA charcuterie board"
+          width="1000"
+          height="750"
+          loading="lazy"
+        />
+      </div>
+    </div>
+  </section>
+  <section class="section center">
+    <div class="container--narrow">
+      <p class="eyebrow">Ready to ride?</p>
+      <h2>Virginia wine country is waiting.</h2>
+      <p class="lede">
+        Choose an available date. We’ll arrange destinations, itinerary, and
+        final pickup details with you by phone.
+      </p>
+      <div class="button-row button-row--center">
+        <Button href="#plan-tour">Plan your tour</Button>
+        <Button href="/experience-guide" variant="secondary">
+          Read the experience guide
+        </Button>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
