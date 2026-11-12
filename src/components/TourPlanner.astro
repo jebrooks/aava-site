@@ -1,0 +1,152 @@
+---
+import { legacyUrl } from "../data/site";
+---
+
+<section
+  class="section section--cream"
+  id="plan-tour"
+  aria-labelledby="tour-planner-heading"
+>
+  <div class="container">
+    <div class="section-heading">
+      <p class="eyebrow">Plan your experience</p>
+      <h2 id="tour-planner-heading">Your perfect day starts here.</h2>
+      <p>
+        Choose your tour and something to savor. We’ll arrange the destinations
+        and itinerary with you by phone.
+      </p>
+    </div>
+    <form action="/booking" method="get" class="tour-planner" data-tour-planner>
+      <input type="hidden" name="src" value="tour-preview" />
+      <fieldset class="tour-step">
+        <legend>
+          <span class="tour-step__number">1</span> Choose your tour
+        </legend>
+        <div class="tour-choice-grid">
+          <label class="tour-choice">
+            <input type="radio" name="tourType" value="public" checked />
+            <span>
+              <strong>Public Tour</strong>
+              <span>
+                Join fellow wine lovers for a shared, small-group experience.
+              </span>
+              <small>Priced per guest · Up to 10 total guests</small>
+            </span>
+          </label>
+          <label class="tour-choice">
+            <input type="radio" name="tourType" value="private" />
+            <span>
+              <strong>Private Tour</strong>
+              <span>
+                The whole bus, personalized service, and a day for your group.
+              </span>
+              <small>Whole-vehicle price · Up to 10 guests</small>
+            </span>
+          </label>
+        </div>
+        <div class="tour-guests-row">
+          <label for="planner-guests">Number of guests</label>
+          <select id="planner-guests" name="guests">
+            {Array.from({ length: 10 }, (_, i) => (
+              <option value={i + 1}>
+                {i + 1} {i === 0 ? "guest" : "guests"}
+              </option>
+            ))}
+          </select>
+          <p class="form-help" data-planner-type-note>
+            Smaller parties are welcome. Public tours require at least 4 total
+            guests to operate.
+          </p>
+        </div>
+      </fieldset>
+      <fieldset class="tour-step">
+        <legend>
+          <span class="tour-step__number">2</span> Choose something to savor
+        </legend>
+        <div class="tour-choice-grid tour-choice-grid--three">
+          <label class="tour-choice">
+            <input type="radio" name="snack" value="sandwich" checked />
+            <span>
+              <strong>Fresh sandwich</strong>
+              <span>
+                Included with your tour. Choose your preference when booking.
+              </span>
+            </span>
+          </label>
+          <label class="tour-choice">
+            <input type="radio" name="snack" value="charcuterie" />
+            <span>
+              <strong>Cheese & charcuterie</strong>
+              <span>
+                Choose from our full catalog at the regular catalog price.
+              </span>
+            </span>
+          </label>
+          <label class="tour-choice">
+            <input type="radio" name="snack" value="none" />
+            <span>
+              <strong>No snack, thanks</strong>
+              <span>Enjoy the day your way. Bottled water is included.</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+      <div class="tour-planner__footer">
+        <div>
+          <strong>Next: pick an available date.</strong>
+          <p>
+            Live availability and current prices appear on the booking page. All
+            guests must be 21 or older.
+          </p>
+        </div>
+        <button class="button button--primary" type="submit">
+          Choose your date <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </form>
+    <p class="tour-custom-link">
+      Dreaming up something different?{" "}
+      <a href={legacyUrl("/custom-tour-request-for-estimate")}>
+        Request a customized tour
+      </a>
+      .
+    </p>
+  </div>
+</section>
+<script>
+  const form = document.querySelector<HTMLFormElement>("[data-tour-planner]");
+  const note = form?.querySelector<HTMLElement>("[data-planner-type-note]");
+  function updateNote() {
+    if (note)
+      note.textContent =
+        new FormData(form!).get("tourType") === "private"
+          ? "Your group reserves the whole bus for one vehicle price, regardless of your guest count."
+          : "Smaller parties are welcome. Public tours require at least 4 total guests to operate.";
+  }
+  try {
+    const saved = JSON.parse(
+      sessionStorage.getItem("aava-tour-booking-draft") || "null",
+    );
+    if (saved && Date.now() - saved.savedAt < 2 * 60 * 60 * 1000) {
+      for (const key of ["tourType", "snack"]) {
+        const input = form?.querySelector<HTMLInputElement>(
+          `input[name="${key}"][value="${saved.values[key]}"]`,
+        );
+        if (input) input.checked = true;
+      }
+      const guests = form?.elements.namedItem(
+        "guests",
+      ) as HTMLSelectElement | null;
+      if (
+        guests &&
+        Number(saved.values.guests) >= 1 &&
+        Number(saved.values.guests) <= 10
+      )
+        guests.value = String(saved.values.guests);
+    }
+  } catch {
+    /* A new booking still works when storage is unavailable. */
+  }
+  form?.addEventListener("change", updateNote);
+  updateNote();
+</script>

@@ -1,0 +1,420 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  PICKUP_LOCATIONS,
+  SANDWICHES,
+  TOUR_PREFERENCES,
+} from "../data/tour-options";
+import { legacyUrl } from "../data/site";
+export const prerender = false;
+---
+
+<BaseLayout
+  title="Book Your Experience"
+  description="Select your tour date, share your preferences, and book securely with Shopify."
+  noindex
+>
+  <section class="section tour-booking" data-tour-booking>
+    <div class="container">
+      <a class="tour-back" href="/tour-booking-preview#plan-tour">
+        ← Back to your tour choices
+      </a>
+      <div class="section-heading tour-booking__heading">
+        <p class="eyebrow">Your next great day out</p>
+        <h1>Book your experience.</h1>
+        <p>
+          Pick a date and share a few details. We’ll coordinate the destinations
+          and final pickup arrangements with you by phone.
+        </p>
+      </div>
+      <noscript>
+        <p class="note">
+          JavaScript is needed to check live seat availability. Please{" "}
+          <a href="/contact">contact us</a> to arrange your booking.
+        </p>
+      </noscript>
+      <form data-booking-form class="tour-booking-layout">
+        <div class="tour-booking-main">
+          <section class="tour-panel" aria-labelledby="date-heading">
+            <div class="tour-panel__heading">
+              <span class="tour-step__number">1</span>
+              <h2 id="date-heading">Choose your date</h2>
+            </div>
+            <div class="tour-fields-grid">
+              <div class="form-field">
+                <label for="booking-type">Tour type</label>
+                <select id="booking-type" name="tourType">
+                  <option value="public">Public Tour — shared ride</option>
+                  <option value="private">Private Tour — whole bus</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="booking-guests">Number of guests</label>
+                <select id="booking-guests" name="guests">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <option value={i + 1}>
+                      {i + 1} {i === 0 ? "guest" : "guests"}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p class="form-help" data-tour-type-note>
+              Public tours require 4 total guests to operate. Smaller parties
+              are welcome to book.
+            </p>
+            <p class="form-help" data-booking-window>
+              Checking the booking window…
+            </p>
+            <div class="tour-calendar" aria-busy="true" data-calendar>
+              <div class="tour-calendar__nav">
+                <button
+                  type="button"
+                  class="tour-calendar__arrow"
+                  data-previous-month
+                  aria-label="Previous month"
+                  disabled
+                >
+                  ←
+                </button>
+                <h3 id="calendar-month" data-calendar-month tabindex="-1">
+                  Checking dates…
+                </h3>
+                <button
+                  type="button"
+                  class="tour-calendar__arrow"
+                  data-next-month
+                  aria-label="Next month"
+                  disabled
+                >
+                  →
+                </button>
+              </div>
+              <table aria-labelledby="calendar-month">
+                <thead>
+                  <tr>
+                    {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                      (day) => (
+                        <th scope="col">{day}</th>
+                      ),
+                    )}
+                  </tr>
+                </thead>
+                <tbody data-calendar-days></tbody>
+              </table>
+              <p class="tour-calendar__legend">
+                <span aria-hidden="true"></span> Available date{" "}
+                <span
+                  class="tour-calendar__selected-key"
+                  aria-hidden="true"
+                ></span>{" "}
+                Your selection
+              </p>
+            </div>
+            <p class="form-status" role="status" data-calendar-status>
+              Loading live Shopify availability…
+            </p>
+            <button
+              type="button"
+              class="button button--secondary"
+              data-refresh-availability
+            >
+              Refresh availability
+            </button>
+          </section>
+          <section class="tour-panel" aria-labelledby="snack-heading">
+            <div class="tour-panel__heading">
+              <span class="tour-step__number">2</span>
+              <h2 id="snack-heading">Something to savor</h2>
+            </div>
+            <div class="form-field">
+              <label for="booking-snack">Your snack</label>
+              <select id="booking-snack" name="snack">
+                <option value="sandwich">Fresh sandwich — included</option>
+                <option value="charcuterie">
+                  Cheese & charcuterie — catalog prices
+                </option>
+                <option value="none">No snack, thanks</option>
+              </select>
+            </div>
+            <div class="form-field" data-sandwich-field>
+              <label for="booking-sandwich">Sandwich preference</label>
+              <select id="booking-sandwich" name="sandwich" required>
+                <option value="">Choose a sandwich</option>
+                {SANDWICHES.map((s) => (
+                  <option>{s}</option>
+                ))}
+              </select>
+              <p class="form-help">
+                We’ll confirm preferences for everyone in your party when we
+                call.
+              </p>
+            </div>
+            <div data-board-picker hidden>
+              <p>
+                Choose from the same charcuterie products and prices as our
+                regular menu.
+              </p>
+              <div class="form-field">
+                <label for="booking-board">Charcuterie board</label>
+                <select id="booking-board" name="boardHandle">
+                  <option value="">Loading the catalog…</option>
+                </select>
+              </div>
+              <div data-board-detail class="tour-board-detail" hidden>
+                <img data-board-image alt="" width="120" height="100" />
+                <div>
+                  <strong data-board-title></strong>
+                  <a data-board-link target="_blank" rel="noreferrer">
+                    View ingredients and product details{" "}
+                    <span class="visually-hidden">(opens in a new tab)</span>
+                  </a>
+                </div>
+              </div>
+              <div class="tour-fields-grid">
+                <div class="form-field">
+                  <label for="booking-board-variant">Size / option</label>
+                  <select id="booking-board-variant" name="boardVariantId">
+                    <option value="">Choose a board first</option>
+                  </select>
+                </div>
+                <div class="form-field">
+                  <label for="booking-board-quantity">Number of boards</label>
+                  <input
+                    id="booking-board-quantity"
+                    type="number"
+                    name="boardQuantity"
+                    min="1"
+                    max="10"
+                    value="1"
+                    inputmode="numeric"
+                  />
+                </div>
+              </div>
+              <div data-tour-board-customizer></div>
+              <p class="form-help">
+                Your board will be prepared for your tour date. All applicable
+                ingredient choices are required for build-your-own boards.
+              </p>
+            </div>
+          </section>
+          <section class="tour-panel" aria-labelledby="details-heading">
+            <div class="tour-panel__heading">
+              <span class="tour-step__number">3</span>
+              <h2 id="details-heading">A few details for your day</h2>
+            </div>
+            <div class="tour-fields-grid">
+              <div class="form-field">
+                <label for="booking-name">Lead guest’s full name</label>
+                <input
+                  id="booking-name"
+                  name="name"
+                  autocomplete="name"
+                  maxlength="100"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label for="booking-email">Email address</label>
+                <input
+                  id="booking-email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  maxlength="254"
+                  required
+                />
+              </div>
+            </div>
+            <div class="tour-fields-grid">
+              <div class="form-field">
+                <label for="booking-phone">Mobile phone</label>
+                <input
+                  id="booking-phone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  maxlength="40"
+                  required
+                />
+                <p class="form-help">
+                  For planning your destinations and tour-day logistics.
+                </p>
+              </div>
+              <div class="form-field">
+                <label for="booking-pickup">Pickup preference</label>
+                <select id="booking-pickup" name="pickup" required>
+                  <option value="">Choose a preference</option>
+                  {PICKUP_LOCATIONS.map((p) => (
+                    <option>{p}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div class="form-field" data-custom-pickup-field hidden>
+              <label for="booking-custom-pickup">Custom pickup address</label>
+              <textarea
+                id="booking-custom-pickup"
+                name="customPickup"
+                maxlength="300"
+                rows="2"
+              ></textarea>
+            </div>
+            <div class="form-field">
+              <label for="booking-allergies">
+                Dietary needs or allergies{" "}
+                <span class="tour-optional">(optional)</span>
+              </label>
+              <textarea
+                id="booking-allergies"
+                name="allergies"
+                maxlength="500"
+                rows="2"
+              ></textarea>
+            </div>
+            <fieldset class="tour-preferences">
+              <legend>
+                Your tour preferences{" "}
+                <span class="tour-optional">(optional)</span>
+              </legend>
+              <div>
+                {TOUR_PREFERENCES.map((p) => (
+                  <label>
+                    <input type="checkbox" name="preferences" value={p} />
+                    <span>{p}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <div class="form-field">
+              <label for="booking-requests">
+                Questions or special requests{" "}
+                <span class="tour-optional">(optional)</span>
+              </label>
+              <textarea
+                id="booking-requests"
+                name="requests"
+                maxlength="500"
+                rows="3"
+              ></textarea>
+            </div>
+          </section>
+          <section class="tour-panel" aria-labelledby="before-booking-heading">
+            <h2 id="before-booking-heading">Before you book</h2>
+            <p>
+              Destinations and final pickup details are arranged by phone.
+              Winery tasting fees are additional. A travel waiver is required
+              before your tour.
+            </p>
+            <div class="tour-acknowledgments">
+              <label>
+                <input type="checkbox" name="ageConfirmed" required />
+                <span>
+                  I confirm that all guests are 21 or older and will bring valid
+                  photo identification.
+                </span>
+              </label>
+              <label>
+                <input type="checkbox" name="termsAccepted" required />
+                <span>
+                  I have read and agree to the{" "}
+                  <a
+                    href={legacyUrl("/terms")}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Terms & Conditions
+                  </a>
+                  .
+                </span>
+              </label>
+              <label>
+                <input type="checkbox" name="damageAccepted" required />
+                <span>
+                  I have read and agree to the{" "}
+                  <a
+                    href={legacyUrl("/experience-guide")}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    cleaning and damage policy in the Experience Guide
+                  </a>
+                  .
+                </span>
+              </label>
+            </div>
+          </section>
+        </div>
+        <aside class="tour-summary" aria-labelledby="summary-heading">
+          <p class="eyebrow">Your day, your way</p>
+          <h2 id="summary-heading">Your booking</h2>
+          <dl>
+            <div>
+              <dt>Tour</dt>
+              <dd data-summary-type>Public Tour</dd>
+            </div>
+            <div>
+              <dt>Date</dt>
+              <dd data-summary-date>Choose a date</dd>
+            </div>
+            <div>
+              <dt>Guests</dt>
+              <dd data-summary-guests>1 guest</dd>
+            </div>
+            <div>
+              <dt>Destinations</dt>
+              <dd>To arrange by phone</dd>
+            </div>
+            <div>
+              <dt>Snack</dt>
+              <dd data-summary-snack>Sandwich included</dd>
+            </div>
+          </dl>
+          <div class="tour-summary__price-line">
+            <span data-tour-price-label>Tour price</span>
+            <strong data-summary-tour-price>—</strong>
+          </div>
+          <div class="tour-summary__price-line" data-summary-board-line hidden>
+            <span>Charcuterie</span>
+            <strong data-summary-board-price>—</strong>
+          </div>
+          <div class="tour-summary__total">
+            <span>Subtotal</span>
+            <strong data-summary-total>—</strong>
+          </div>
+          <p class="form-help">
+            Any applicable taxes and discounts are shown by Shopify before
+            payment. Winery tasting fees are additional.
+          </p>
+          <p
+            class="tour-summary__availability"
+            data-summary-capacity
+            aria-live="polite"
+          >
+            Select a date to see availability.
+          </p>
+          <button
+            class="button button--primary tour-checkout-button"
+            type="submit"
+            data-tour-checkout
+            disabled
+          >
+            Continue to secure checkout
+          </button>
+          <p class="form-status" data-checkout-status role="alert"></p>
+          <p class="tour-summary__secure">
+            Payment is handled securely by Shopify. Availability is confirmed
+            during payment.
+          </p>
+          <p class="form-help" data-summary-minimum>
+            Public tours require at least 4 total guests. If the minimum isn’t
+            reached, we’ll contact you about alternatives or a refund.
+          </p>
+        </aside>
+      </form>
+    </div>
+  </section>
+</BaseLayout>
+<script>
+  import "../scripts/tour-booking";
+</script>
