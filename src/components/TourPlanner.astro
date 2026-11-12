@@ -1,5 +1,10 @@
 ---
 import { legacyUrl } from "../data/site";
+
+interface Props {
+  source?: string;
+}
+const { source = "tour-preview" } = Astro.props;
 ---
 
 <section
@@ -17,7 +22,7 @@ import { legacyUrl } from "../data/site";
       </p>
     </div>
     <form action="/booking" method="get" class="tour-planner" data-tour-planner>
-      <input type="hidden" name="src" value="tour-preview" />
+      <input type="hidden" name="src" value={source} />
       <fieldset class="tour-step">
         <legend>
           <span class="tour-step__number">1</span> Choose your tour

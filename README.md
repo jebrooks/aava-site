@@ -168,13 +168,13 @@ Schedule edits take effect at the next job or manual sync. The initial six-month
 require several manual runs; repeat while the result reports `pending > 0` (CLI exit code 2).
 The website's existing tour booking links remain unchanged by this catalog-management feature.
 
-## Tour booking preview (first PR)
+## Tour booking
 
-The new flow is available at `/tour-booking-preview` → `/booking`. Both pages are noindex and
-are intentionally absent from public navigation and the sitemap. Existing Experiences booking
-links keep their current destination until the separate operations/cutover PR.
+The Experiences page now embeds the tour planner. Its “Find a tour” and “Book now” buttons
+scroll to the planner, which opens `/booking` on the same site. `/tour-booking-preview` remains
+available for isolated review; that page and `/booking` are noindex.
 
-The preview offers Public/Private tours, actual guest count, a live month calendar, snacks,
+The booking flow offers Public/Private tours, actual guest count, a live month calendar, snacks,
 regular catalog boards (including BYO validation), registration, required acknowledgments,
 and a dedicated Shopify cart. Destinations are arranged by phone. Availability and checkout
 both read `tour_schedule/default` directly, enforcing blackouts and the current 3-day / 6-month
@@ -225,4 +225,4 @@ requirements block checkout handoff rather than silently accepting a partial boo
 
 `npm run test:booking` covers registration, schedule/stock checks, fulfillment mapping, price
 mirroring, partial-cart rejection, source protection, and idempotent synchronization. The existing
-booking emails, waiver delivery, staff workflow, and public-link cutover remain in the second PR.
+booking emails, waiver delivery, and staff workflow remain in the operations PR.
