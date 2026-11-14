@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cartCopyWithLineChange } from '../src/lib/cart-edit.ts';
+import { cartCopyWithLineChange, cartCopyWithAddedLine } from '../src/lib/cart-edit.ts';
 const fixture = () => ({
   attributes: [{key:'Checkout locked',value:'true'},{key:'Delivery ZIP',value:'22205'}],
   lines: {nodes: [
@@ -31,4 +31,17 @@ test('the final item can be removed into an empty editable cart', () => {
 test('rejects missing lines and invalid quantities', () => {
   assert.throws(()=>cartCopyWithLineChange(fixture(),'missing',0),/not found/);
   for(const quantity of [-1,0.5,51,NaN]) assert.throws(()=>cartCopyWithLineChange(fixture(),'first',quantity),/quantity/);
+});
+
+test('adding to a checkout cart preserves the saved delivery window and existing customized boards', () => {
+  const original=fixture();const snapshot=structuredClone(original);
+  const input=cartCopyWithAddedLine(original,'new-board',2,[{key:'Meats',value:'Salami'}]);
+  assert.deepEqual(input.attributes,[{key:'Delivery ZIP',value:'22205'}]);
+  assert.deepEqual(input.lines,[
+    {merchandiseId:'board',quantity:2,attributes:[{key:'Cheeses',value:'Brie'}]},
+    {merchandiseId:'board',quantity:1,attributes:[{key:'Cheeses',value:'Gouda'}]},
+    {merchandiseId:'delivery',quantity:1,attributes:[]},
+    {merchandiseId:'new-board',quantity:2,attributes:[{key:'Meats',value:'Salami'}]},
+  ]);
+  assert.deepEqual(original,snapshot);
 });

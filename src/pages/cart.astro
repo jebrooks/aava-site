@@ -23,6 +23,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         <aside class="cart-summary">
           <h2>Delivery and checkout</h2>
+          <div class="selected-delivery" data-selected-delivery hidden></div>
+          <button class="text-button" type="button" data-change-delivery hidden>Change delivery window</button>
           <form class="delivery-form" data-delivery-form>
             <label>
               <span>Delivery ZIP code</span>
@@ -41,7 +43,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <p class="form-status" data-delivery-status role="status"></p>
           </form>
 
-          <div class="selected-delivery" data-selected-delivery hidden></div>
           <dl class="cart-totals">
             <div><dt>Subtotal</dt><dd data-subtotal>—</dd></div>
             <div><dt>Total before delivery/tax</dt><dd data-total>—</dd></div>
@@ -75,6 +76,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const saveSlot = document.querySelector<HTMLButtonElement>('[data-save-slot]');
   const deliveryStatus = document.querySelector<HTMLElement>('[data-delivery-status]');
   const selectedDelivery = document.querySelector<HTMLElement>('[data-selected-delivery]');
+  const changeDelivery = document.querySelector<HTMLButtonElement>('[data-change-delivery]');
   let currentCart: ShopifyCart | null = null;
 
   const money = (value: { amount: string; currencyCode: string }) =>
@@ -208,7 +210,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     const slotLine = cart.lines.nodes.find(isDeliveryLine);
     const attrs = Object.fromEntries(cart.attributes.map((attribute) => [attribute.key, attribute.value]));
-    if (slotLine && selectedDelivery) {
+    const locked = attrs['Checkout locked'] === 'true';
+    const hasSavedWindow = Boolean(slotLine && slotLine.quantity === 1);
+    if (deliveryForm) deliveryForm.hidden = !needsDelivery || hasSavedWindow;
+    if (changeDelivery) {
+      changeDelivery.hidden = !needsDelivery || !hasSavedWindow;
+      changeDelivery.textContent = 'Change delivery window';
+    }
+    if (slotField) slotField.hidden = true;
+    if (saveSlot) saveSlot.hidden = true;
+    if (deliveryStatus) deliveryStatus.textContent = '';
+    if (slotLine && selectedDelivery && needsDelivery) {
       selectedDelivery.hidden = false;
       selectedDelivery.replaceChildren();
       const label = element('strong');
@@ -220,11 +232,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     } else if (selectedDelivery) {
       selectedDelivery.hidden = true;
     }
-    if (checkout) checkout.disabled = !customerLines.length ||
-      (needsDelivery && (!slotLine || !slotLine.merchandise.availableForSale));
+    if (checkout) {
+      checkout.textContent = locked ? 'Resume checkout' : 'Continue to secure checkout';
+      checkout.disabled = !customerLines.length ||
+        (needsDelivery && (!hasSavedWindow || (!locked && !slotLine?.merchandise.availableForSale)));
+    }
     if (cartStatus) cartStatus.textContent = customerLines.length && needsDelivery && !slotLine
       ? 'Choose a delivery window before checkout.'
-      : '';
+      : locked && customerLines.length
+        ? 'Your checkout is ready to resume. Your saved delivery window will be checked again before continuing.'
+        : hasSavedWindow && needsDelivery
+          ? 'Your delivery window is saved. Continue to checkout when you’re ready.'
+          : '';
   }
 
   async function loadCart() {
@@ -249,6 +268,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (linesRoot) linesRoot.textContent = error instanceof Error ? error.message : 'Could not load the cart.';
     }
   }
+
+  changeDelivery?.addEventListener('click', () => {
+    if (!deliveryForm) return;
+    deliveryForm.hidden = !deliveryForm.hidden;
+    changeDelivery.textContent = deliveryForm.hidden ? 'Change delivery window' : 'Keep saved window';
+    if (!deliveryForm.hidden) loadSlots?.click();
+  });
 
   loadSlots?.addEventListener('click', async () => {
     const zip = zipInput?.value.trim() || '';
@@ -326,5 +352,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       });
   });
 
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) void loadCart();
+  });
   void loadCart();
 </script>
