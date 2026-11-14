@@ -1,4 +1,4 @@
-import { cartCopyWithLineChange } from '../cart-edit';
+import { cartCopyWithLineChange, cartCopyWithAddedLine } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
@@ -229,7 +229,7 @@ export async function createCart(merchandiseId: string, quantity: number, attrib
   return checkedCart(data.cartCreate);
 }
 
-export async function copyCartWithLineChange(cart: ShopifyCart, lineId: string, quantity: number) {
+async function createCartCopy(input: ReturnType<typeof cartCopyWithLineChange>) {
   const data = await storefrontGraphql<{ cartCreate: CartPayload }>(
     `${CART_FIELDS}
     mutation CopyEditedCart($input: CartInput!) {
@@ -239,9 +239,17 @@ export async function copyCartWithLineChange(cart: ShopifyCart, lineId: string, 
         warnings { message }
       }
     }`,
-    { input: cartCopyWithLineChange(cart, lineId, quantity) },
+    { input },
   );
   return checkedCart(data.cartCreate);
+}
+
+export function copyCartWithLineChange(cart: ShopifyCart, lineId: string, quantity: number) {
+  return createCartCopy(cartCopyWithLineChange(cart, lineId, quantity));
+}
+
+export function copyCartWithAddedLine(cart: ShopifyCart, merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {
+  return createCartCopy(cartCopyWithAddedLine(cart, merchandiseId, quantity, attributes));
 }
 
 export async function addCartLine(id: string, merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {

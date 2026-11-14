@@ -1949,3 +1949,5 @@ ol {
 @media (max-width: 859px) {
   .site-header:not([data-menu-open]) .primary-nav { display: none; }
 }
+
+[data-cart-app] [hidden] { display: none !important; }

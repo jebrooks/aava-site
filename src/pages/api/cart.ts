@@ -11,6 +11,7 @@ import {
   getCart,
   removeCartLines,
   copyCartWithLineChange,
+  copyCartWithAddedLine,
   replaceDeliverySlot,
   updateCartAttributes,
   updateCartLine,
@@ -72,8 +73,10 @@ export const POST: APIRoute = async ({ request }) => {
       }
       const suppliedCartId = typeof body.cartId === 'string' ? body.cartId : '';
       const current = suppliedCartId ? await getCart(id(suppliedCartId, 'Cart ID')) : null;
-      const cart = current && !isCheckoutLocked(current)
-        ? await addCartLine(current.id, merchandiseId, amount, attributes)
+      const cart = current
+        ? isCheckoutLocked(current)
+          ? await copyCartWithAddedLine(current, merchandiseId, amount, attributes)
+          : await addCartLine(current.id, merchandiseId, amount, attributes)
         : await createCart(merchandiseId, amount, attributes);
       return json({ cart: publicCart(cart) });
     }
@@ -117,20 +120,22 @@ export const POST: APIRoute = async ({ request }) => {
       const slotKey = String(body.slotKey || '');
       const zip = String(body.zip || '');
       const slot = await assertDeliverySlotAvailable(zip, variantId, slotKey);
-      const current = await getCart(cartId);
+      let current = await getCart(cartId);
       if (!current) throw new ShopifyApiError('Cart not found.', 404);
-      if (isCheckoutLocked(current)) {
-        throw new ShopifyApiError('This cart is already in checkout. Start a new cart to make changes.', 409);
-      }
       if (!current.lines.nodes.some((line) =>
         !line.merchandise.product.handle.startsWith('delivery-slot-') && line.merchandise.requiresShipping
       )) {
         throw new ShopifyApiError('Add a physical charcuterie item before choosing delivery.', 400);
       }
+      const currentSlot = current.lines.nodes.find(line => line.merchandise.product.handle.startsWith('delivery-slot-'));
+      if (isCheckoutLocked(current)) {
+        if (!currentSlot) throw new ShopifyApiError('This checkout has no saved delivery window.', 409);
+        current = await copyCartWithLineChange(current, currentSlot.id, 0);
+      }
       const existingSlotLines = current.lines.nodes
         .filter((line) => line.merchandise.product.handle.startsWith('delivery-slot-'))
         .map((line) => line.id);
-      const cart = await replaceDeliverySlot(cartId, existingSlotLines, variantId, [
+      const cart = await replaceDeliverySlot(current.id, existingSlotLines, variantId, [
         { key: 'Delivery ZIP', value: zip },
         { key: 'Delivery date', value: slot.date },
         { key: 'Delivery window', value: slot.label },
