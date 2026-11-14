@@ -1,3 +1,4 @@
+import { cartCopyWithLineChange } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
@@ -225,6 +226,21 @@ export async function createCart(merchandiseId: string, quantity: number, attrib
     { input: { lines: [{ merchandiseId, quantity, attributes }] } },
   );
 
+  return checkedCart(data.cartCreate);
+}
+
+export async function copyCartWithLineChange(cart: ShopifyCart, lineId: string, quantity: number) {
+  const data = await storefrontGraphql<{ cartCreate: CartPayload }>(
+    `${CART_FIELDS}
+    mutation CopyEditedCart($input: CartInput!) {
+      cartCreate(input: $input) {
+        cart { ...CartFields }
+        userErrors { field message code }
+        warnings { message }
+      }
+    }`,
+    { input: cartCopyWithLineChange(cart, lineId, quantity) },
+  );
   return checkedCart(data.cartCreate);
 }
 
