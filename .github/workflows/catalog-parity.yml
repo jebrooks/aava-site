@@ -44,6 +44,9 @@ jobs:
       - name: Test tour booking and board fulfillment
         run: npm run test:booking
 
+      - name: Test cart editing
+        run: npm run test:cart
+
       - name: Build the site
         run: npm run build
 

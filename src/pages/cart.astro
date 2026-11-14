@@ -158,15 +158,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const remove = element('button', 'text-button');
     remove.type = 'button';
     remove.textContent = 'Remove';
+    const lineStatus = element('p', 'form-status');
+    lineStatus.setAttribute('role', 'status');
     remove.addEventListener('click', async () => {
+      remove.disabled = true;
+      input.disabled = true;
+      remove.textContent = 'Removing…';
+      lineStatus.textContent = '';
       try {
         renderCart(await cartRequest({ action: 'remove', cartId: currentCart?.id, lineId: line.id }));
       } catch (error) {
-        if (cartStatus) cartStatus.textContent = error instanceof Error ? error.message : 'Remove failed.';
+        lineStatus.textContent = error instanceof Error ? error.message : 'Remove failed. Please try again.';
+        remove.disabled = false;
+        input.disabled = false;
+        remove.textContent = 'Remove';
       }
     });
     controls.append(label, remove);
-    content.append(controls);
+    content.append(controls, lineStatus);
     const price = element('p', 'cart-line__price');
     price.textContent = money(line.cost.totalAmount);
     row.append(content, price);

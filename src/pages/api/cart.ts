@@ -10,6 +10,7 @@ import {
   createCart,
   getCart,
   removeCartLines,
+  copyCartWithLineChange,
   replaceDeliverySlot,
   updateCartAttributes,
   updateCartLine,
@@ -82,17 +83,16 @@ export const POST: APIRoute = async ({ request }) => {
       const lineId = id(body.lineId, 'Line ID');
       const amount = quantity(body.quantity);
       const current = await getCart(cartId);
-      if (current && isCheckoutLocked(current)) {
-        throw new ShopifyApiError('This cart is already in checkout. Start a new cart to make changes.', 409);
-      }
       const line = current?.lines.nodes.find((candidate) => candidate.id === lineId);
       if (!line) throw new ShopifyApiError('Cart line not found.', 404);
       if (line.merchandise.product.handle.startsWith('delivery-slot-')) {
         throw new ShopifyApiError('Choose delivery through the delivery scheduler.', 400);
       }
-      const cart = amount
-        ? await updateCartLine(cartId, lineId, amount)
-        : await removeCartLines(cartId, [lineId]);
+      const cart = current && isCheckoutLocked(current)
+        ? await copyCartWithLineChange(current, lineId, amount)
+        : amount
+          ? await updateCartLine(cartId, lineId, amount)
+          : await removeCartLines(cartId, [lineId]);
       return json({ cart: publicCart(cart) });
     }
 
@@ -100,15 +100,14 @@ export const POST: APIRoute = async ({ request }) => {
       const cartId = id(body.cartId, 'Cart ID');
       const lineId = id(body.lineId, 'Line ID');
       const current = await getCart(cartId);
-      if (current && isCheckoutLocked(current)) {
-        throw new ShopifyApiError('This cart is already in checkout. Start a new cart to make changes.', 409);
-      }
       const line = current?.lines.nodes.find((candidate) => candidate.id === lineId);
       if (!line) throw new ShopifyApiError('Cart line not found.', 404);
       if (line.merchandise.product.handle.startsWith('delivery-slot-')) {
         throw new ShopifyApiError('Choose delivery through the delivery scheduler.', 400);
       }
-      const cart = await removeCartLines(cartId, [lineId]);
+      const cart = current && isCheckoutLocked(current)
+        ? await copyCartWithLineChange(current, lineId, 0)
+        : await removeCartLines(cartId, [lineId]);
       return json({ cart: publicCart(cart) });
     }
 
