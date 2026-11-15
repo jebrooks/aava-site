@@ -46,8 +46,8 @@ Copy `.env.example` to `.env` for local overrides.
 
 - `PUBLIC_LEGACY_SITE_URL` points temporary booking, checkout, product, and policy links to the
   current Squarespace site during the staged migration.
-- `PUBLIC_CONTACT_FORM_ENDPOINT` connects the contact form to a hosted form endpoint. Without it,
-  the form opens a pre-filled message in the visitor's email application.
+- `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact-form email from the Vercel backend.
+  Both are server-only; the sender must belong to a domain verified in Resend.
 - The server-side Shopify Storefront token powers catalog and cart operations.
 - The Shopify Admin token, webhook secret, cron secret, location/publication IDs, and Turnstile
   secret are server-only.
@@ -226,3 +226,37 @@ requirements block checkout handoff rather than silently accepting a partial boo
 `npm run test:booking` covers registration, schedule/stock checks, fulfillment mapping, price
 mirroring, partial-cart rejection, source protection, and idempotent synchronization. The existing
 booking emails, waiver delivery, and staff workflow remain in the operations PR.
+
+
+## Contact form email on Vercel
+
+`/contact` submits to the Astro `/api/contact` Vercel Function, which sends through Resend to
+`info.allaboardva@gmail.com`. The visitor's address is the reply-to address. The sender and
+recipient are set on the server. The existing contact layout stays in place; submission shows
+an inline confirmation or a retryable error and keeps the visitor's message on failure.
+
+To enable live delivery:
+
+1. Add the [Resend integration](https://vercel.com/marketplace/resend) to the Vercel project.
+   This supplies the server-only `RESEND_API_KEY` variable.
+2. [Verify a sending domain in Resend](https://resend.com/docs/dashboard/domains/introduction),
+   preferably a subdomain such as `mail.allaboardva.com`, using its required DNS records.
+3. Set `CONTACT_EMAIL_FROM` in Vercel to an address on that verified domain, for example
+   `All ABoard VA <website@mail.allaboardva.com>`. This is the sending identity; inquiries
+   still arrive in the existing Gmail inbox.
+4. Configure the variables for Production and any Preview environments where real sending
+   is intended, then redeploy. Copy values to the ignored local `.env` only for local sending.
+
+There is no `mailto:` submission fallback. Missing configuration or delivery-provider failures
+return an error instead of falsely reporting success. The direct email link remains available.
+Submissions use server validation, same-origin checks, a honeypot, bounded input, per-instance
+rate limiting, a provider timeout, and Resend idempotency keys for unchanged retries. Rate limits
+are best-effort per warm function instance; Vercel firewall controls can supplement them.
+Only a successful provider acceptance produces confirmation; inbox delivery is not claimed by
+the API. Inquiry content and provider credentials are never logged. Native HTML submissions
+also work and redirect to `/contact?sent=1` after acceptance.
+
+`npm run test:contact` tests delivery with a mocked provider, validation, spam checks, error
+handling, and native form submission. No test emails are sent by this suite. A live inbox test
+is still required after configuring Resend. The retired `PUBLIC_CONTACT_FORM_ENDPOINT` variable
+is no longer used and can be removed from Vercel.
