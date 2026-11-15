@@ -915,6 +915,7 @@ ol {
 
 .contact-flourish {
   width: min(100%, 330px);
+  height: auto;
   margin-top: 2rem;
   opacity: 0.72;
 }
