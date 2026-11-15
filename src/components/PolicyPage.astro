@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from './PageHero.astro';
+interface Props { title: string; html: string; }
+const { title, html } = Astro.props;
+---
+<BaseLayout title={title} description={`${title} for All ABoard VA tours and charcuterie orders.`}>
+  <PageHero image="/images/hero-experiences.webp" title={title} compact />
+  <section class="section">
+    <div class="container--narrow">
+      <p><a href="/terms-conditions">← All policies and waivers</a></p>
+      <article class="policy-copy" set:html={html} />
+      <p>Questions? <a href="/contact">Contact us</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .policy-copy { line-height: 1.8; overflow-wrap: anywhere; }
+  .policy-copy :global(h2), .policy-copy :global(h3), .policy-copy :global(h4) { margin-top: 2rem; }
+  .policy-copy :global(li) { margin-block: .6rem; }
+</style>

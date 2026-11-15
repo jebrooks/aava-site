@@ -3,7 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import TourPlanner from '../components/TourPlanner.astro';
-import { legacyUrl } from '../data/site';
 
 export const prerender = false;
 const tourTypes = [
@@ -43,7 +42,7 @@ const tourTypes = [
   >
     <div class="button-row">
       <Button href="#plan-tour" variant="light">Find a tour</Button>
-      <Button href={legacyUrl('/request-tour')} variant="light" external>Let us build your booking</Button>
+      <Button href={'/request-tour'} variant="light">Let us build your booking</Button>
     </div>
   </PageHero>
 
@@ -91,7 +90,7 @@ const tourTypes = [
         ))}
       </div>
       <div class="button-row button-row--center" style="margin-top: 2.5rem;">
-        <Button href={legacyUrl('/custom-tour-request-for-estimate')} external>Request a custom estimate</Button>
+        <Button href={'/custom-tour-request-for-estimate'}>Request a custom estimate</Button>
         <Button href="/experience-guide" variant="secondary">Read the experience guide</Button>
       </div>
     </div>
@@ -121,7 +120,7 @@ const tourTypes = [
       <p class="lede">Choose an available tour or tell us what you’re dreaming up. We’ll handle the details.</p>
       <div class="button-row button-row--center">
         <Button href="#plan-tour">Book now</Button>
-        <Button href={legacyUrl('/frequently-asked-questions')} variant="secondary" external>Read the FAQs</Button>
+        <Button href={'/frequently-asked-questions'} variant="secondary">Read the FAQs</Button>
       </div>
     </div>
   </section>

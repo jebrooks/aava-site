@@ -1,5 +1,4 @@
 ---
-import { legacyUrl } from "../data/site";
 
 interface Props {
   source?: string;
@@ -111,7 +110,7 @@ const { source = "tour-preview" } = Astro.props;
     </form>
     <p class="tour-custom-link">
       Dreaming up something different?{" "}
-      <a href={legacyUrl("/custom-tour-request-for-estimate")}>
+      <a href={"/custom-tour-request-for-estimate"}>
         Request a customized tour
       </a>
       .

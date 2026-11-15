@@ -1,0 +1,7 @@
+---
+import PolicyPage from '../components/PolicyPage.astro';
+import policies from '../data/policies.json';
+export const prerender = false;
+const policy = policies['food-purchase-consumption-waiver'];
+---
+<PolicyPage title={policy.title} html={policy.html} />

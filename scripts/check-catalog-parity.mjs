@@ -1,3 +1,4 @@
+import { checkSiteLinks } from './check-site-links.mjs';
 import { existsSync } from 'node:fs';
 import { appendFile } from 'node:fs/promises';
 import net from 'node:net';
@@ -212,6 +213,9 @@ async function main() {
     const message = `✅ Shopify and the rendered catalog contain the same ${shopifyHandles.length} products.`;
     console.log(message);
     await writeSummary(message);
+    const linkSummary = await checkSiteLinks(pageUrl.origin);
+    console.log(linkSummary);
+    await writeSummary(linkSummary);
   } finally {
     await stopServer(server);
   }

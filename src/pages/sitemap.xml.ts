@@ -14,6 +14,17 @@ const staticPaths = [
   '/experience-guide',
   '/about',
   '/contact',
+  '/terms-conditions',
+  '/cancellation-policy',
+  '/tasting-fee-policy',
+  '/tour-waiver-release',
+  '/food-purchase-consumption-waiver',
+  '/frequently-asked-questions',
+  '/press',
+  '/request-tour',
+  '/custom-tour-request-for-estimate',
+  '/booking-updates',
+  '/gift-certificates',
 ];
 
 function escapeXml(value: string) {

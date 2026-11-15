@@ -3,7 +3,6 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import PageHero from "../components/PageHero.astro";
 import Button from "../components/Button.astro";
 import TourPlanner from "../components/TourPlanner.astro";
-import { legacyUrl } from "../data/site";
 export const prerender = false;
 ---
 
@@ -22,7 +21,7 @@ export const prerender = false;
       <Button href="#plan-tour" variant="light">
         Find a tour
       </Button>
-      <Button href={legacyUrl("/request-tour")} variant="light" external>
+      <Button href={"/request-tour"} variant="light">
         Let us build your booking
       </Button>
     </div>

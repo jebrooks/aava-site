@@ -1,3 +1,4 @@
+import { siteRelativeHref } from './site-links.ts';
 export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
@@ -44,7 +45,7 @@ export function renderRichText(value: string): string | null {
           if (inLink || typeof item.url !== 'string' || !safeRichTextUrl(item.url)) return children;
           const title = typeof item.title === 'string' ? ` title="${escapeHtml(item.title)}"` : '';
           const target = item.target === '_blank' ? ' target="_blank" rel="noopener noreferrer"' : '';
-          return `<a href="${escapeHtml(item.url)}"${title}${target}>${children}</a>`;
+          return `<a href="${escapeHtml(siteRelativeHref(item.url))}"${title}${target}>${children}</a>`;
         }
         default: return '';
       }

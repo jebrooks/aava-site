@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+
+export const prerender = false;
+const policies = [
+  { title: 'Cancellation Policy', path: '/cancellation-policy', description: 'Details on booking changes, cancellations, fees, and refunds.' },
+  { title: 'Tasting Fee Policy', path: '/tasting-fee-policy', description: 'How winery tasting charges and related refunds are handled.' },
+  { title: 'Tour Waiver & Release', path: '/tour-waiver-release', description: 'Participation requirements and liability release for tour guests.' },
+  { title: 'Food Purchase & Consumption Waiver', path: '/food-purchase-consumption-waiver', description: 'Food-safety and consumption terms for charcuterie purchases.' },
+];
+---
+
+<BaseLayout title="Terms & Conditions" description="Review All ABoard VA policies and waivers for wine tours, tasting fees, and charcuterie purchases.">
+  <PageHero image="/images/hero-experiences.webp" title="Terms & Conditions" description="Policies and waivers for your tour or charcuterie order." compact />
+  <section class="section section--cream" aria-labelledby="policies-heading">
+    <div class="container--narrow">
+      <div class="section-heading">
+        <p class="eyebrow">Before you book</p>
+        <h2 id="policies-heading">Review the policies for your experience.</h2>
+        <p>Use the links below to read the policies that apply to your booking, tasting fees, or food order.</p>
+      </div>
+      <ul class="policy-list">
+        {policies.map(policy => (
+          <li>
+            <a href={policy.path}>
+              {policy.title} <span aria-hidden="true">→</span>
+              <p class="form-help">{policy.description}</p>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="form-help">Questions about a policy? <a href="/contact">Contact us</a> before booking.</p>
+    </div>
+  </section>
+</BaseLayout>

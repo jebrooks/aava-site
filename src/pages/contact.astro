@@ -2,11 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import { site } from '../data/site';
-import { contactTopics } from '../lib/contact-form';
-import { randomUUID } from 'node:crypto';
+import ContactForm from '../components/ContactForm.astro';
 
 export const prerender = false;
-const sent = Astro.url.searchParams.get('sent') === '1';
 ---
 
 <BaseLayout
@@ -38,92 +36,7 @@ const sent = Astro.url.searchParams.get('sent') === '1';
         <img class="contact-flourish" src="/images/flourish-left.webp" alt="" width="1000" height="1167" loading="lazy" />
       </div>
 
-      <form
-        class="contact-form"
-        action="/api/contact"
-        method="post"
-        data-contact-form
-      >
-        <input type="hidden" name="submissionId" value={randomUUID()} />
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="first-name">First name</label>
-            <input id="first-name" name="firstName" type="text" autocomplete="given-name" maxlength="100" required />
-          </div>
-          <div class="form-field">
-            <label for="last-name">Last name</label>
-            <input id="last-name" name="lastName" type="text" autocomplete="family-name" maxlength="100" required />
-          </div>
-          <div class="form-field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="email" maxlength="254" required />
-          </div>
-          <div class="form-field">
-            <label for="phone">Phone <span aria-hidden="true">(optional)</span></label>
-            <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="40" />
-          </div>
-          <div class="form-field form-field--full">
-            <label for="topic">What can we help with?</label>
-            <select id="topic" name="topic" required>
-              <option value="">Select one</option>
-              {contactTopics.map(topic => <option>{topic}</option>)}
-            </select>
-          </div>
-          <div class="form-field form-field--full">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" maxlength="10000" required></textarea>
-          </div>
-          <div class="visually-hidden" aria-hidden="true">
-            <label for="company">Company</label>
-            <input id="company" name="company" type="text" tabindex="-1" autocomplete="off" />
-          </div>
-          <div class="form-field form-field--full">
-            <button class="button" type="submit">Send inquiry</button>
-          </div>
-        </div>
-        <p class="form-help">Send us your inquiry and we’ll reply by email.</p>
-        <p class="form-status" role="status" aria-live="polite" data-form-status>
-          {sent ? 'Thank you! Your inquiry has been sent. We’ll be in touch by email.' : ''}
-        </p>
-      </form>
+      <ContactForm />
     </div>
   </section>
 </BaseLayout>
-
-<script>
-  const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
-  const status = form?.querySelector<HTMLElement>('[data-form-status]');
-  const button = form?.querySelector<HTMLButtonElement>('button[type="submit"]');
-  let sending = false;
-  form?.addEventListener('input', () => {
-    const submissionId = form.elements.namedItem('submissionId') as HTMLInputElement;
-    submissionId.value = crypto.randomUUID();
-  });
-  form?.addEventListener('submit', async event => {
-    event.preventDefault();
-    if (sending || !form.reportValidity()) return;
-    sending = true;
-    if (button) { button.disabled = true; button.textContent = 'Sending…'; }
-    form.setAttribute('aria-busy', 'true');
-    if (status) status.textContent = 'Sending your inquiry…';
-    try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        signal: AbortSignal.timeout(30_000),
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
-      });
-      const result = await response.json();
-      if (!response.ok || !result.ok) throw new Error(result.error || 'Your message could not be sent. Please try again.');
-      form.reset();
-      (form.elements.namedItem('submissionId') as HTMLInputElement).value = crypto.randomUUID();
-      if (status) status.textContent = 'Thank you! Your inquiry has been sent. We’ll be in touch by email.';
-    } catch (error) {
-      if (status) status.textContent = error instanceof Error ? error.message : 'Your message could not be sent. Please try again or email info.allaboardva@gmail.com.';
-    } finally {
-      sending = false;
-      form.setAttribute('aria-busy', 'false');
-      if (button) { button.disabled = false; button.textContent = 'Send inquiry'; }
-    }
-  });
-</script>
