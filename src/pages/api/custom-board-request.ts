@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { checkBotId } from 'botid/server';
 import { apiError, assertSameOrigin, json, readJson } from '../../lib/http';
 import { allowRequest } from '../../lib/rate-limit';
 import { ShopifyApiError } from '../../lib/shopify/client';
@@ -24,22 +25,23 @@ function optionalText(value: unknown, maximum = 2000) {
   return text;
 }
 
-async function verifyTurnstile(token: string, ip: string) {
-  const secret = import.meta.env.TURNSTILE_SECRET_KEY || '';
-  if (!secret) {
-    if (import.meta.env.PROD) {
-      throw new ShopifyApiError('Form protection is not configured.', 503);
-    }
-    return;
+async function verifyVisitor(request: Request) {
+  let result;
+  try {
+    result = await checkBotId({
+      developmentOptions: { isDevelopment: import.meta.env.DEV },
+      advancedOptions: {
+        checkLevel: 'basic',
+        headers: Object.fromEntries(request.headers),
+      },
+    });
+  } catch (error) {
+    console.error('Custom-board BotID verification failed.', error);
+    throw new ShopifyApiError('We could not verify your request. Please try again shortly.', 503);
   }
-
-  const body = new URLSearchParams({ secret, response: token, remoteip: ip });
-  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body,
-  });
-  const result = (await response.json()) as { success?: boolean };
-  if (!result.success) throw new ShopifyApiError('Please complete the anti-spam check.', 400);
+  if (result.isBot || !result.isHuman) {
+    throw new ShopifyApiError('We could not verify your request. Please refresh the page and try again.', 403);
+  }
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -52,7 +54,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const body = await readJson<Record<string, unknown>>(request);
     if (body.company) return json({ ok: true });
-    await verifyTurnstile(String(body.turnstileToken || ''), ip);
+    await verifyVisitor(request);
 
     const email = requiredText(body.email, 'Email', 254).toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

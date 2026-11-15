@@ -1,7 +1,5 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 ---
 
 <BaseLayout
@@ -9,7 +7,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
   description="Tell All ABoard VA about your gathering and receive a custom charcuterie quote and secure invoice."
   image="/images/hero-charcuterie.webp"
 >
-  {turnstileSiteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
   <section class="section custom-request-page">
     <div class="container--narrow">
       <div class="section-heading">
@@ -33,7 +30,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
           <label class="form-grid__wide"><span>Anything else we should know?</span><textarea name="notes" rows="5" maxlength="2000"></textarea></label>
           <label class="honeypot" aria-hidden="true"><span>Company website</span><input name="company" tabindex="-1" autocomplete="off" /></label>
         </div>
-        {turnstileSiteKey && <div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>}
         <label class="consent-field">
           <input name="consent" type="checkbox" required />
           <span>I agree that All ABoard VA may contact me about this request.</span>
@@ -46,6 +42,16 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
 </BaseLayout>
 
 <script>
+  import { initBotId } from 'botid/client/core';
+
+  initBotId({
+    protect: [{
+      path: '/api/custom-board-request',
+      method: 'POST',
+      advancedOptions: { checkLevel: 'basic' },
+    }],
+  });
+
   const form = document.querySelector<HTMLFormElement>('[data-custom-request-form]');
   const status = document.querySelector<HTMLElement>('[data-request-status]');
   const requestedDate = form?.elements.namedItem('requestedDate') as HTMLInputElement | null;
@@ -61,7 +67,6 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '';
     if (status) status.textContent = 'Sending your request…';
     const data = new FormData(form);
     const payload: Record<string, FormDataEntryValue | number> = Object.fromEntries(data.entries());
-    payload.turnstileToken = String(data.get('cf-turnstile-response') || '');
     payload.guestCount = Number(data.get('guestCount'));
     try {
       const response = await fetch('/api/custom-board-request', {

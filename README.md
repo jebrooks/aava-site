@@ -47,8 +47,9 @@ Copy `.env.example` to `.env` for local overrides.
 - `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact-form email from the Vercel backend.
   Both are server-only; the sender must belong to a domain verified in Resend.
 - The server-side Shopify Storefront token powers catalog and cart operations.
-- The Shopify Admin token, webhook secret, cron secret, location/publication IDs, and Turnstile
-  secret are server-only.
+- The Shopify Admin token, webhook secret, cron secret, and location/publication IDs are server-only.
+- Custom-board requests use Vercel BotID Basic for invisible bot protection, with no additional
+  API keys. Both the browser and API explicitly use Basic to avoid Deep Analysis charges.
 
 Never store API keys, payment credentials, or private form secrets in a `PUBLIC_` variable. Public
 variables are included in browser-delivered files.
