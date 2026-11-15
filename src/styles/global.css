@@ -1473,8 +1473,7 @@ ol {
 
 .product-gallery img {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  height: auto;
 }
 
 .product-detail__content h1 {
