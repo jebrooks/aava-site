@@ -1,3 +1,5 @@
+import { loadSharedBlackoutDates } from './blackouts.ts';
+import { BLACKOUT_SOURCE } from '../blackout-dates.ts';
 import { isTourVariant, deliveryVariantTitle } from "../tour-fulfillment.ts";
 import { resolveTourBoard } from "./tour-board-sync.ts";
 import { randomUUID } from "node:crypto";
@@ -73,6 +75,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
       Object.fromEntries(
         data.metaobjectByHandle.fields.map((f) => [f.key, f.value || ""]),
       ),
+      await loadSharedBlackoutDates(deps.admin),
     );
   }
   async function addOns() {
@@ -209,6 +212,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
       .sort((a, b) => a.date.localeCompare(b.date));
     return {
       today,
+      blackoutSource: BLACKOUT_SOURCE,
       minimumDate: addDays(today, config.minimumDays),
       maximumDate: addMonths(today, config.monthsAhead),
       minimumDays: config.minimumDays,

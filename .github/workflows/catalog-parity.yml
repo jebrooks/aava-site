@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test shared blackout dates
+        run: npm run test:blackouts
+
       - name: Test tour scheduling
         run: npm run test:tours
 

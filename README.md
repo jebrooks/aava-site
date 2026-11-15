@@ -126,10 +126,11 @@ should only be used where the site owner has the necessary rights.
 
 Edit **Shopify Admin → Content → Metaobjects → Tour schedule → default**. The default is
 all weekdays, 3 minimum calendar days in advance, and a 6 calendar-month horizon, in Eastern
-Time. Enter blackout dates as `YYYY-MM-DD`, one per line; the parser imposes no date-count
-limit. Invalid dates stop the sync rather than silently opening blocked days. Prices are editable
+Time. Business closures are managed in the shared **Blackout dates → Business blackout dates**
+entry, not in either schedule. Enter `YYYY-MM-DD` dates, one per line; there is no fixed
+date-count limit. Invalid shared dates stop availability and synchronization. Prices are editable
 in USD; initial prices use the site's advertised $125 per seat and $1,250 for the whole bus.
-November 25–30, 2026 is initially blocked to match the Thanksgiving closure announcement.
+The shared list was seeded with November 25–30 and December 24–27, 2026 from the tour schedule.
 
 Each eligible date gets a `tour-seat-YYYY-MM-DD` product with 10 units and a
 `tour-bus-YYYY-MM-DD` bundle requiring all 10 units of that seat variant. Products require no
@@ -176,8 +177,8 @@ available for isolated review; that page and `/booking` are noindex.
 The booking flow offers Public/Private tours, actual guest count, a live month calendar, snacks,
 regular catalog boards (including BYO validation), registration, required acknowledgments,
 and a dedicated Shopify cart. Destinations are arranged by phone. Availability and checkout
-both read `tour_schedule/default` directly, enforcing blackouts and the current 3-day / 6-month
-settings independently of the nightly catalog job. A public order buys its guest quantity;
+both read `tour_schedule/default` and `booking_blackouts/default` directly, enforcing the shared
+closures and current 3-day / 6-month settings independently of the nightly catalog job. A public order buys its guest quantity;
 a private order buys one whole-bus bundle and records the actual number of passengers.
 
 Tour charcuterie uses the existing **Charcuterie collection** and its current delivery-variant
@@ -287,3 +288,47 @@ metafields and asset download scripts retain their source URLs as provenance, no
 `npm run check:links -- http://127.0.0.1:4330` crawls a running site and fails for broken
 internal pages/fragments or absolute links back to the old host. Catalog parity CI also runs
 this crawl while its temporary server is active. `npm run test:links` covers link normalization.
+
+
+## Shared blackout dates for deliveries and tours
+
+Edit **Shopify Admin → Content → Metaobjects → Blackout dates → Business blackout dates**
+(`booking_blackouts/default`). The **Dates** field contains one `YYYY-MM-DD` date per line.
+An empty field intentionally means no business-wide closures. Delivery and tour schedules
+retain their own operating days, lead times, horizons, capacity, and prices, but both use this
+single blackout list. No schedule reference needs to be selected manually.
+
+Availability and checkout read the shared list directly with no application cache. Missing or
+invalid shared configuration fails closed, including when an environment delivery schedule
+fallback exists. The daily jobs archive blocked delivery products and tour seat/bus products.
+Removing a blackout lets eligible archived products reopen without replacing their IDs or
+resetting sold inventory. Delivery reopen also republishes the product; publication failures
+put it back into Archived for a safe retry. Existing orders are not canceled by schedule edits.
+
+Migration and rollout:
+
+```sh
+npm run shopify:setup-blackouts                 # Read-only plan
+npm run shopify:setup-blackouts -- --apply      # Create/seed shared entry, bridge old code, archive closures
+# Merge and deploy the code, then remove the old per-schedule fields:
+npm run shopify:setup-blackouts -- --retire-legacy-fields --apply
+```
+
+The initial seed copies the current tour blackout dates. A preexisting shared list is preserved,
+so rerunning setup cannot overwrite its edits with stale tour data. During rollout, the old
+schedule fields are labeled **legacy migration copy** and carry the same dates to protect the
+previous deployment. Do not maintain those copies manually. The cleanup command verifies that
+both production availability endpoints report `blackoutSource: booking_blackouts/default`
+before deleting either legacy field. Use `--site=https://your-production-host` if the production
+host has changed. Migration records are backed up under `/tmp` before writes.
+
+The initial migration also archives already-generated products on the closures immediately;
+new closures are enforced immediately by availability/checkout and reconciled in the catalog
+by the scheduled jobs. Removing a closure restores eligible dates after the next catalog sync. Run the existing authenticated jobs for immediate catalog reconciliation.
+New-store setup should create both schedules, then run the shared-blackout setup before enabling
+bookings. The `DELIVERY_SCHEDULE_JSON.blackoutDates` fallback is no longer authoritative.
+
+`npm run test:blackouts` covers parsing, arbitrary-length lists, delivery availability and
+checkout rejection, pagination, archiving/reopening without restocking, publication failure,
+and refusing missing configuration even with a fallback. Tour booking and sync tests cover
+the same shared source for public seats and private buses.

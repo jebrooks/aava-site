@@ -31,7 +31,6 @@ if (!definitionQuery.metaobjectDefinitionByType) {
           { name: 'Daily order capacity', key: 'daily_capacity', type: 'number_integer', required: true },
           { name: 'Lead time in hours', key: 'lead_time_hours', type: 'number_integer', required: true },
           { name: 'Horizon in days', key: 'horizon_days', type: 'number_integer', required: true },
-          { name: 'Blackout dates', key: 'blackout_dates', type: 'multi_line_text_field' },
           { name: 'Weekly windows JSON', key: 'weekly_windows', type: 'json', required: true },
         ],
       },
@@ -75,7 +74,6 @@ const fields = [
   { key: 'daily_capacity', value: String(schedule.dailyCapacity) },
   { key: 'lead_time_hours', value: String(schedule.leadTimeHours) },
   { key: 'horizon_days', value: String(schedule.horizonDays) },
-  { key: 'blackout_dates', value: (schedule.blackoutDates || []).join('\n') },
   { key: 'weekly_windows', value: JSON.stringify(schedule.weeklyWindows) },
 ];
 

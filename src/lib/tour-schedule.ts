@@ -31,7 +31,7 @@ export function validTourDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) &&
     new Date(value).toISOString().slice(0, 10) === value;
 }
-export function parseTourSchedule(fields: Record<string, string>): TourSchedule {
+export function parseTourSchedule(fields: Record<string, string>, blackoutDates: string[] = []): TourSchedule {
   const integer = (key: string, min: number, max: number) => {
     const value = Number(fields[key]);
     if (!fields[key] || !Number.isInteger(value) || value < min || value > max) throw new Error(`Invalid tour schedule ${key}.`);
@@ -45,8 +45,6 @@ export function parseTourSchedule(fields: Record<string, string>): TourSchedule 
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const days = JSON.parse(fields.operating_days || '[]');
   if (!Array.isArray(days) || days.some(day => !weekdays.includes(day))) throw new Error('Invalid tour operating days.');
-  const blackoutDates = [...new Set((fields.blackout_dates || '').split(/[\s,]+/).filter(Boolean))];
-  if (blackoutDates.some(date => !validTourDate(date))) throw new Error('Invalid tour blackout date. Use YYYY-MM-DD, one per line.');
   if (!['true', 'false'].includes(fields.enabled)) throw new Error('Invalid tour enabled switch.');
   const schedule = {
     enabled: fields.enabled === 'true', minimumDays: integer('minimum_days', 1, 365),

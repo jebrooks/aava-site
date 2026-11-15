@@ -27,6 +27,8 @@ const sourceId = "gid://shopify/ProductVariant/123";
 const tourId = "gid://shopify/ProductVariant/124";
 function fixture() {
   const state = {
+    blackouts: "",
+    missingBlackouts: false,
     fields: {
       enabled: "true",
       minimum_days: "3",
@@ -40,7 +42,6 @@ function fixture() {
         "Friday",
         "Saturday",
       ]),
-      blackout_dates: "",
       seat_price: "125.00",
       bus_price: "1250.00",
     },
@@ -126,6 +127,7 @@ function fixture() {
     },
   });
   const admin = async (query) => {
+    if (query.includes("query SharedBlackoutDates")) return {metaobjectByHandle:state.missingBlackouts?null:{fields:[{key:"dates",value:state.blackouts}]}};
     if (query.includes("query BookingSchedule"))
       return {
         metaobjectByHandle: {
@@ -291,8 +293,11 @@ test("availability applies the schedule immediately and checks the requested pub
   assert.equal(data.dates.length, 1);
   assert.equal(data.dates[0].available, false);
   assert.equal(data.addons[0].variants[0].price.amount, "59.00");
-  state.fields.blackout_dates = "2026-11-14";
+  state.blackouts = "2026-11-14";
   assert.equal((await service.availability("public", 1)).dates.length, 0);
+  assert.equal((await service.availability("private", 1)).dates.length, 0);
+  await assert.rejects(()=>service.checkout(base), /date is no longer available/);
+  await assert.rejects(()=>service.checkout({...base,tourType:"private"}), /date is no longer available/);
 });
 test("disabled and outside-horizon dates cannot reach Shopify cart creation", async () => {
   const { state, service } = fixture();
@@ -393,4 +398,14 @@ test("warnings, lost lines, changed prices and shipping board lines all block ha
       /Availability changed/,
     );
   }
+});
+
+test('missing or invalid shared dates refuse availability and checkout',async()=>{
+ const {state,service}=fixture();
+ state.missingBlackouts=true;
+ await assert.rejects(()=>service.availability('public',2),/booking_blackouts\/default/);
+ state.missingBlackouts=false;state.blackouts='2026-02-30';
+ await assert.rejects(()=>service.availability('public',2),/Invalid blackout/);
+ await assert.rejects(()=>service.checkout(base),/Invalid blackout/);
+ assert.equal(state.cartInput,null);
 });
