@@ -1016,8 +1016,9 @@ ol {
 
 .bus-gallery img {
   width: 100%;
+  height: auto;
   aspect-ratio: 4 / 3;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 10px;
 }
 
@@ -1364,9 +1365,12 @@ ol {
     display: none;
   }
 
-  .values-grid,
-  .bus-gallery {
+  .values-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .bus-gallery {
+    grid-template-columns: 1fr;
   }
 
   .footer-inner {
