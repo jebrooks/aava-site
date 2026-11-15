@@ -131,8 +131,28 @@ are needed. The Gift Cards navigation and homepage/charcuterie links go to `/gif
 which redirects to the first native gift card in the collection’s manual order. If unavailable
 or unconfigured, the page offers a gift-certificate inquiry instead.
 
-Customers choose an amount and add it to the regular cart. Gift-card-only purchases skip local
-delivery scheduling; orders that also contain physical boards still require a delivery window.
+Customers choose an amount and can select **Send as a gift** on the product page before adding
+it to the cart. That option collects a required recipient email, optional name (255 characters),
+message (200 characters), and send date up to 90 days ahead. Blank send dates mean sending after
+purchase; leaving the option unchecked sends to the buyer’s checkout email. Shopify sends
+scheduled emails approximately 4–10 a.m. in the purchasing customer’s timezone, captured from
+the browser; customers cannot select an exact time. Quantity applies to that same recipient.
+Add cards separately for different recipients. The cart shows the recipient and date; to change
+them, remove the card and add it again. Saved dates that have passed must be updated before checkout.
+
+Recipient fields are implemented in `src/components/GiftCardRecipient.astro` and validated in
+`src/lib/gift-card.ts`. The server creates Shopify’s native line properties, including
+`__shopify_send_gift_card_to_recipient` and `__shopify_offset`, rather than accepting arbitrary
+attributes. Cart copies preserve them. `npm run test:cart` includes recipient validation,
+date/timezone boundaries, and cart-copy preservation. Theme recipient settings in Shopify
+Online Store do not affect this Astro storefront. Maintain the **New gift card** and **Gift card
+receipt** notification templates in Shopify → Settings → Notifications → Customer notifications;
+customized templates must support recipient details. See Shopify’s
+[recipient form documentation](https://shopify.dev/docs/storefronts/themes/product-merchandising/gift-cards)
+and [notification guidance](https://help.shopify.com/en/manual/online-store/themes/customizing-themes/common-customizations/add-gift-card-recipient-fields).
+
+Gift-card-only purchases skip local delivery scheduling; orders that also contain physical boards
+still require a delivery window.
 Shopify owns checkout, payment, gift-card issuance, and redemption. Verify purchase, notification,
 and redemption separately before cutover; the website does not reconcile legacy balances.
 

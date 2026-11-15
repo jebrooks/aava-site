@@ -69,7 +69,7 @@ const CART_FIELDS = `#graphql
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
             image { url altText width height }
-            product { handle title }
+            product { handle title isGiftCard }
           }
         }
       }
@@ -156,6 +156,7 @@ export async function assertCatalogVariant(variantId: string) {
       selectedOptions: Array<{name:string;value:string}>;
       product: {
         handle: string;
+        isGiftCard: boolean;
         tags: string[];
         collections: { nodes: Array<{ handle: string }> };
       };
@@ -168,7 +169,7 @@ export async function assertCatalogVariant(variantId: string) {
           id
           availableForSale
           selectedOptions {name value}
-          product { handle tags collections(first: 20) { nodes { handle } } }
+          product { handle isGiftCard tags collections(first: 20) { nodes { handle } } }
         }
       }
     }`,

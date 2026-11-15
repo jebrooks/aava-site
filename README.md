@@ -102,7 +102,8 @@ The homepage and the five primary content routes are local:
 The codebase includes Shopify-backed catalog/product routes, a local cart, scheduled delivery,
 Shopify-backed tour booking, custom-board draft requests, and local inquiry, policy, waiver, FAQ,
 and press pages. Gift Cards links open the native Shopify gift-card product through
-`/gift-certificates`, with an inquiry fallback. Purchase, redemption, and legacy balances require
+`/gift-certificates`, with an inquiry fallback. Product pages collect optional gift recipients and
+send dates using Shopify’s native delivery properties. Purchase, redemption, and legacy balances require
 separate verification. Internal navigation no longer relies on
 `legacyUrl()` or `PUBLIC_LEGACY_SITE_URL`. Implementation does not prove external configuration,
 payment readiness, or DNS cutover; use [MIGRATION.md](MIGRATION.md) for the remaining verification.

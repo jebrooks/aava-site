@@ -116,7 +116,12 @@ after live sales without a fresh reconciliation.
 - Enable a native Shopify gift-card product, include it in the charcuterie collection, and publish
   it to the Headless storefront. `/gift-certificates` redirects to the first native gift card in
   collection order; no product-type or tag conventions are required. Amounts, copy, and images
-  stay in Shopify. Gift-card-only carts skip delivery scheduling. See the
+  stay in Shopify. Customers can select Send as a gift on the Astro product page to specify a
+  recipient email, optional name/message, and a send date up to 90 days ahead. The cart carries
+  Shopify’s native recipient properties through checkout. Shopify’s Online Store theme settings
+  do not configure this custom form. Verify that New gift card and Gift card receipt notification
+  templates support recipients, then verify paid issuance and scheduled delivery with an approved
+  end-to-end test. Gift-card-only carts skip delivery scheduling. See the
   [content guide](docs/content-management.md#gift-cards) for maintenance and fallback behavior.
 - Export outstanding Squarespace gift-certificate liabilities, verify each balance, issue an
   equivalent Shopify replacement, and retain the confidential crosswalk outside Git. Finance or

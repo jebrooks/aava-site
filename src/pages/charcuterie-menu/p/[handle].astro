@@ -5,6 +5,7 @@ import { isShopifyConfigured } from '../../../lib/shopify/config';
 import type { ShopifyProduct } from '../../../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
 import BoardCustomizer from '../../../components/BoardCustomizer.astro';
+import GiftCardRecipient from '../../../components/GiftCardRecipient.astro';
 
 export const prerender = false;
 
@@ -93,6 +94,7 @@ const productSchema = product && initialVariant ? {
               <input type="hidden" name="variant" value={initialVariant.id} data-variant-select />
             )}
             <BoardCustomizer handle={handle} />
+            {product.isGiftCard && <GiftCardRecipient />}
             <label>
               <span>Quantity</span>
               <input name="quantity" type="number" min="1" max="50" value="1" inputmode="numeric" />
@@ -127,6 +129,7 @@ const productSchema = product && initialVariant ? {
   <script>
     import type { Money, ProductVariant } from '../../../lib/shopify/types';
     import { boardAttributes, getBoardConfiguration } from '../../../lib/board-customization';
+    import { giftCardAttributes } from '../../../lib/gift-card';
 
     const form = document.querySelector<HTMLFormElement>('[data-product-form]');
     const variantSelect = document.querySelector<HTMLSelectElement | HTMLInputElement>('[data-variant-select]');
@@ -159,6 +162,14 @@ const productSchema = product && initialVariant ? {
           accompaniments: data.getAll('accompaniments'),
         } : undefined;
         boardAttributes(handle, selections);
+        const giftCard = data.get('sendAsGift') === 'on' ? {
+          email: data.get('recipientEmail'),
+          name: data.get('recipientName'),
+          message: data.get('giftMessage'),
+          sendOn: data.get('giftSendOn'),
+          offset: new Date().getTimezoneOffset(),
+        } : undefined;
+        giftCardAttributes(Boolean(submittedForm.querySelector('[data-gift-card-recipient]')), giftCard);
         const response = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -168,6 +179,7 @@ const productSchema = product && initialVariant ? {
             merchandiseId: data.get('variant'),
             quantity: Number(data.get('quantity')),
             selections,
+            giftCard,
           }),
         });
         const result = await response.json();

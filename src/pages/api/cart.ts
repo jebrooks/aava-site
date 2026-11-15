@@ -4,6 +4,7 @@ import { apiError, assertSameOrigin, json, readJson } from '../../lib/http';
 import { ShopifyApiError } from '../../lib/shopify/client';
 import { assertDeliverySlotAvailable } from '../../lib/shopify/schedule';
 import { boardAttributes, assertBoardLine } from '../../lib/board-customization';
+import { giftCardAttributes, assertGiftCardLine } from '../../lib/gift-card';
 import {
   addCartLine,
   assertCatalogVariant,
@@ -67,7 +68,10 @@ export const POST: APIRoute = async ({ request }) => {
       const variant = await assertCatalogVariant(merchandiseId);
       let attributes;
       try {
-        attributes = boardAttributes(variant.product.handle, body.selections);
+        attributes = [
+          ...boardAttributes(variant.product.handle, body.selections),
+          ...giftCardAttributes(variant.product.isGiftCard, body.giftCard),
+        ];
       } catch (error) {
         throw new ShopifyApiError((error as Error).message, 400);
       }
@@ -154,6 +158,11 @@ export const POST: APIRoute = async ({ request }) => {
       if (!catalogLines.length) throw new ShopifyApiError('Add an item before checkout.', 400);
       for (const line of catalogLines) {
         if (isTourVariant(line.merchandise)) throw new ShopifyApiError('On-tour boards must be booked with a tour.', 400);
+        try {
+          assertGiftCardLine(line.merchandise.product.isGiftCard, line.attributes);
+        } catch (error) {
+          throw new ShopifyApiError(`${(error as Error).message} Remove the gift card and add it again to update its delivery details.`, 400);
+        }
         try {
           assertBoardLine(line.merchandise.product.handle, line.attributes);
         } catch {
