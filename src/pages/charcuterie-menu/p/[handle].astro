@@ -72,7 +72,7 @@ const productSchema = product && initialVariant ? {
         <div class="product-detail__content">
           <p class="eyebrow">{product.isGiftCard ? 'Give an All ABoard VA experience' : 'Handcrafted charcuterie'}</p>
           <h1>{product.title}</h1>
-          <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>
+          {!product.isGiftCard && <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>}
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
