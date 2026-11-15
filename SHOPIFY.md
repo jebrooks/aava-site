@@ -87,8 +87,15 @@ after live sales without a fresh reconciliation.
 
 ## 4. Forms, webhooks, and gift cards
 
-- Create a Cloudflare Turnstile widget for both production and preview domains. Configure its site
-  and secret keys. Production custom requests fail closed when Turnstile is absent.
+- Custom-board requests use Vercel BotID Basic, explicitly selected in both browser and API code.
+  No Cloudflare widget or keys are needed. Vercel handles the challenge routes automatically.
+  Keep Vercel OIDC enabled in the project settings so the server can authenticate BotID checks.
+  Redeploy after installing the integration, then verify a browser submission creates a draft
+  order and a direct POST without a browser challenge is rejected. Check BotID results in the
+  project's Firewall traffic view. Verification failures block draft creation.
+  Local `npm run dev` uses the SDK's development behavior (allows humans without a live check);
+  production protection must be tested on a Vercel deployment, including Preview.
+  Run `npm run test:forms` for API regression tests with simulated verification results and drafts.
 - Add a Vercel Firewall rate-limit rule for `/api/custom-board-request` (five requests per ten
   minutes per IP). The application includes a best-effort instance-local limiter, but serverless
   instances do not share that memory.
