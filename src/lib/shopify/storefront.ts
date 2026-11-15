@@ -1,3 +1,4 @@
+import { relativeSiteLinks } from '../site-links';
 import { cartCopyWithLineChange, cartCopyWithAddedLine } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
@@ -142,7 +143,7 @@ export async function getProductByHandle(handle: string) {
 }
 function deliveryProduct(product: ShopifyProduct): ShopifyProduct {
   const variants = product.variants.nodes.filter(v=>!isTourVariant(v)).map(v=>({...v,title:deliveryVariantTitle(v)}));
-  return {...product,availableForSale:variants.some(v=>v.availableForSale),
+  return {...product,descriptionHtml:relativeSiteLinks(product.descriptionHtml),availableForSale:variants.some(v=>v.availableForSale),
     options:product.options.filter(o=>o.name!=='Fulfillment'),variants:{nodes:variants}};
 }
 

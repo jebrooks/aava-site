@@ -3,7 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { featuredBoards, legacyUrl } from '../data/site';
+import { featuredBoards } from '../data/site';
 import { isShopifyConfigured } from '../lib/shopify/config';
 import { listCharcuterieProducts } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
@@ -79,7 +79,7 @@ const giftCard = shopifyProducts.find((product) =>
           Leave the selections to us. We’ll create a crowd-pleasing mix of artisan cheeses, cured
           meats, fruit, and accompaniments using the best ingredients available.
         </p>
-        <Button href={quickPick ? `/charcuterie-menu/p/${quickPick.handle}` : legacyUrl('/charcuterie-menu/p/chefs-choice-charcuterie')} external={!quickPick}>Order Quick Pick</Button>
+        <Button href={quickPick ? `/charcuterie-menu/p/${quickPick.handle}` : '/charcuterie-menu/p/chefs-choice-charcuterie'}>Order Quick Pick</Button>
       </div>
     </div>
   </section>
@@ -101,7 +101,7 @@ const giftCard = shopifyProducts.find((product) =>
       ) : (
         <div class="product-grid">
           {featuredBoards.map((board) => (
-            <a class="product-card" href={legacyUrl(board.href)} target="_blank" rel="noreferrer">
+            <a class="product-card" href={board.href}>
               <img src={board.image} alt={board.name} width="1000" height="1000" loading="lazy" />
               <div class="product-card__body">
                 <h3>{board.name}</h3>
@@ -155,9 +155,8 @@ const giftCard = shopifyProducts.find((product) =>
       <h2>Give the gift of charcuterie.</h2>
       <p class="lede">A digital gift certificate lets them choose the board and occasion that feels just right.</p>
       <Button
-        href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : legacyUrl('/charcuterie-menu/p/gift-certificate')}
+        href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : '/gift-certificates'}
         variant="light"
-        external={!giftCard}
       >Give a digital gift certificate</Button>
     </div>
   </section>

@@ -20,13 +20,6 @@ export const site = {
   ],
 } as const;
 
-export const legacySiteUrl =
-  import.meta.env.PUBLIC_LEGACY_SITE_URL || 'https://www.allaboardva.com';
-
-export function legacyUrl(path: string) {
-  return new URL(path, legacySiteUrl).toString();
-}
-
 export const featuredBoards = [
   {
     name: 'Great American Graze',

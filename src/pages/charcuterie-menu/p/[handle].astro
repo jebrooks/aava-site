@@ -22,6 +22,7 @@ if (isShopifyConfigured()) {
   }
 }
 
+if (!product && !errorMessage && handle === 'gift-certificate') return Astro.redirect('/gift-certificates', 302);
 if (!product) Astro.response.status = errorMessage ? 503 : 404;
 const image = product?.featuredImage;
 const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;

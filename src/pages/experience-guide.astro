@@ -2,7 +2,6 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
-import { legacyUrl } from '../data/site';
 
 export const prerender = false;
 const tours = [
@@ -10,13 +9,13 @@ const tours = [
     title: 'Public Tour',
     bestFor: 'Solo travelers, couples, and small groups who enjoy meeting others.',
     group: 'Up to 10 total guests',
-    price: '$125–$175 per person, depending on region',
+    price: 'Current per-guest pricing is shown when booking',
   },
   {
     title: 'Private Tour',
     bestFor: 'Friends, families, and colleagues looking for a more intimate day.',
     group: 'Your group of up to 10',
-    price: '$1,250–$1,750 for the vehicle',
+    price: 'One whole-vehicle price, shown when booking',
   },
   {
     title: 'Customized Tour',
@@ -107,7 +106,7 @@ const tours = [
       <div>
         <p class="eyebrow">Public tours</p>
         <h2>Pickup made easy.</h2>
-        <p>Public tour pickup and drop-off locations are selected based on your tour region and may include:</p>
+        <p>Choose a pickup preference when booking. We’ll confirm the itinerary and pickup details with you by phone. Pickup options may include:</p>
         <ul class="check-list">
           <li>Northside Social, Clarendon</li>
           <li>Ballston Metro</li>
@@ -125,7 +124,7 @@ const tours = [
           your tour.
         </p>
         <p class="note">
-          Depending on your region, pickup can range from approximately 8:30–10:15 AM. Your exact
+          Pickup timing depends on the itinerary we arrange with you. Your exact
           details arrive by email before departure.
         </p>
       </div>
@@ -138,7 +137,7 @@ const tours = [
         <p class="eyebrow">What to expect</p>
         <h2>A full day in wine country.</h2>
         <p class="lede">
-          Tours typically last 8–11 hours depending on the selected region. Most routes visit three
+          Tours typically last 8–11 hours depending on the itinerary. Most routes visit three
           handpicked wineries, with scenic drive times kept as comfortable as possible.
         </p>
         <ul class="check-list">
@@ -169,10 +168,10 @@ const tours = [
         <p>Review the current details for cancellations, tastings, food, and travel.</p>
       </div>
       <ul class="policy-list">
-        <li><a href={legacyUrl('/cancellation-policy')} target="_blank" rel="noreferrer">Cancellation Policy →</a></li>
-        <li><a href={legacyUrl('/tasting-fee-policy')} target="_blank" rel="noreferrer">Tasting Fee Policy →</a></li>
-        <li><a href={legacyUrl('/tour-waiver-release')} target="_blank" rel="noreferrer">Tour Waiver & Release →</a></li>
-        <li><a href={legacyUrl('/food-purchase-consumption-waiver')} target="_blank" rel="noreferrer">Food Purchase Waiver →</a></li>
+        <li><a href={'/cancellation-policy'} target="_blank" rel="noreferrer">Cancellation Policy →</a></li>
+        <li><a href={'/tasting-fee-policy'} target="_blank" rel="noreferrer">Tasting Fee Policy →</a></li>
+        <li><a href={'/tour-waiver-release'} target="_blank" rel="noreferrer">Tour Waiver & Release →</a></li>
+        <li><a href={'/food-purchase-consumption-waiver'} target="_blank" rel="noreferrer">Food Purchase Waiver →</a></li>
       </ul>
     </div>
   </section>
@@ -181,10 +180,10 @@ const tours = [
     <div class="container--narrow">
       <p class="eyebrow eyebrow--light">Your ride is just beginning</p>
       <h2>All ABoard!</h2>
-      <p class="lede">Find your date and region, or ask us to build a tour around your group.</p>
+      <p class="lede">Choose your tour and date, or ask us to plan a custom outing for your group.</p>
       <div class="button-row button-row--center">
-        <Button href={legacyUrl('/experiences#choose-region')} variant="light" external>Find a tour</Button>
-        <Button href={legacyUrl('/custom-tour-request-for-estimate')} variant="light" external>Request a custom estimate</Button>
+        <Button href={'/experiences#plan-tour'} variant="light">Find a tour</Button>
+        <Button href={'/custom-tour-request-for-estimate'} variant="light">Request a custom estimate</Button>
       </div>
     </div>
   </section>

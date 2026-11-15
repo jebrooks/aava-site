@@ -2,7 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
-import { legacyUrl } from '../data/site';
+import { press } from '../data/press';
 import { isShopifyConfigured } from '../lib/shopify/config';
 import { listCharcuterieProducts } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
@@ -17,23 +17,7 @@ if (isShopifyConfigured()) {
   }
 }
 
-const press = [
-  {
-    title: 'Northern Virginia Magazine',
-    image: '/images/press-nova.webp',
-    href: 'https://northernvirginiamag.com/things-to-do/2026/03/16/9-themed-tours-to-explore-northern-virginia/',
-  },
-  {
-    title: 'The Alimond Show',
-    image: '/images/press-alimond.webp',
-    href: 'https://alimondphotography.com/colleen-brooks/',
-  },
-  {
-    title: 'ARLnow',
-    image: '/images/press-arlnow.webp',
-    href: 'https://www.arlnow.com/announcements/new-arlington-based-business-offers-curated-small-group-wine-tours-to-virginia-wine-country-1139/',
-  },
-];
+
 ---
 
 <BaseLayout>
@@ -104,9 +88,8 @@ const press = [
       </p>
       <div class="button-row button-row--center">
         <Button
-          href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : legacyUrl('/charcuterie-menu/p/gift-certificate')}
+          href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : '/gift-certificates'}
           variant="light"
-          external={!giftCard}
         >
           Give a digital gift certificate
         </Button>

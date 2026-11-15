@@ -1,7 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
-import { legacyUrl } from '../data/site';
 
 export const prerender = false;
 const policies = [
@@ -24,9 +23,8 @@ const policies = [
       <ul class="policy-list">
         {policies.map(policy => (
           <li>
-            <a href={legacyUrl(policy.path)} target="_blank" rel="noreferrer">
+            <a href={policy.path}>
               {policy.title} <span aria-hidden="true">→</span>
-              <span class="visually-hidden"> (opens in a new tab)</span>
               <p class="form-help">{policy.description}</p>
             </a>
           </li>

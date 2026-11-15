@@ -12,6 +12,8 @@
     "shopify:setup": "node --env-file=.env scripts/shopify/setup.mjs",
     "shopify:normalize": "node scripts/shopify/normalize-squarespace.mjs",
     "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs",
+    "test:links": "node --experimental-strip-types --test tests/site-links.test.mjs",
+    "check:links": "node scripts/check-site-links.mjs",
     "test:contact": "node --experimental-strip-types --test tests/contact-form.test.mjs",
     "test:cart": "node --experimental-strip-types --test tests/cart-edit.test.mjs",
     "test:boards": "node --experimental-strip-types --test tests/board-customization.test.mjs",

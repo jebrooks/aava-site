@@ -44,8 +44,6 @@ sitemap, and server integrations require the configured adapter.
 
 Copy `.env.example` to `.env` for local overrides.
 
-- `PUBLIC_LEGACY_SITE_URL` points temporary booking, checkout, product, and policy links to the
-  current Squarespace site during the staged migration.
 - `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact-form email from the Vercel backend.
   Both are server-only; the sender must belong to a domain verified in Resend.
 - The server-side Shopify Storefront token powers catalog and cart operations.
@@ -260,3 +258,31 @@ also work and redirect to `/contact?sent=1` after acceptance.
 handling, and native form submission. No test emails are sent by this suite. A live inbox test
 is still required after configuring Resend. The retired `PUBLIC_CONTACT_FORM_ENDPOINT` variable
 is no longer used and can be removed from Vercel.
+
+
+## Relative site links and domain cutover
+
+Navigation uses root-relative URLs so Preview, `aava-site.vercel.app`, and the eventual
+`www.allaboardva.com` deployment stay on the host being visited. Canonical URLs, sitemap URLs,
+and social metadata deliberately use the final absolute domain. Social profiles, press articles,
+Shopify checkout, and service API URLs remain external.
+
+`PUBLIC_LEGACY_SITE_URL` is retired and can be removed from Vercel. The published policy pages
+are checked-in snapshots in `src/data/policies.json`, with source provenance; production does
+not fetch Squarespace. Their wording is preserved. Known conflicting tasting-fee cutoffs in
+the source policy need a separate business decision; this migration does not choose new terms.
+
+Tour planning, custom estimates, booking help, and gift-certificate inquiries use local pages
+and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking
+changes. No Shopify gift-certificate product exists yet, so gift links lead to an inquiry rather
+than a Squarespace checkout. The old gift-product path redirects there only while no matching
+Shopify product exists. FAQs describe the current region-free booking flow, and Press reuses
+the existing coverage with local images.
+
+Shopify product descriptions and announcement rich text normalize links to `allaboardva.com`
+and `www.allaboardva.com` (plus the primary Vercel alias) into relative links when rendered. Historical product migration
+metafields and asset download scripts retain their source URLs as provenance, not navigation.
+
+`npm run check:links -- http://127.0.0.1:4330` crawls a running site and fails for broken
+internal pages/fragments or absolute links back to the old host. Catalog parity CI also runs
+this crawl while its temporary server is active. `npm run test:links` covers link normalization.

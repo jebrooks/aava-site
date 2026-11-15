@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { press } from '../data/press';
+export const prerender = false;
+---
+<BaseLayout title="In the Press" description="Read coverage of All ABoard VA wine tours and charcuterie in the press.">
+  <PageHero image="/images/hero-home.webp" title="In the Press" description="Stories about our tours, boards, and the people behind All ABoard VA." compact />
+  <section class="section section--cream">
+    <div class="container press-grid">
+      {press.map(item => (
+        <a class="press-card" href={item.href} target="_blank" rel="noreferrer">
+          <img src={item.image} alt={item.title} width="750" height="500" loading="lazy" />
+          <h2>{item.title}</h2>
+          <p>Read the story <span aria-hidden="true">→</span><span class="visually-hidden"> (opens in a new tab)</span></p>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

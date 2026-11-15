@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+export const prerender = false;
+const groups = [
+  { id: 'tours', title: 'Wine tours', questions: [
+    ['How do I book a tour?', 'Choose Public or Private, your guest count, and a snack in the <a href="/experiences#plan-tour">tour planner</a>. Then choose an available date, share your preferences, and continue to secure checkout.'],
+    ['How far ahead can I book?', 'Tours must be booked at least three days ahead, up to six months in advance. The booking calendar shows current availability and any blocked dates.'],
+    ['What is the difference between Public and Private?', 'Public tours are shared and priced per guest, with up to 10 total guests. Private tours reserve the whole bus for your group of 1–10 guests at one vehicle price. Current prices appear when you choose a date.'],
+    ['Can a small party join a public tour?', 'Yes. Smaller parties can book seats. Public tours require at least four total guests to operate.'],
+    ['How are destinations and pickup arranged?', 'Share your pickup preference when booking. We’ll arrange the destinations, itinerary, and final pickup details with you by phone.'],
+    ['What is included?', 'Your tour includes transportation, a host, bottled water, and a fresh sandwich if selected. Charcuterie can be added at its regular catalog price. Winery tasting fees are additional; see the <a href="/tasting-fee-policy">tasting-fee policy</a>.'],
+    ['Is there an age requirement?', 'All tour guests must be at least 21 and bring valid photo identification. Review the <a href="/tour-waiver-release">tour waiver</a> before booking.'],
+    ['Can you plan something custom?', 'Yes. <a href="/custom-tour-request-for-estimate">Send us your plans</a> and we’ll follow up about a custom outing.'],
+    ['How do I change or cancel a booking?', 'Review the <a href="/cancellation-policy">cancellation policy</a> and <a href="/booking-updates">contact us about your booking</a>. Include your reference and scheduled date so we can help.'],
+  ]},
+  { id: 'charcuterie', title: 'Charcuterie and gifts', questions: [
+    ['Where can I see the menu and prices?', 'Browse the <a href="/charcuterie-menu">current catalog</a> for available boards, options, and prices.'],
+    ['Can I choose the ingredients?', 'Our <a href="/charcuterie-menu/build-your-own">Build-Your-Own boards</a> let you choose ingredients within the limits shown on each product. A vegetarian choice is available.'],
+    ['How does delivery work?', 'Add your board to the cart, enter your delivery ZIP code, check dates, and select a delivery window. The scheduler checks whether your ZIP is eligible. Local pickup is not offered for regular orders.'],
+    ['Can I add a board to my tour?', 'Yes. Select charcuterie in the tour planner and choose from the catalog on the booking page. Tour add-ons use regular catalog prices and are provided on your tour.'],
+    ['Can I request a custom board?', 'Use the <a href="/custom-board-request">custom-board request form</a> to share your date, guest count, budget, and preferences.'],
+    ['What if I have dietary restrictions?', 'Include dietary restrictions in your request and <a href="/contact">contact us</a> with any questions before ordering. Review the <a href="/food-purchase-consumption-waiver">food purchase and consumption waiver</a>.'],
+    ['How do I arrange a gift certificate?', '<a href="/gift-certificates">Contact us about a gift certificate</a> and we’ll help arrange the right gift.'],
+    ['Where are the full policies?', 'Our <a href="/terms-conditions">Terms & Conditions page</a> links to the cancellation policy, tasting-fee terms, and tour and food waivers.'],
+  ]},
+];
+---
+<BaseLayout title="Frequently Asked Questions" description="Answers about All ABoard VA wine tours, booking, delivery, charcuterie, and gift certificates.">
+  <PageHero image="/images/hero-home.webp" title="Frequently Asked Questions" description="Helpful details for planning your tour or charcuterie order." compact />
+  <section class="section section--cream">
+    <div class="container--narrow">
+      {groups.map(group => (
+        <section class="faq-group" id={group.id} aria-labelledby={`${group.id}-heading`}>
+          <h2 id={`${group.id}-heading`}>{group.title}</h2>
+          {group.questions.map(([question, answer]) => (
+            <details class="faq-item"><summary>{question}</summary><div set:html={answer} /></details>
+          ))}
+        </section>
+      ))}
+      <p>Still have a question? <a href="/contact">Get in touch</a>.</p>
+    </div>
+  </section>
+</BaseLayout>
+<style>
+  .faq-group { margin-bottom: 3rem; }
+  .faq-item { border-bottom: 1px solid var(--line); padding: 1rem 0; }
+  .faq-item summary { cursor: pointer; font-weight: 650; }
+  .faq-item div { padding-top: 1rem; line-height: 1.8; }
+</style>
