@@ -1,5 +1,5 @@
 import { relativeSiteLinks } from '../site-links';
-import { cartCopyWithLineChange, cartCopyWithAddedLine } from '../cart-edit';
+import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
@@ -253,6 +253,11 @@ export function copyCartWithLineChange(cart: ShopifyCart, lineId: string, quanti
 
 export function copyCartWithAddedLine(cart: ShopifyCart, merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {
   return createCartCopy(cartCopyWithAddedLine(cart, merchandiseId, quantity, attributes));
+}
+
+export function removeUnusedDelivery(cart: ShopifyCart) {
+  const input = cartCopyWithoutUnusedDelivery(cart);
+  return input ? createCartCopy(input) : Promise.resolve(cart);
 }
 
 export async function addCartLine(id: string, merchandiseId: string, quantity: number, attributes: LineAttribute[] = []) {

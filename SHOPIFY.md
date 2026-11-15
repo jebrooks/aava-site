@@ -121,7 +121,9 @@ after live sales without a fresh reconciliation.
   Shopify’s native recipient properties through checkout. Shopify’s Online Store theme settings
   do not configure this custom form. Verify that New gift card and Gift card receipt notification
   templates support recipients, then verify paid issuance and scheduled delivery with an approved
-  end-to-end test. Gift-card-only carts skip delivery scheduling. See the
+  end-to-end test. Gift-card-only carts skip delivery scheduling; cart edits and checkout remove
+  unused delivery-capacity lines and metadata when no physical products remain. An already-open
+  checkout is preserved and the site saves the replacement cart ID. See the
   [content guide](docs/content-management.md#gift-cards) for maintenance and fallback behavior.
 - Export outstanding Squarespace gift-certificate liabilities, verify each balance, issue an
   equivalent Shopify replacement, and retain the confidential crosswalk outside Git. Finance or

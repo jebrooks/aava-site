@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cartCopyWithLineChange, cartCopyWithAddedLine } from '../src/lib/cart-edit.ts';
+import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery } from '../src/lib/cart-edit.ts';
 const fixture = () => ({
   attributes: [{key:'Checkout locked',value:'true'},{key:'Delivery ZIP',value:'22205'}],
   lines: {nodes: [
@@ -44,4 +44,57 @@ test('adding to a checkout cart preserves the saved delivery window and existing
     {merchandiseId:'new-board',quantity:2,attributes:[{key:'Meats',value:'Salami'}]},
   ]);
   assert.deepEqual(original,snapshot);
+});
+
+const deliveryCart = () => ({
+  attributes: [
+    {key:'Checkout locked',value:'true'},
+    {key:'Delivery ZIP',value:'22205'},
+    {key:'Delivery date',value:'2026-11-20'},
+    {key:'Delivery window',value:'Afternoon'},
+    {key:'Delivery slot key',value:'2026-11-20-afternoon'},
+    {key:'Delivery timezone',value:'America/New_York'},
+    {key:'Note',value:'Keep this note'},
+  ],
+  lines: {nodes: [
+    {id:'gift',quantity:2,merchandise:{id:'gift-variant',requiresShipping:false,product:{handle:'gift-card'}},attributes:[
+      {key:'Recipient email',value:'friend@example.com'},
+      {key:'Send on',value:'2026-12-01'},
+      {key:'__shopify_send_gift_card_to_recipient',value:'true'},
+    ]},
+    {id:'slot',quantity:1,merchandise:{id:'slot-variant',requiresShipping:true,product:{handle:'delivery-slot-2026-11-20'}},attributes:[]},
+  ]},
+});
+
+test('digital-only cleanup drops the shipping slot and delivery metadata, preserving gifts and the original checkout', () => {
+  const cart=deliveryCart();const snapshot=structuredClone(cart);
+  const input=cartCopyWithoutUnusedDelivery(cart);
+  assert.deepEqual(input.attributes,[{key:'Note',value:'Keep this note'}]);
+  assert.deepEqual(input.lines,[{merchandiseId:'gift-variant',quantity:2,attributes:cart.lines.nodes[0].attributes}]);
+  assert.deepEqual(cart,snapshot);
+});
+
+test('mixed gift and physical-board orders retain delivery, including the shipping capacity line', () => {
+  const cart=deliveryCart();
+  cart.lines.nodes.push({id:'board',quantity:1,merchandise:{id:'board-variant',requiresShipping:true,product:{handle:'great-american-graze'}},attributes:[]});
+  assert.equal(cartCopyWithoutUnusedDelivery(cart),null);
+});
+
+test('stale delivery metadata without a slot still creates a clean digital checkout', () => {
+  const cart=deliveryCart();cart.lines.nodes.pop();
+  const input=cartCopyWithoutUnusedDelivery(cart);
+  assert.deepEqual(input.attributes,[{key:'Note',value:'Keep this note'}]);
+  assert.equal(input.lines.length,1);
+});
+
+test('removing the last customer item does not leave an orphan delivery purchase', () => {
+  const cart=deliveryCart();cart.lines.nodes.shift();
+  assert.deepEqual(cartCopyWithoutUnusedDelivery(cart).lines,[]);
+});
+
+test('already clean digital carts can resume checkout without creating more carts', () => {
+  const cart=deliveryCart();cart.lines.nodes.pop();cart.attributes=[{key:'Checkout locked',value:'true'}];
+  assert.equal(cartCopyWithoutUnusedDelivery(cart),null);
+  cart.lines.nodes=[];
+  assert.equal(cartCopyWithoutUnusedDelivery(cart),null);
 });
