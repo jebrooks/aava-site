@@ -13,6 +13,7 @@ const PRODUCT_FIELDS = `#graphql
     title
     description
     descriptionHtml
+    isGiftCard
     productType
     tags
     availableForSale

@@ -113,7 +113,11 @@ after live sales without a fresh reconciliation.
 - Configure a Shopify Flow or staff order view for the `custom-board-request` and `needs-quote`
   draft-order tags. Staff must price the draft, choose/reserve delivery inventory, and send the
   invoice from Shopify Admin.
-- Enable a Shopify gift-card product and include it in the charcuterie collection.
+- Enable a native Shopify gift-card product, include it in the charcuterie collection, and publish
+  it to the Headless storefront. `/gift-certificates` redirects to the first native gift card in
+  collection order; no product-type or tag conventions are required. Amounts, copy, and images
+  stay in Shopify. Gift-card-only carts skip delivery scheduling. See the
+  [content guide](docs/content-management.md#gift-cards) for maintenance and fallback behavior.
 - Export outstanding Squarespace gift-certificate liabilities, verify each balance, issue an
   equivalent Shopify replacement, and retain the confidential crosswalk outside Git. Finance or
   the business owner must approve the reconciliation before Squarespace redemption is disabled.

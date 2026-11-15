@@ -3,21 +3,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import { press } from '../data/press';
-import { isShopifyConfigured } from '../lib/shopify/config';
-import { listCharcuterieProducts } from '../lib/shopify/storefront';
-import type { ShopifyProduct } from '../lib/shopify/types';
-
-let giftCard: ShopifyProduct | undefined;
-if (isShopifyConfigured()) {
-  try {
-    giftCard = (await listCharcuterieProducts()).products.nodes.find((product) =>
-      product.productType.toLowerCase().includes('gift') || product.tags.includes('gift-card'));
-  } catch (error) {
-    console.error('Unable to load the Shopify gift-card product.', error);
-  }
-}
-
-
 ---
 
 <BaseLayout>
@@ -84,14 +69,14 @@ if (isShopifyConfigured()) {
       <h2>Looking for a thoughtful gift?</h2>
       <p class="lede">
         Let them choose the day, the destination, or the perfect board with an All ABoard VA digital
-        gift certificate.
+        gift card.
       </p>
       <div class="button-row button-row--center">
         <Button
-          href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : '/gift-certificates'}
+          href="/gift-certificates"
           variant="light"
         >
-          Give a digital gift certificate
+          Shop gift cards
         </Button>
         <Button href="/charcuterie-menu" variant="light">Explore the menu</Button>
       </div>

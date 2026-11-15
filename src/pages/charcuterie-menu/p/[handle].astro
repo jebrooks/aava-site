@@ -69,20 +69,22 @@ const productSchema = product && initialVariant ? {
           />
         </div>
         <div class="product-detail__content">
-          <p class="eyebrow">Handcrafted charcuterie</p>
+          <p class="eyebrow">{product.isGiftCard ? 'Give an All ABoard VA experience' : 'Handcrafted charcuterie'}</p>
           <h1>{product.title}</h1>
           <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
+          {product.isGiftCard && <p>A digital gift for wine tours or charcuterie. No delivery window is needed when purchasing a gift card on its own.</p>}
+
           <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
               <label>
-                <span>Choose an option</span>
+                <span>{product.isGiftCard ? 'Choose a gift card amount' : 'Choose an option'}</span>
                 <select name="variant" data-variant-select>
                   {variants.map((variant) => (
                     <option value={variant.id} disabled={!variant.availableForSale} selected={variant.id === initialVariant.id}>
-                      {variant.title} — {formatMoney(variant.price)}{!variant.availableForSale ? ' — Sold out' : ''}
+                      {product.isGiftCard ? formatMoney(variant.price) : `${variant.title} — ${formatMoney(variant.price)}`}{!variant.availableForSale ? ' — Sold out' : ''}
                     </option>
                   ))}
                 </select>
@@ -113,7 +115,7 @@ const productSchema = product && initialVariant ? {
     <section class="section">
       <div class="container--narrow commerce-notice">
         <p class="eyebrow">Product unavailable</p>
-        <h1>We couldn’t load this board.</h1>
+        <h1>We couldn’t load this product.</h1>
         <p>{errorMessage || 'The product may have moved or is no longer offered.'}</p>
         <a class="button button--primary" href="/charcuterie-menu">Return to the menu</a>
       </div>
@@ -147,7 +149,7 @@ const productSchema = product && initialVariant ? {
       const button = submittedForm.querySelector<HTMLButtonElement>('button[type="submit"]');
       if (!button) return;
       button.disabled = true;
-      if (status) status.textContent = 'Adding your board…';
+      if (status) status.textContent = 'Adding to your cart…';
       try {
         const handle = submittedForm.dataset.productHandle || '';
         const selections = getBoardConfiguration(handle) ? {

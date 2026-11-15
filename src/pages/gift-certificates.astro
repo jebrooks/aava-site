@@ -1,7 +1,18 @@
 ---
 import InquiryPage from '../components/InquiryPage.astro';
+import { isShopifyConfigured } from '../lib/shopify/config';
+import { listCharcuterieProducts } from '../lib/shopify/storefront';
 export const prerender = false;
+
+if (isShopifyConfigured()) {
+  try {
+    const giftCard = (await listCharcuterieProducts()).products.nodes.find((product) => product.isGiftCard);
+    if (giftCard) return Astro.redirect(`/charcuterie-menu/p/${giftCard.handle}`, 302);
+  } catch (error) {
+    console.error('Unable to load Shopify gift cards.', error);
+  }
+}
 ---
-<InquiryPage title="Give an All ABoard VA experience" description="Get in touch to arrange a gift certificate for a wine tour or charcuterie." topic="Something else" prompt="Tell us you’d like to arrange a gift certificate, what you have in mind, and your preferred amount.">
+<InquiryPage title="Give an All ABoard VA experience" description="Online gift cards are temporarily unavailable. Get in touch and we’ll help arrange your gift." topic="Something else" prompt="Tell us you’d like to arrange a gift certificate, what you have in mind, and your preferred amount.">
   <p>A gift certificate lets them choose their own experience. Tell us what you have in mind and we’ll help arrange your gift.</p>
 </InquiryPage>

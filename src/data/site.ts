@@ -10,6 +10,7 @@ export const site = {
   nav: [
     { href: '/experiences', label: 'Experiences' },
     { href: '/charcuterie', label: 'Charcuterie' },
+    { href: '/gift-certificates', label: 'Gift Cards' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ],

@@ -11,6 +11,7 @@
 
 - Read [content management](docs/content-management.md) before changing content or operational settings. Edit the authoritative source rather than adding a code override for Shopify-managed content.
 - Shopify Admin → Content → Metaobjects owns announcements (`announcement_banner`), delivery settings (`delivery_schedule/default`), tour settings and prices (`tour_schedule/default`), and shared closures (**Blackout dates → Business blackout dates**, `booking_blackouts/default`).
+- Native gift-card products belong in the charcuterie collection and Headless publication; `/gift-certificates` discovers them using Shopify’s `isGiftCard` flag. See the content guide for maintenance.
 - Shopify products, product metafields, collections, and publication settings own the commerce catalog. Generated date products, bundles, and on-tour variants are managed by synchronization code.
 - Marketing copy lives in `src/pages/`; company details and featured boards in `src/data/site.ts`; ingredient options in `src/data/board-customizations.json`; tour choices in `src/data/tour-options.ts`; policies in `src/data/policies.json`; and press in `src/data/press.ts`.
 - Announcement edits take about a minute to appear. Schedule edits need catalog reconciliation as described in the guide; shared blackout checks read the list directly. Repository edits require deployment.

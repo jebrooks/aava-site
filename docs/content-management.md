@@ -120,8 +120,21 @@ task authorizes a policy change; unresolved tasting-fee wording needs a business
 Policy pages display the wording; they do not independently collect signed waivers.
 
 Use `./scripts/fetch-assets.sh` only when refreshing migrated source images, and review resulting
-binary changes. Gift-certificate links currently lead to an inquiry; the code does not establish
-that a Shopify gift-card product has been provisioned.
+binary changes.
+
+### Gift cards
+
+Manage native gift-card products, amounts, descriptions, and images in Shopify → Products.
+Include the gift-card product in the configured charcuterie collection and publish it to the
+Headless storefront. The site uses Shopify’s native `isGiftCard` flag; no tags or product type
+are needed. The Gift Cards navigation and homepage/charcuterie links go to `/gift-certificates`,
+which redirects to the first native gift card in the collection’s manual order. If unavailable
+or unconfigured, the page offers a gift-certificate inquiry instead.
+
+Customers choose an amount and add it to the regular cart. Gift-card-only purchases skip local
+delivery scheduling; orders that also contain physical boards still require a delivery window.
+Shopify owns checkout, payment, gift-card issuance, and redemption. Verify purchase, notification,
+and redemption separately before cutover; the website does not reconcile legacy balances.
 
 When a source of content, metaobject field, or editing workflow changes, update this guide and
 the compact map in `AGENTS.md` in the same PR. Keep live credentials and customer data out of docs.

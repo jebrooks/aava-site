@@ -101,8 +101,9 @@ The homepage and the five primary content routes are local:
 
 The codebase includes Shopify-backed catalog/product routes, a local cart, scheduled delivery,
 Shopify-backed tour booking, custom-board draft requests, and local inquiry, policy, waiver, FAQ,
-and press pages. Gift-certificate links currently lead to an inquiry; native gift-card provisioning
-and legacy balances require separate verification. Internal navigation no longer relies on
+and press pages. Gift Cards links open the native Shopify gift-card product through
+`/gift-certificates`, with an inquiry fallback. Purchase, redemption, and legacy balances require
+separate verification. Internal navigation no longer relies on
 `legacyUrl()` or `PUBLIC_LEGACY_SITE_URL`. Implementation does not prove external configuration,
 payment readiness, or DNS cutover; use [MIGRATION.md](MIGRATION.md) for the remaining verification.
 
@@ -274,9 +275,9 @@ the source policy need a separate business decision; this migration does not cho
 
 Tour planning, custom estimates, booking help, and gift-certificate inquiries use local pages
 and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking
-changes. No Shopify gift-certificate product exists yet, so gift links lead to an inquiry rather
-than a Squarespace checkout. The old gift-product path redirects there only while no matching
-Shopify product exists. FAQs describe the current region-free booking flow, and Press reuses
+changes. Gift links use `/gift-certificates` to find a native Shopify gift card in the catalog
+collection and open its product page, with an inquiry fallback. The old gift-product path
+redirects there only while no matching Shopify product exists. FAQs describe the current region-free booking flow, and Press reuses
 the existing coverage with local images.
 
 Shopify product descriptions and announcement rich text normalize links to `allaboardva.com`

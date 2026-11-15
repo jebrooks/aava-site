@@ -43,6 +43,7 @@ export interface ShopifyProduct {
   title: string;
   description: string;
   descriptionHtml: string;
+  isGiftCard: boolean;
   productType: string;
   tags: string[];
   availableForSale: boolean;
