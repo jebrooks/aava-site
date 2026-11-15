@@ -11,6 +11,7 @@ import {
   createCart,
   getCart,
   removeCartLines,
+  removeUnusedDelivery,
   copyCartWithLineChange,
   copyCartWithAddedLine,
   replaceDeliverySlot,
@@ -82,7 +83,7 @@ export const POST: APIRoute = async ({ request }) => {
           ? await copyCartWithAddedLine(current, merchandiseId, amount, attributes)
           : await addCartLine(current.id, merchandiseId, amount, attributes)
         : await createCart(merchandiseId, amount, attributes);
-      return json({ cart: publicCart(cart) });
+      return json({ cart: publicCart(await removeUnusedDelivery(cart)) });
     }
 
     if (action === 'update') {
@@ -100,7 +101,7 @@ export const POST: APIRoute = async ({ request }) => {
         : amount
           ? await updateCartLine(cartId, lineId, amount)
           : await removeCartLines(cartId, [lineId]);
-      return json({ cart: publicCart(cart) });
+      return json({ cart: publicCart(await removeUnusedDelivery(cart)) });
     }
 
     if (action === 'remove') {
@@ -115,7 +116,7 @@ export const POST: APIRoute = async ({ request }) => {
       const cart = current && isCheckoutLocked(current)
         ? await copyCartWithLineChange(current, lineId, 0)
         : await removeCartLines(cartId, [lineId]);
-      return json({ cart: publicCart(cart) });
+      return json({ cart: publicCart(await removeUnusedDelivery(cart)) });
     }
 
     if (action === 'setDelivery') {
@@ -150,7 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (action === 'checkout') {
-      const cart = await getCart(id(body.cartId, 'Cart ID'));
+      let cart = await getCart(id(body.cartId, 'Cart ID'));
       if (!cart) throw new ShopifyApiError('Cart not found.', 404);
       const catalogLines = cart.lines.nodes.filter(
         (line) => !line.merchandise.product.handle.startsWith('delivery-slot-'),
@@ -186,13 +187,14 @@ export const POST: APIRoute = async ({ request }) => {
           attributes['Delivery slot key'] || '',
         );
       }
+      cart = await removeUnusedDelivery(cart);
       const lockedCart = isCheckoutLocked(cart)
         ? cart
         : await updateCartAttributes(cart.id, [
             ...cart.attributes.filter((attribute) => attribute.key !== 'Checkout locked'),
             { key: 'Checkout locked', value: 'true' },
           ]);
-      return json({ checkoutUrl: lockedCart.checkoutUrl });
+      return json({ cart: publicCart(lockedCart), checkoutUrl: lockedCart.checkoutUrl });
     }
 
     throw new ShopifyApiError('Unsupported cart action.', 400);

@@ -356,6 +356,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       .then(async (response) => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Checkout is not ready.');
+        renderCart(result.cart);
         window.location.assign(result.checkoutUrl);
       })
       .catch((error) => {
