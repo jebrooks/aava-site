@@ -18,8 +18,6 @@ if (isShopifyConfigured()) {
 }
 const quickPick = shopifyProducts.find((product) =>
   product.handle === 'chefs-choice-charcuterie' || product.tags.includes('quick-pick'));
-const giftCard = shopifyProducts.find((product) =>
-  product.productType.toLowerCase().includes('gift') || product.tags.includes('gift-card'));
 ---
 
 <BaseLayout
@@ -153,11 +151,11 @@ const giftCard = shopifyProducts.find((product) =>
     <div class="container home-gift__inner">
       <p class="eyebrow eyebrow--light">Not sure what to choose?</p>
       <h2>Give the gift of charcuterie.</h2>
-      <p class="lede">A digital gift certificate lets them choose the board and occasion that feels just right.</p>
+      <p class="lede">A digital gift card lets them choose the board and occasion that feels just right.</p>
       <Button
-        href={giftCard ? `/charcuterie-menu/p/${giftCard.handle}` : '/gift-certificates'}
+        href="/gift-certificates"
         variant="light"
-      >Give a digital gift certificate</Button>
+      >Shop gift cards</Button>
     </div>
   </section>
 </BaseLayout>

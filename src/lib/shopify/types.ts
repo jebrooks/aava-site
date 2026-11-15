@@ -43,6 +43,7 @@ export interface ShopifyProduct {
   title: string;
   description: string;
   descriptionHtml: string;
+  isGiftCard: boolean;
   productType: string;
   tags: string[];
   availableForSale: boolean;
@@ -64,7 +65,7 @@ export interface CartLine {
   attributes: Array<{ key: string; value: string }>;
   cost: { totalAmount: Money };
   merchandise: ProductVariant & {
-    product: Pick<ShopifyProduct, 'handle' | 'title'>;
+    product: Pick<ShopifyProduct, 'handle' | 'title' | 'isGiftCard'>;
   };
 }
 

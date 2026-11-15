@@ -44,8 +44,8 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
   depends on Resend. These external services remain required after Squarespace retirement.
 - Policy pages are checked-in snapshots with provenance; displaying a waiver is not a signed-waiver
   collection system. Verify the required consent and operational records before cutover.
-- Gift-certificate navigation is an inquiry workflow. Native gift cards and legacy liabilities still
-  require explicit reconciliation and live verification.
+- Gift-card navigation opens the native Shopify product, with an inquiry fallback. Purchase,
+  redemption, and legacy liabilities still require explicit reconciliation and live verification.
 - `legacyUrl()` and `PUBLIC_LEGACY_SITE_URL` are retired. Historical URLs in migration metadata and
   asset download scripts are provenance, not active navigation.
 

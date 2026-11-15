@@ -1,0 +1,64 @@
+---
+import { GIFT_CARD_MESSAGE_LIMIT, GIFT_CARD_NAME_LIMIT } from '../lib/gift-card';
+---
+
+<div class="gift-card-recipient" data-gift-card-recipient>
+  <label class="gift-card-recipient__toggle">
+    <input type="checkbox" name="sendAsGift" aria-controls="gift-card-recipient-fields" data-send-as-gift />
+    <span>Send as a gift — email it now or on a chosen date</span>
+  </label>
+  <p class="gift-card-recipient__hint">Buying for yourself? Leave this unchecked to receive the gift card at your checkout email.</p>
+  <fieldset id="gift-card-recipient-fields" class="gift-card-recipient__fields" data-recipient-fields hidden disabled>
+    <legend>Gift delivery</legend>
+    <label>
+      <span>Recipient email</span>
+      <input type="email" name="recipientEmail" autocomplete="off" maxlength="254" required />
+    </label>
+    <label>
+      <span>Recipient name (optional)</span>
+      <input type="text" name="recipientName" autocomplete="off" maxlength={GIFT_CARD_NAME_LIMIT} />
+    </label>
+    <label>
+      <span>Personal message (optional)</span>
+      <textarea name="giftMessage" rows="3" maxlength={GIFT_CARD_MESSAGE_LIMIT} aria-describedby="gift-message-hint"></textarea>
+      <small id="gift-message-hint">Up to {GIFT_CARD_MESSAGE_LIMIT} characters.</small>
+    </label>
+    <label>
+      <span>Send on (optional)</span>
+      <input type="date" name="giftSendOn" aria-describedby="gift-send-hint" />
+    </label>
+    <p class="gift-card-recipient__hint" id="gift-send-hint">Leave blank to send after purchase. Choose a date up to 90 days ahead. Scheduled emails arrive approximately 4–10 a.m. in your timezone; an exact time cannot be selected.</p>
+    <p class="gift-card-recipient__hint">You’ll receive a gift card receipt. All cards in this quantity will go to this recipient. Add cards separately for different recipients.</p>
+  </fieldset>
+</div>
+
+<script>
+  import { giftCardDateRange } from '../lib/gift-card';
+  const toggle = document.querySelector<HTMLInputElement>('[data-send-as-gift]');
+  const fields = document.querySelector<HTMLFieldSetElement>('[data-recipient-fields]');
+  const sendOn = document.querySelector<HTMLInputElement>('[name="giftSendOn"]');
+  function updateRecipient() {
+    if (!toggle || !fields || !sendOn) return;
+    fields.hidden = !toggle.checked;
+    fields.disabled = !toggle.checked;
+    const range = giftCardDateRange(new Date().getTimezoneOffset());
+    sendOn.min = range.min;
+    sendOn.max = range.max;
+  }
+  toggle?.addEventListener('change', updateRecipient);
+  window.addEventListener('pageshow', updateRecipient);
+  updateRecipient();
+</script>
+
+<style>
+  .gift-card-recipient { padding-block: 0.5rem; }
+  .gift-card-recipient .gift-card-recipient__toggle { display: flex; align-items: start; gap: 0.7rem; cursor: pointer; }
+  .gift-card-recipient__toggle input { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; margin-top: 0.1rem; accent-color: var(--burgundy); }
+  .gift-card-recipient__hint { font-size: 0.78rem; font-weight: 400; color: var(--ink-soft); margin-block: 0.6rem 0; }
+  .gift-card-recipient__fields { display: grid; gap: 1rem; min-width: 0; padding: 1rem; margin: 1rem 0 0; border: 1px solid var(--line); border-radius: 7px; }
+  .gift-card-recipient__fields[hidden] { display: none; }
+  .gift-card-recipient__fields legend { font-size: 0.85rem; font-weight: 700; padding-inline: 0.4rem; }
+  .gift-card-recipient__fields input { width: 100%; max-width: 100%; }
+  .gift-card-recipient__fields textarea { width: 100%; padding: 0.82rem 0.9rem; color: var(--ink); background: #fdfdfb; border: 1px solid rgba(51, 47, 48, 0.28); border-radius: 7px; resize: vertical; font: inherit; }
+  .gift-card-recipient__fields small { font-weight: 400; }
+</style>

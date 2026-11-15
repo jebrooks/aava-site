@@ -128,13 +128,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       content.append(variant);
     }
     for (const attribute of line.attributes.filter(attribute =>
-      ['Board preference', 'Cheeses', 'Meats', 'Accompaniments'].includes(attribute.key)
+      ['Board preference', 'Cheeses', 'Meats', 'Accompaniments', 'Recipient email', 'Recipient name', 'Message', 'Send on'].includes(attribute.key)
     )) {
       const detail = element('p', 'cart-line__selection');
       const label = element('strong');
       label.textContent = `${attribute.key}: `;
       detail.append(label, document.createTextNode(attribute.value));
       content.append(detail);
+    }
+    if (line.merchandise.product.isGiftCard) {
+      const delivery = element('p', 'cart-line__selection');
+      const recipient = line.attributes.find(attribute => attribute.key === 'Recipient email');
+      const scheduled = line.attributes.some(attribute => attribute.key === 'Send on');
+      delivery.textContent = !recipient ? 'Sent to your checkout email after purchase.'
+        : scheduled ? 'Scheduled email delivery, approximately 4–10 a.m. in your timezone.'
+        : 'Emailed to the recipient after purchase.';
+      const edit = element('a');
+      edit.href = `/charcuterie-menu/p/${line.merchandise.product.handle}`;
+      edit.textContent = 'To change the recipient or date, remove this card and add it again.';
+      content.append(delivery, edit);
     }
     const controls = element('div', 'cart-line__controls');
     const label = element('label');
