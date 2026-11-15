@@ -14,6 +14,7 @@ const staticPaths = [
   '/experience-guide',
   '/about',
   '/contact',
+  '/terms-conditions',
 ];
 
 function escapeXml(value: string) {
