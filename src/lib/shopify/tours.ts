@@ -1,3 +1,4 @@
+import { loadSharedBlackoutDates } from './blackouts.ts';
 import { randomUUID } from 'node:crypto';
 import {
   TOUR_TAG, TOUR_CAPACITY, parseTourSchedule, eligibleTourDates,
@@ -168,7 +169,7 @@ export async function syncTourCatalog(options: {
     `query TourSchedule{metaobjectByHandle(handle:{type:"tour_schedule",handle:"default"}){fields{key value}}}`,
   );
   if (!result.metaobjectByHandle) throw new Error('Create the tour_schedule/default Shopify metaobject first.');
-  const config = parseTourSchedule(Object.fromEntries(result.metaobjectByHandle.fields.map(f => [f.key, f.value || ''])));
+  const config = parseTourSchedule(Object.fromEntries(result.metaobjectByHandle.fields.map(f => [f.key, f.value || ''])), await loadSharedBlackoutDates(graphql));
   // Close the coming day's cutoff before midnight. This accommodates UTC cron timing and DST.
   const closingDay = localTourDate(new Date(now.getTime() + 2 * 60 * 60 * 1000));
   const earliest = addDays(closingDay, config.minimumDays);

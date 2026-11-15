@@ -4,13 +4,14 @@ import { syncTourCatalog } from '../src/lib/shopify/tours.ts';
 const now = new Date('2026-11-11T20:00:00Z');
 function fixture() {
   const state = {
-    fields: {enabled:'true',minimum_days:'3',months_ahead:'1',operating_days:'["Sunday"]',blackout_dates:'',seat_price:'125.00',bus_price:'1250.00'},
-    products:[], lock:null, calls:[], failBundle:false, failPublish:false,
+    fields: {enabled:'true',minimum_days:'3',months_ahead:'1',operating_days:'["Sunday"]',seat_price:'125.00',bus_price:'1250.00'},
+    blackouts:'', missingBlackouts:false, products:[], lock:null, calls:[], failBundle:false, failPublish:false,
   };
   const clone = value => JSON.parse(JSON.stringify(value));
   const ok = key => ({[key]:{userErrors:[]}});
   const graphql = async (query, v={}) => {
     state.calls.push(query);
+    if (query.includes('query SharedBlackoutDates')) return {metaobjectByHandle:state.missingBlackouts?null:{fields:[{key:'dates',value:state.blackouts}]}};
     if (query.includes('query TourSchedule')) return {metaobjectByHandle:{fields:Object.entries(state.fields).map(([key,value])=>({key,value}))}};
     if (query.includes('query TourSyncLock')) return {shop:{id:'shop',metafield:clone(state.lock)}};
     if (query.includes('mutation TourSyncLock')) {
@@ -63,9 +64,9 @@ test('creates paired tagged non-shipping products with 10 shared seats, and repe
 test('blackouts archive both products; reopening preserves remaining seats; disabling closes every date', async () => {
   const {state,run}=fixture(); await run();
   const seat=state.products.find(p=>p.handle==='tour-seat-2026-11-15'); seat.variants.nodes[0].inventoryQuantity=4;
-  state.fields.blackout_dates='2026-11-15';
+  state.blackouts='2026-11-15';
   assert.equal((await run()).archived.length,2); assert.equal(seat.status,'ARCHIVED');
-  state.fields.blackout_dates='';assert.equal((await run()).reopened.length,2);
+  state.blackouts='';assert.equal((await run()).reopened.length,2);
   assert.equal(seat.variants.nodes[0].inventoryQuantity,4);
   state.fields.enabled='false';assert.equal((await run()).archived.length,8);
 });
@@ -103,7 +104,7 @@ test('publication failure is retried without duplicate products or inventory res
 test('overlapping run makes no product changes; invalid schedule also makes no changes', async () => {
   const {state,run}=fixture();state.lock={value:JSON.stringify({token:'other',expiresAt:Date.now()+100000}),compareDigest:'digest'};
   assert.equal((await run()).busy,true);assert.equal(state.products.length,0);
-  state.fields.blackout_dates='bad date';await assert.rejects(run(),/Invalid tour blackout/);
+  state.blackouts='bad date';await assert.rejects(run(),/Invalid blackout/);
   assert.equal(state.products.length,0);
 });
 
@@ -121,4 +122,10 @@ test('a seat configured to oversell is taken off sale with its bus bundle', asyn
   await assert.rejects(run(),/unsafe inventory settings/);
   assert.equal(seat.status,'ARCHIVED');
   assert.equal(state.products.find(p=>p.handle==='tour-bus-2026-11-15').status,'ARCHIVED');
+});
+
+test('missing shared blackout record stops synchronization before product writes', async()=>{
+ const {state,run}=fixture();state.missingBlackouts=true;
+ await assert.rejects(run(),/booking_blackouts\/default/);
+ assert.equal(state.products.length,0);assert.equal(state.calls.some(q=>q.includes('mutation')),false);
 });

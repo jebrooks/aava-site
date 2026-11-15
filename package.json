@@ -12,6 +12,8 @@
     "shopify:setup": "node --env-file=.env scripts/shopify/setup.mjs",
     "shopify:normalize": "node scripts/shopify/normalize-squarespace.mjs",
     "shopify:import": "node --env-file=.env scripts/shopify/import-catalog.mjs",
+    "test:blackouts": "node --experimental-strip-types --test tests/shared-blackouts.test.mjs",
+    "shopify:setup-blackouts": "node --env-file=.env --experimental-strip-types scripts/shopify/setup-blackouts.mjs",
     "test:links": "node --experimental-strip-types --test tests/site-links.test.mjs",
     "check:links": "node scripts/check-site-links.mjs",
     "test:contact": "node --experimental-strip-types --test tests/contact-form.test.mjs",

@@ -1,3 +1,5 @@
+import { loadSharedBlackoutDates } from './blackouts';
+import { BLACKOUT_SOURCE } from '../blackout-dates';
 import { adminGraphql, ShopifyApiError } from './client';
 import type { DeliveryScheduleConfig, DeliverySlot, DeliveryWindow } from './types';
 
@@ -5,6 +7,7 @@ const SCHEDULE_TIMEZONE = 'America/New_York' as const;
 const SLOT_TAG = 'delivery-slot';
 
 interface AdminSlotProduct {
+  status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
   id: string;
   handle: string;
   configuredCapacity: { value: string } | null;
@@ -82,9 +85,7 @@ function validateSchedule(value: unknown): DeliveryScheduleConfig {
     dailyCapacity: Number(candidate.dailyCapacity),
     leadTimeHours: Number(candidate.leadTimeHours),
     horizonDays: Number(candidate.horizonDays),
-    blackoutDates: Array.isArray(candidate.blackoutDates)
-      ? candidate.blackoutDates.map(String)
-      : [],
+    blackoutDates: [],
     weeklyWindows: candidate.weeklyWindows,
   };
 }
@@ -100,7 +101,7 @@ function configFromEnvironment() {
   }
 }
 
-export async function getDeliveryScheduleConfig() {
+async function getBaseDeliveryScheduleConfig() {
   try {
     const data = await adminGraphql<{
       metaobjectByHandle: { fields: Array<{ key: string; value: string | null }> } | null;
@@ -122,7 +123,7 @@ export async function getDeliveryScheduleConfig() {
         dailyCapacity: Number(fields.daily_capacity),
         leadTimeHours: Number(fields.lead_time_hours),
         horizonDays: Number(fields.horizon_days),
-        blackoutDates: parseStringList(fields.blackout_dates),
+        blackoutDates: [],
         weeklyWindows: JSON.parse(fields.weekly_windows || '{}'),
       });
     }
@@ -135,6 +136,14 @@ export async function getDeliveryScheduleConfig() {
   const fallback = configFromEnvironment();
   if (fallback) return fallback;
   throw new ShopifyApiError('Create the delivery_schedule/default Shopify metaobject.', 503);
+}
+
+export async function getDeliveryScheduleConfig() {
+  const [config, blackoutDates] = await Promise.all([
+    getBaseDeliveryScheduleConfig(), loadSharedBlackoutDates(adminGraphql),
+  ]);
+  // Shared-date failures must not be bypassed by the development/environment fallback.
+  return { ...config, blackoutDates };
 }
 
 export function normalizeZip(value: string) {
@@ -211,43 +220,40 @@ export function getEligibleDates(config: DeliveryScheduleConfig, now = new Date(
   return dates;
 }
 
-async function getSlotProducts() {
-  const data = await adminGraphql<{
-    products: { nodes: AdminSlotProduct[] };
-  }>(
-    `#graphql
-    query DeliverySlotProducts($query: String!) {
-      products(first: 250, query: $query) {
-        nodes {
-          id
-          handle
-          configuredCapacity: metafield(namespace: "delivery", key: "daily_capacity") { value }
-          variants(first: 10) {
-            nodes {
-              id
-              title
-              inventoryQuantity
-              inventoryItem { id }
-            }
+async function getSlotProducts(includeArchived = false) {
+  const products: AdminSlotProduct[] = [];
+  let after: string | null = null;
+  do {
+    const data: { products: { nodes: AdminSlotProduct[]; pageInfo: { hasNextPage: boolean; endCursor: string | null } } } = await adminGraphql(
+      `query DeliverySlotProducts($query: String!, $after: String) {
+        products(first: 100, after: $after, query: $query) {
+          nodes {
+            id handle status
+            configuredCapacity: metafield(namespace: "delivery", key: "daily_capacity") { value }
+            variants(first: 10) { nodes { id title inventoryQuantity inventoryItem { id } } }
           }
+          pageInfo { hasNextPage endCursor }
         }
-      }
-    }`,
-    { query: `tag:${SLOT_TAG} status:active` },
-  );
-  return data.products.nodes;
+      }`,
+      { query: includeArchived ? `tag:${SLOT_TAG}` : `tag:${SLOT_TAG} status:active`, after },
+    );
+    products.push(...data.products.nodes);
+    after = data.products.pageInfo.hasNextPage ? data.products.pageInfo.endCursor : null;
+    if (data.products.pageInfo.hasNextPage && !after) throw new ShopifyApiError('Shopify did not return a delivery product cursor.');
+  } while (after);
+  return products;
 }
 
-export async function getAvailableDeliverySlots(zip: string) {
+export async function getAvailableDeliverySlots(zip: string, now = new Date()) {
   const config = await getDeliveryScheduleConfig();
   const normalizedZip = normalizeZip(zip);
   if (!normalizedZip || !config.eligibleZips.includes(normalizedZip)) {
-    return { eligible: false, timezone: config.timezone, slots: [] as DeliverySlot[] };
+    return { eligible: false, blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone, slots: [] as DeliverySlot[] };
   }
 
   const products = await getSlotProducts();
   const productsByHandle = new Map(products.map((product) => [product.handle, product]));
-  const slots = getEligibleDates(config).flatMap(({ date, windows }) => {
+  const slots = getEligibleDates(config, now).flatMap(({ date, windows }) => {
     const product = productsByHandle.get(`delivery-slot-${date}`);
     if (!product) return [];
     const variant = product.variants.nodes[0];
@@ -263,11 +269,11 @@ export async function getAvailableDeliverySlots(zip: string) {
     }));
   });
 
-  return { eligible: true, timezone: config.timezone, slots };
+  return { eligible: true, blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone, slots };
 }
 
-export async function assertDeliverySlotAvailable(zip: string, variantId: string, slotKey: string) {
-  const availability = await getAvailableDeliverySlots(zip);
+export async function assertDeliverySlotAvailable(zip: string, variantId: string, slotKey: string, now = new Date()) {
+  const availability = await getAvailableDeliverySlots(zip, now);
   const slot = availability.slots.find(
     (candidate) =>
       candidate.variantId === variantId && candidate.key === slotKey && candidate.available,
@@ -349,6 +355,12 @@ async function createSlotProduct(
     );
   }
 
+  await publishSlotProduct(result.productSet.product.id, publicationId);
+
+  return handle;
+}
+
+async function publishSlotProduct(id: string, publicationId: string) {
   const publication = await adminGraphql<{
     publishablePublish: { userErrors: Array<{ message: string }> };
   }>(
@@ -358,7 +370,7 @@ async function createSlotProduct(
         userErrors { message }
       }
     }`,
-    { id: result.productSet.product.id, publicationId },
+    { id, publicationId },
   );
   if (publication.publishablePublish.userErrors.length) {
     throw new ShopifyApiError(
@@ -366,7 +378,6 @@ async function createSlotProduct(
     );
   }
 
-  return handle;
 }
 
 async function setConfiguredCapacity(productId: string, dailyCapacity: number) {
@@ -452,16 +463,16 @@ async function reconcileDailyCapacity(
   return true;
 }
 
-async function archiveSlotProduct(id: string) {
+async function setSlotProductStatus(id: string, status: 'ACTIVE' | 'ARCHIVED') {
   const result = await adminGraphql<ProductSetResult>(
     `#graphql
-    mutation ArchiveDeliverySlot($identifier: ProductSetIdentifiers, $input: ProductSetInput!) {
+    mutation SetDeliverySlotStatus($identifier: ProductSetIdentifiers, $input: ProductSetInput!) {
       productSet(identifier: $identifier, input: $input, synchronous: true) {
         product { id handle }
         userErrors { field message }
       }
     }`,
-    { identifier: { id }, input: { status: 'ARCHIVED' } },
+    { identifier: { id }, input: { status } },
   );
   if (result.productSet.userErrors.length) {
     throw new ShopifyApiError(
@@ -470,7 +481,7 @@ async function archiveSlotProduct(id: string) {
   }
 }
 
-export async function materializeDeliverySlots() {
+export async function materializeDeliverySlots(now = new Date()) {
   const locationId = import.meta.env.SHOPIFY_DELIVERY_LOCATION_ID || '';
   const publicationId = import.meta.env.SHOPIFY_STOREFRONT_PUBLICATION_ID || '';
   if (!locationId || !publicationId) {
@@ -481,32 +492,38 @@ export async function materializeDeliverySlots() {
   }
 
   const [config, existingProducts] = await Promise.all([
-    getDeliveryScheduleConfig(),
-    getSlotProducts(),
+    getDeliveryScheduleConfig(), getSlotProducts(true),
   ]);
-  const today = localDateString(new Date());
-  const expiredProducts = existingProducts.filter((product) =>
-    product.handle.startsWith('delivery-slot-') && product.handle.slice('delivery-slot-'.length) < today
-  );
-  for (const product of expiredProducts) await archiveSlotProduct(product.id);
-
-  const existingHandles = new Set(
-    existingProducts
-      .filter((product) => !expiredProducts.includes(product))
-      .map((product) => product.handle),
-  );
-  const created: string[] = [];
+  const today = localDateString(now);
+  const blocked = new Set(config.blackoutDates);
+  const eligibleDates = getEligibleDates(config, now);
+  const eligible = new Set(eligibleDates.map(item => item.date));
+  const dateOf = (product: AdminSlotProduct) => product.handle.slice('delivery-slot-'.length);
+  const closing = existingProducts.filter(product => product.handle.startsWith('delivery-slot-') &&
+    (dateOf(product) < today || blocked.has(dateOf(product))));
+  const archived: string[] = [];
+  for (const product of closing) {
+    if (product.status === 'ARCHIVED') continue;
+    await setSlotProductStatus(product.id, 'ARCHIVED');
+    archived.push(product.handle);
+  }
+  const reopened: string[] = [];
   const capacityUpdated: string[] = [];
-
-  for (const product of existingProducts.filter((item) => !expiredProducts.includes(item))) {
-    if (await reconcileDailyCapacity(product, config.dailyCapacity, locationId)) {
+  for (const product of existingProducts.filter(item => eligible.has(dateOf(item)))) {
+    if (product.status === 'ARCHIVED') {
+      // Status-only changes preserve sold capacity; never recreate an existing day's inventory.
+      await setSlotProductStatus(product.id, 'ACTIVE');
+      try { await publishSlotProduct(product.id, publicationId); }
+      catch (error) { await setSlotProductStatus(product.id, 'ARCHIVED'); throw error; }
+      reopened.push(product.handle);
+    }
+    if (product.status !== 'DRAFT' && await reconcileDailyCapacity(product, config.dailyCapacity, locationId)) {
       capacityUpdated.push(product.handle);
     }
   }
-
-  const missing = getEligibleDates(config).filter(
-    ({ date }) => !existingHandles.has(`delivery-slot-${date}`),
-  );
+  const existingHandles = new Set(existingProducts.map(product => product.handle));
+  const created: string[] = [];
+  const missing = eligibleDates.filter(({ date }) => !existingHandles.has(`delivery-slot-${date}`));
   for (let offset = 0; offset < missing.length; offset += 5) {
     const batch = missing.slice(offset, offset + 5);
     created.push(...await Promise.all(batch.map(({ date }) =>
@@ -517,8 +534,9 @@ export async function materializeDeliverySlots() {
   return {
     created,
     capacityUpdated,
-    archived: expiredProducts.map((product) => product.handle),
-    existing: existingHandles.size,
+    archived,
+    reopened,
+    existing: existingProducts.filter(product => eligible.has(dateOf(product))).length,
     horizonDays: config.horizonDays,
   };
 }
