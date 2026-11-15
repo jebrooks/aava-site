@@ -47,6 +47,9 @@ jobs:
       - name: Test cart editing
         run: npm run test:cart
 
+      - name: Test contact form delivery
+        run: npm run test:contact
+
       - name: Build the site
         run: npm run build
 
