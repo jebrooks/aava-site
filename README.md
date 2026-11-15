@@ -4,6 +4,16 @@ A headless Astro rebuild of the public All ABoard VA Squarespace site. Marketing
 branded charcuterie storefront live in Astro; Shopify owns products, inventory, carts, checkout,
 payments, gift cards, draft-order invoices, and orders. The production runtime targets Vercel.
 
+## Documentation
+
+- [Content management](docs/content-management.md): where to edit content, Shopify metaobjects,
+  when edits take effect, and how to verify them.
+- [Deployments and preview review](docs/deployments.md): PR previews, production releases,
+  environment variables for **both Preview and Production**, troubleshooting, and rollback.
+- [SHOPIFY.md](SHOPIFY.md): provisioning, integrations, imports, and catalog parity configuration.
+- [MIGRATION.md](MIGRATION.md): migration history and remaining cutover verification.
+- [AGENTS.md](AGENTS.md): project instructions for coding agents and maintenance conventions.
+
 ## Get started
 
 Prerequisite: Node.js 22.12 or newer.
@@ -36,13 +46,17 @@ webhook verification, and custom-order requests require trusted server-side code
 - Framework preset: Astro
 - Required runtime: Vercel Functions
 - Scheduled task: `/api/cron/materialize-delivery` daily at 05:15 UTC
+- Scheduled task: `/api/cron/materialize-tours` daily at 03:00 UTC
 
 Marketing pages can still be prerendered later, but the catalog, product pages, cart API, dynamic
 sitemap, and server integrations require the configured adapter.
 
 ## Environment variables
 
-Copy `.env.example` to `.env` for local overrides.
+Copy `.env.example` to `.env` for local overrides. In Vercel, set required application variables
+for **both Preview and Production**, then redeploy each affected environment after changes.
+See [Deployments](docs/deployments.md#environment-variables--preview-and-production) for scope and
+external-service considerations. GitHub Actions secrets are configured separately.
 
 - `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact-form email from the Vercel backend.
   Both are server-only; the sender must belong to a domain verified in Resend.
@@ -67,7 +81,7 @@ scripts/
   fetch-assets.sh      Asset refresh helper
 src/
   components/          Shared header, footer, buttons, and page hero
-  data/site.ts         Contact details, navigation, products, legacy URL helper
+  data/site.ts         Contact details, navigation, social links, featured boards
   lib/shopify/         Storefront/Admin clients, carts, scheduling, and draft orders
   layouts/             SEO and document shell
   pages/               File-based content, commerce, and API routes
@@ -85,39 +99,22 @@ The homepage and the five primary content routes are local:
 - `/about`
 - `/contact`
 
-The codebase now includes Shopify-backed catalog/product routes, a local cart, scheduled-delivery
-selection, hosted checkout handoff, gift-card product support, and draft-order custom requests.
-Until Shopify credentials and migrated products are supplied, the existing board showcase falls
-back to Squarespace links. Tours, waivers, policies, and some utility content remain on Squarespace.
-See [MIGRATION.md](./MIGRATION.md) for cutover status and [shopify-plan.md](./shopify-plan.md) for the
-agreed architecture.
+The codebase includes Shopify-backed catalog/product routes, a local cart, scheduled delivery,
+Shopify-backed tour booking, custom-board draft requests, and local inquiry, policy, waiver, FAQ,
+and press pages. Gift-certificate links currently lead to an inquiry; native gift-card provisioning
+and legacy balances require separate verification. Internal navigation no longer relies on
+`legacyUrl()` or `PUBLIC_LEGACY_SITE_URL`. Implementation does not prove external configuration,
+payment readiness, or DNS cutover; use [MIGRATION.md](MIGRATION.md) for the remaining verification.
 
 ## Updating content
 
-- Manage announcements in **Shopify Admin → Content → Metaobjects → Announcement banner**.
-  Each entry has a **Name** for identification, **Content** with Shopify's rich-text editor,
-  an enabled switch, and optional start/end dates. Format Content with bold, italics, and links
-  anywhere in the text; the Name is not displayed. There are no separate link label/URL fields.
-  Both dates are inclusive in Eastern Time (`America/New_York`); blank dates have no limit.
-  Reversed dates hide the entry. When entries overlap, latest start date wins (undated entries
-  have lowest priority), then latest edit, then alphabetical handle order.
-  Changes appear on new page loads within about a minute without redeploying. Run
-  `npm run shopify:setup-announcement` to create or migrate the definition; existing messages
-  and links become rich text before the old link fields are removed. Existing rich content is
-  preserved. Missing, disabled, invalid, or unavailable configured content hides the banner.
-  Local development without Admin credentials uses a sample announcement.
-  Run `npm run test:announcement` for scheduling and safe rich-text rendering tests.
-- Shared company details and legacy integration URLs live in `src/data/site.ts`.
-- Page copy lives in the matching file under `src/pages/`.
-- Brand colors, typography, and layout rules live in `src/styles/global.css`.
-- Build-your-own ingredient lists and size limits live in `src/data/board-customizations.json`.
-  Update that file and redeploy to change the available selections. Each board's choices are
-  validated by the cart API and stored as Shopify cart-line attributes for checkout and fulfillment.
-  Small allows up to 2 cheeses and 1 meat, or 3 cheeses without meat; Large allows up to 3 cheeses
-  and 2 meats, or 5 cheeses without meat. Both allow up to 5 accompaniments. Customers must choose
-  at least one cheese and accompaniment, and at least one meat when selecting the meat option.
-- To refresh source images from the public Squarespace CDN, run `./scripts/fetch-assets.sh` and
-  review the resulting binary changes before committing.
+Use [Content management](docs/content-management.md) as the authoritative editing guide. It maps
+Shopify announcements, delivery schedules, tour schedules, shared blackouts, products/metafields,
+and repository-owned content to their editing locations and verification steps.
+
+Shopify-managed content generally needs no redeployment, but schedule changes require catalog
+reconciliation. Repository content changes go through a PR and Vercel preview. Do not rerun setup
+or migration imports to make ordinary content edits; some scripts overwrite settings or inventory.
 
 The images and copy in this repository were migrated from the existing All ABoard VA site and
 should only be used where the site owner has the necessary rights.
@@ -142,8 +139,8 @@ The `scheduled-tour` tag and date/handle convention are reserved for the automat
 The daily authenticated Vercel job is `/api/cron/materialize-tours`, scheduled at **03:00 UTC**
 (10 p.m. EST / 11 p.m. EDT). It anticipates the coming day's minimum-notice cutoff during the
 last two Eastern hours of the day, so boundary dates close before midnight, including when
-Vercel starts a daily invocation later in the scheduled hour. The horizon never exceeds six
-calendar months from the current Eastern date. Dates closer than the minimum, blocked dates,
+Vercel starts a daily invocation later in the scheduled hour. The horizon uses the configured
+one to twelve calendar months from the current Eastern date (six by default). Dates closer than the minimum, blocked dates,
 disabled weekdays, dates beyond a reduced horizon, and all dates when Enabled is off are
 **archived, not deleted**. Bookings and historical order data remain intact. Changing a schedule
 or blocking a booked day does not cancel or refund existing reservations.
@@ -166,7 +163,8 @@ npm run test:tours
 
 Schedule edits take effect at the next job or manual sync. The initial six-month backfill can
 require several manual runs; repeat while the result reports `pending > 0` (CLI exit code 2).
-The website's existing tour booking links remain unchanged by this catalog-management feature.
+The customer planner lives on `/experiences` and continues to `/booking`;
+`/tour-booking-preview` remains available for isolated review.
 
 ## Tour booking
 

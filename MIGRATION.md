@@ -1,6 +1,10 @@
 # Squarespace migration notes
 
-Audit date: 2026-08-08
+Original source audit: 2026-08-08. Implementation notes reconciled: 2026-11-15.
+
+Use [Content management](docs/content-management.md) for routine edits and
+[Deployments](docs/deployments.md) for PR previews and releases. This document tracks migration
+history and cutover verification; code coverage alone does not establish live service readiness.
 
 ## What is complete
 
@@ -9,7 +13,8 @@ Audit date: 2026-08-08
 - Recreated the homepage and all top-level navigation pages as local Astro routes.
 - Added page titles, descriptions, canonical URLs, social metadata, structured business data,
   robots rules, sitemap, keyboard focus styles, reduced-motion support, and a 404 page.
-- Added an email fallback for the contact form and environment-based integration seams.
+- Replaced the initial contact email fallback with server-side Resend delivery for contact and
+  inquiry forms; custom-board requests create Shopify draft orders with Vercel BotID protection.
 - Began with a hosting-neutral static build, then adopted the Vercel adapter for trusted commerce
   endpoints and server-rendered Shopify routes.
 - Added a headless Shopify storefront, cart proxy, Vercel server runtime, delivery-slot inventory,
@@ -26,45 +31,37 @@ The source sitemap contains 124 URLs:
 - Policies, FAQs, press, gift, launch, and campaign pages
 - A handful of apparent older or duplicate routes that should be reviewed before cutover
 
-The local implementation now covers the public content pages plus the active-charcuterie commerce
-surface. Shopify and Vercel configuration, live catalog import, fulfillment rules, gift-certificate
-reconciliation, and end-to-end payment tests must still be completed before cutover.
+The local implementation now covers the public content pages, active-charcuterie commerce,
+Shopify-backed public/private tour booking, and custom inquiries. Verify actual store provisioning,
+catalog completeness, fulfillment, gift-certificate reconciliation, payments, and DNS separately.
 
-## Temporary integration boundary
+## Current integration boundary
 
-Calls to `legacyUrl()` in `src/` deliberately send visitors to the live Squarespace site for:
+- Marketing, FAQs, policies, waivers, press, booking help, and custom-estimate inquiry pages are local.
+- Tour planning on `/experiences` continues to `/booking`; Shopify seat inventory and whole-bus
+  bundles enforce availability. There is no separate external tour scheduler in this implementation.
+- Products, checkout, orders, and operational settings depend on Shopify; contact/inquiry email
+  depends on Resend. These external services remain required after Squarespace retirement.
+- Policy pages are checked-in snapshots with provenance; displaying a waiver is not a signed-waiver
+  collection system. Verify the required consent and operational records before cutover.
+- Gift-certificate navigation is an inquiry workflow. Native gift cards and legacy liabilities still
+  require explicit reconciliation and live verification.
+- `legacyUrl()` and `PUBLIC_LEGACY_SITE_URL` are retired. Historical URLs in migration metadata and
+  asset download scripts are provenance, not active navigation.
 
-- Winery tour availability and booking requests
-- Charcuterie links only when Shopify is not yet configured or a mapped product is absent
-- Custom tour requests
-- FAQs, current policies, and waivers
-- Press and booking-update utility pages
+## Verification needed before full cutover
 
-Search for every temporary dependency with:
-
-```sh
-rg "legacyUrl" src
-```
-
-Do not point `PUBLIC_LEGACY_SITE_URL` at the new production domain during DNS cutover. Replace each
-legacy workflow first or use a separately reachable legacy hostname; otherwise those links can
-loop back to the new site.
-
-## Decisions needed before full cutover
-
-1. **Commerce:** Shopify is selected; create the store/custom app and validate imported active
-   products, inventory, taxes, discounts, gift cards, payments, and order email.
-2. **Tours:** decide whether availability is inventory-backed commerce, a scheduling platform, or a
-   purpose-built booking flow. Preserve public/private/custom pricing behavior and minimum group
-   rules.
-3. **Forms and waivers:** choose where submissions are stored, how consent is recorded, what spam
-   protection is required, and who receives notifications.
-4. **Email marketing:** export newsletter consent and select the destination list before replacing
-   the signup forms.
-5. **Content scope:** identify which duplicate, seasonal, launch, and custom-order URLs should be
-   migrated, archived, or redirected.
-6. **Hosting:** Vercel is selected; configure production environment variables, cron security,
-   webhook URLs, logs, and preview/production domains.
+1. **Commerce:** verify store/app configuration, imported products, inventory, taxes, discounts,
+   delivery rules, gift cards, payments, and order email against approved business records.
+2. **Tours:** verify public/private booking, seat/bus inventory sharing, minimum notice, closures,
+   board fulfillment, cancellations, refunds, and existing reservation handling end to end.
+3. **Forms and waivers:** verify email recipients, custom-board draft workflow, consent records,
+   spam protection, and any required signed-waiver collection or retention process.
+4. **Email marketing:** reconcile newsletter consent and destination lists before retiring old forms.
+5. **Content scope:** review every source route for migration, redirect, or retirement; resolve
+   conflicting tasting-fee policy wording with the business owner.
+6. **Hosting:** verify Vercel variables for **both Preview and Production**, redeploy after changes,
+   and confirm production cron security, webhooks, logs, domain assignment, and DNS cutover.
 
 ## Recommended cutover sequence
 
@@ -78,9 +75,9 @@ loop back to the new site.
 ### 2. Replace transactions
 
 - Import products into the chosen commerce system and validate delivery-date/time fields.
-- Rebuild tour availability and custom estimate flows.
-- Connect contact, request, newsletter, and waiver forms.
-- Replace every `legacyUrl()` call with the corresponding local or hosted workflow URL.
+- Verify the implemented tour booking and custom estimate flows against real business rules.
+- Verify contact/request delivery and complete any required newsletter or signed-waiver workflow.
+- Crawl local navigation to confirm no required workflow still sends visitors to Squarespace.
 
 ### 3. Preserve search and analytics
 

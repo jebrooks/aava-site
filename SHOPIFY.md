@@ -1,8 +1,9 @@
 # Shopify implementation runbook
 
-The application code is ready to connect to a Shopify store. This runbook covers the external
-configuration and data that cannot be created safely without the store owner’s credentials and
-business records.
+This runbook covers Shopify provisioning, integrations, and catalog migration. For routine edits,
+use [Content management](docs/content-management.md); for PR review, environment scoping, and
+release procedures, use [Deployments](docs/deployments.md). Setup steps below are for initial
+provisioning or deliberate repairs, not a checklist to rerun against an operating store.
 
 ## 1. Create the Shopify resources
 
@@ -19,14 +20,17 @@ business records.
    subscriptions. The application exchanges its Client ID and secret for a cached 24-hour Admin
    token automatically.
 6. Put the IDs and tokens into `.env` locally and Vercel’s encrypted environment variables for
-   Preview and Production. Never commit `.env`.
+   **both Preview and Production**. A Production-only variable is unavailable to PR previews.
+   Redeploy each affected environment after changing variables. Never commit `.env`. Configure
+   GitHub Actions credentials separately; see the catalog parity gate below.
 
 The complete variable contract and a one-line schedule example are in `.env.example`.
 
 ## 2. Configure catalog metadata and delivery rules
 
 Create a real `DELIVERY_SCHEDULE_JSON` using approved ZIP codes, selectable windows, lead time,
-shared daily capacity, and blackout dates. Weekday keys use JavaScript numbering: Sunday `0`
+shared daily capacity, and horizon. Manage closures in `booking_blackouts/default`, not this
+environment fallback. Weekday keys use JavaScript numbering: Sunday `0`
 through Saturday `6`. Each time must use 24-hour `HH:mm` format. Capacity is the maximum number of
 orders across the entire delivery date; the windows do not have separate limits.
 
@@ -37,7 +41,11 @@ npm run shopify:setup
 ```
 
 This creates or updates `delivery_schedule/default` in Shopify Admin and creates product metafield
-definitions. Staff can subsequently edit the schedule metaobject in Shopify Admin. Existing slot
+definitions. It overwrites an existing schedule with the environment values; do not rerun it with
+stale defaults after staff have edited the entry. Staff subsequently edit the schedule metaobject
+in Shopify Admin. Create the tour schedule and shared blackout entry as described in the
+[content guide](docs/content-management.md) and [blackout setup notes](README.md#shared-blackout-dates-for-deliveries-and-tours)
+before enabling bookings. Existing slot
 inventory is never reset automatically because it may already represent paid orders; exceptional
 changes to generated dates must be made through Shopify inventory.
 
