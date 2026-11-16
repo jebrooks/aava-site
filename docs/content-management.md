@@ -135,6 +135,19 @@ are needed. The Gift Cards navigation and homepage/charcuterie links go to `/gif
 which redirects to the first native gift card in the collection’s manual order. If unavailable
 or unconfigured, the page offers a gift-certificate inquiry instead.
 
+Gift-card amount choices are read directly from the product's Shopify variants and sorted by
+price; add or remove denominations in Shopify, with no code change needed. The price guide on
+the gift-card product page also reads Shopify on each page request. Charcuterie prices come
+from available, published delivery variants grouped by serving count in variant options,
+variant titles, `custom.serving_count`, or product titles (in that order). Gift cards, delivery
+slots, scheduled tours, and on-tour variants are excluded. The displayed groups are serves 4,
+8, 10, and 15. All charcuterie groups show approximate guidance: the midpoint of the current
+price range, rounded to the nearest $25 (minimum $25).
+Tour prices come from `tour_schedule/default` (`seat_price` and `bus_price`) in the shop currency;
+disabled tours are omitted. Missing sources omit their rows rather than displaying fixed fallback
+prices, and do not prevent gift-card purchases. See `src/components/GiftCardPriceGuide.astro`
+and `src/lib/gift-card-guide.ts`. `npm run test:cart` covers the guide's grouping and calculations.
+
 Customers choose an amount and can select **Send as a gift** on the product page before adding
 it to the cart. That option collects a required recipient email, optional name (255 characters),
 message (200 characters), and send date up to 90 days ahead. Blank send dates mean sending after

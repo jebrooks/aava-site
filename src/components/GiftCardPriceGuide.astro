@@ -1,0 +1,45 @@
+---
+import { listCharcuterieProducts } from '../lib/shopify/storefront';
+import { adminGraphql } from '../lib/shopify/client';
+import { parseTourSchedule } from '../lib/tour-schedule';
+import { giftCardPriceGuide } from '../lib/gift-card-guide';
+import type { GiftTourPrices } from '../lib/gift-card-guide';
+
+async function tourPrices(): Promise<GiftTourPrices | null> {
+  const data = await adminGraphql<{
+    shop: { currencyCode: string };
+    metaobjectByHandle: { fields: Array<{ key: string; value: string | null }> } | null;
+  }>(`query GiftGuideTourPrices {
+    shop { currencyCode }
+    metaobjectByHandle(handle: { type: "tour_schedule", handle: "default" }) { fields { key value } }
+  }`);
+  if (!data.metaobjectByHandle) return null;
+  const schedule = parseTourSchedule(Object.fromEntries(data.metaobjectByHandle.fields.map(field => [field.key, field.value || ''])));
+  return { ...schedule, currencyCode: data.shop.currencyCode };
+}
+
+const [catalog, tours] = await Promise.allSettled([listCharcuterieProducts(), tourPrices()]);
+if (catalog.status === 'rejected') console.error('Gift card guide catalog unavailable.');
+if (tours.status === 'rejected') console.error('Gift card guide tour prices unavailable.');
+const rows = giftCardPriceGuide(catalog.status === 'fulfilled' ? catalog.value.products.nodes : [],
+  tours.status === 'fulfilled' ? tours.value : null);
+const money = (value: { amount: string; currencyCode: string }) => new Intl.NumberFormat('en-US', {
+  style: 'currency', currency: value.currencyCode, minimumFractionDigits: 0, maximumFractionDigits: 2,
+}).format(Number(value.amount));
+---
+{rows.length > 0 && (
+  <section class="gift-price-guide" aria-labelledby="gift-price-guide-heading">
+    <h2 id="gift-price-guide-heading">What could your gift cover?</h2>
+    <table>
+      <caption class="visually-hidden">Current charcuterie and wine tour price guidance</caption>
+      <thead><tr><th scope="col">Gift ideas</th><th scope="col">Price guide</th></tr></thead>
+      <tbody>
+        {rows.map(row => <tr>
+          <th scope="row">{row.label}</th>
+          <td>{row.approximate ? '~' : ''}{money(row.minimum)}{row.minimum.amount !== row.maximum.amount && `–${money(row.maximum)}`}</td>
+        </tr>)}
+      </tbody>
+    </table>
+    <p>Approximate prices are marked with ~. Final prices depend on your selection. Tour tasting fees are additional.</p>
+  </section>
+)}
