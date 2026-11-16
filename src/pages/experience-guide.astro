@@ -2,8 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
+import policies from '../data/policies.json';
 
 export const prerender = false;
+const cleaningDamage = policies['cleaning-damage'];
 const tours = [
   {
     title: 'Public Tour',
@@ -57,6 +59,7 @@ const tours = [
         <a href="#pickup">Pickup made easy</a>
         <a href="#timing">What to expect</a>
         <a href="#etiquette">Ride etiquette & liability</a>
+        <a href="#cleaning-damage">Cleaning & damage</a>
         <a href="#policies">Policies & waivers</a>
       </nav>
     </div>
@@ -160,6 +163,13 @@ const tours = [
     </div>
   </section>
 
+  <section class="section" id="cleaning-damage" aria-labelledby="cleaning-damage-heading">
+    <div class="container--narrow">
+      <h2 id="cleaning-damage-heading">{cleaningDamage.title}</h2>
+      <div class="cleaning-damage-copy" set:html={cleaningDamage.html} />
+    </div>
+  </section>
+
   <section class="section" id="policies">
     <div class="container info-columns">
       <div>
@@ -188,3 +198,8 @@ const tours = [
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  .cleaning-damage-copy { line-height: 1.8; overflow-wrap: anywhere; }
+  .cleaning-damage-copy :global(li) { margin-block: 0.6rem; }
+</style>

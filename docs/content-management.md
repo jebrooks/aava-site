@@ -118,6 +118,8 @@ behavior tests. Keep internal links relative so reviewers stay on the preview ho
 Policies are checked-in snapshots with source provenance. Preserve approved wording unless the
 task authorizes a policy change; unresolved tasting-fee wording needs a business decision.
 Policy pages display the wording; they do not independently collect signed waivers.
+The `cleaning-damage` snapshot in `src/data/policies.json` supplies the Experience Guide’s
+Cleaning & Damage section; booking links directly to `/experience-guide#cleaning-damage`.
 
 Use `./scripts/fetch-assets.sh` only when refreshing migrated source images, and review resulting
 binary changes.
