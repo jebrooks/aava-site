@@ -2,10 +2,15 @@
 import { site } from '../data/site';
 import { getAnnouncement } from '../lib/shopify/announcement';
 
+interface Props {
+  activeNavHref?: string;
+}
+
+const { activeNavHref } = Astro.props;
 const announcement = await getAnnouncement();
 const pathname = Astro.url.pathname;
 const isActive = (href: string) =>
-  href === '/' ? pathname === href : pathname.startsWith(href);
+  activeNavHref ? href === activeNavHref : href === '/' ? pathname === href : pathname.startsWith(href);
 ---
 
 <a class="skip-link" href="#main-content">Skip to content</a>

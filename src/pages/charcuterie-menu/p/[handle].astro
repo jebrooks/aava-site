@@ -59,6 +59,7 @@ const productSchema = product && initialVariant ? {
   description={product?.description || errorMessage || 'This charcuterie product could not be found.'}
   image={imageSrc}
   noindex={!product}
+  activeNavHref={product?.isGiftCard ? '/gift-certificates' : undefined}
 >
   {productSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(productSchema)} />}
   {product && initialVariant ? (
