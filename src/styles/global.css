@@ -1666,11 +1666,21 @@ ol {
 
 .cart-line {
   display: grid;
-  grid-template-columns: 120px 1fr auto;
-  gap: 1.2rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
   padding-block: 1.25rem;
-  align-items: center;
+  align-items: start;
   border-bottom: 1px solid var(--line);
+}
+
+.cart-line__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cart-line .form-status:empty {
+  min-height: 0;
+  margin: 0;
 }
 
 .cart-line:first-child {
@@ -1737,6 +1747,7 @@ ol {
 .cart-line__price {
   margin: 0;
   font-weight: 700;
+  justify-self: end;
 }
 
 .field-row {
@@ -1842,17 +1853,9 @@ ol {
     grid-template-columns: 1fr;
   }
 
-  .cart-line {
-    grid-template-columns: 86px 1fr;
-  }
-
   .cart-line img {
     width: 86px;
     height: 86px;
-  }
-
-  .cart-line__price {
-    grid-column: 2;
   }
 
   .field-row,
