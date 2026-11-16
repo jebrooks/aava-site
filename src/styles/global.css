@@ -14,6 +14,7 @@
   --container: 1240px;
   --narrow: 820px;
   --radius: 18px;
+  --quantity-control-height: 3.25rem;
 }
 
 *,
@@ -54,6 +55,12 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+input[type="number"],
+select[name="guests"],
+.product-form:has([data-gift-card-recipient]) select[name="variant"] {
+  height: var(--quantity-control-height);
 }
 
 a {
@@ -1538,6 +1545,16 @@ ol {
 
 .product-form input {
   width: 7rem;
+}
+
+.product-form:has([data-gift-card-recipient]) :is(select[name="variant"], input[name="quantity"]) {
+  font-size: 1rem;
+}
+
+.product-form:has([data-gift-card-recipient]) select[name="variant"] {
+  width: auto;
+  max-width: 100%;
+  justify-self: start;
 }
 
 .product-form .button {
