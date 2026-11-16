@@ -141,8 +141,8 @@ the gift-card product page also reads Shopify on each page request. Charcuterie 
 from available, published delivery variants grouped by serving count in variant options,
 variant titles, `custom.serving_count`, or product titles (in that order). Gift cards, delivery
 slots, scheduled tours, and on-tour variants are excluded. The displayed groups are serves 4,
-8, 10, and 15. Serves 4 and 8 show approximate guidance: the midpoint of the current price range,
-rounded to the nearest $25 (minimum $25). Other serving groups show the current price or range.
+8, 10, and 15. All charcuterie groups show approximate guidance: the midpoint of the current
+price range, rounded to the nearest $25 (minimum $25).
 Tour prices come from `tour_schedule/default` (`seat_price` and `bus_price`) in the shop currency;
 disabled tours are omitted. Missing sources omit their rows rather than displaying fixed fallback
 prices, and do not prevent gift-card purchases. See `src/components/GiftCardPriceGuide.astro`

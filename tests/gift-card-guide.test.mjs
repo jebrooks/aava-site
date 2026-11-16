@@ -8,7 +8,7 @@ const variant = (amount, title = 'Default Title', changes = {}) => ({
 const product = (title, variants, changes = {}) => ({ title, isGiftCard: false, tags: ['charcuterie'], servingCount: null, variants: { nodes: variants }, ...changes });
 const tours = { enabled: true, seatPrice: '125.00', busPrice: '1250.00', currencyCode: 'USD' };
 
-test('groups serving sizes from Shopify and rounds only the requested small-board guidance', () => {
+test('groups serving sizes from Shopify and rounds charcuterie guidance', () => {
   const rows = giftCardPriceGuide([
     product('Custom vegetarian (serves 4)', [variant(40)]),
     product('Signature boards', [variant(59, 'Small (serves 4)'), variant(175, 'Large (serves 10)')]),
@@ -19,20 +19,20 @@ test('groups serving sizes from Shopify and rounds only the requested small-boar
   assert.deepEqual(rows.map(row => [row.label, row.minimum.amount, row.approximate]), [
     ['Charcuterie — serves 4', '50.00', true],
     ['Charcuterie — serves 8', '75.00', true],
-    ['Charcuterie — serves 10', '175.00', false],
-    ['Charcuterie — serves 15', '262.00', false],
+    ['Charcuterie — serves 10', '175.00', true],
+    ['Charcuterie — serves 15', '250.00', true],
     ['Public wine tour — per person', '125.00', false],
     ['Private wine tour — up to 10 people', '1250.00', false],
   ]);
 });
 
-test('price changes flow into ranges and tour guidance without fixed price fallbacks', () => {
+test('price changes flow into estimates and tour guidance without fixed price fallbacks', () => {
   const rows = giftCardPriceGuide([
     product('Board (serves 4)', [variant(100)]),
     product('Board (serves 10)', [variant(180), variant(210)]),
   ], { ...tours, seatPrice: '140.00', busPrice: '1400.00' });
   assert.equal(rows[0].minimum.amount, '100.00');
-  assert.deepEqual([rows[1].minimum.amount, rows[1].maximum.amount], ['180.00', '210.00']);
+  assert.deepEqual([rows[1].minimum.amount, rows[1].maximum.amount], ['200.00', '200.00']);
   assert.deepEqual(rows.slice(2).map(row => row.minimum.amount), ['140.00', '1400.00']);
   assert.deepEqual(giftCardPriceGuide([], null), []);
   assert.deepEqual(giftCardPriceGuide([], { ...tours, enabled: false }), []);

@@ -42,12 +42,11 @@ export function giftCardPriceGuide(products: ShopifyProduct[], tours: GiftTourPr
     if (!prices?.length || prices.some(price => price.currencyCode !== prices[0].currencyCode)) continue;
     const min = Math.min(...prices.map(price => Number(price.amount)));
     const max = Math.max(...prices.map(price => Number(price.amount)));
-    const approximate = count === 4 || count === 8;
-    // Small-board guidance uses the range midpoint rounded to the nearest $25.
+    // Charcuterie guidance uses the range midpoint rounded to the nearest $25.
     const estimate = Math.max(25, Math.round(((min + max) / 2) / 25) * 25);
     const money = (amount: number): Money => ({ amount: amount.toFixed(2), currencyCode: prices[0].currencyCode });
-    rows.push({ label: `Charcuterie — serves ${count}`, minimum: money(approximate ? estimate : min),
-      maximum: money(approximate ? estimate : max), approximate });
+    rows.push({ label: `Charcuterie — serves ${count}`, minimum: money(estimate),
+      maximum: money(estimate), approximate: true });
   }
   if (tours?.enabled) {
     for (const [label, amount] of [
