@@ -23,6 +23,7 @@
 - Read [deployments and preview review](docs/deployments.md) for the full workflow. Use PRs targeting `main`; Vercel deploys branch pushes as previews and `main` as Production.
 - Check both the Vercel deployment status and the separate `Catalog parity` Actions check before merging.
 - Open the PR's Vercel bot comment → **Preview** to review the site. **Ready** opens deployment details. Confirm the deployment matches the latest PR commit and include the preview URL, affected routes, and validation results in the handoff.
+- In the final handoff, include both the PR link and a direct link to an affected page on the PR's Vercel preview site. For multiple affected pages, include the most useful review links.
 - Set required Vercel environment variables for **both Preview and Production**, and redeploy each affected environment after changes. GitHub Actions credentials are configured separately.
 - Confirm the configured external services before write-based preview testing: shared Shopify or email credentials can affect live services. Keep internal navigation relative so reviews stay on the preview host.
 
