@@ -76,8 +76,6 @@ const productSchema = product && initialVariant ? {
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
-          {product.isGiftCard && <p>Gift cards can be used for both All ABoard VA wine tours and charcuterie orders. No delivery window is needed when purchasing a gift card on its own.</p>}
-
           <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
               <label>
