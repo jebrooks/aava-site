@@ -70,13 +70,13 @@ const productSchema = product && initialVariant ? {
           />
         </div>
         <div class="product-detail__content">
-          <p class="eyebrow">{product.isGiftCard ? 'Give an All ABoard VA experience' : 'Handcrafted charcuterie'}</p>
+          <p class="eyebrow">{product.isGiftCard ? 'For wine tours & charcuterie' : 'Handcrafted charcuterie'}</p>
           <h1>{product.title}</h1>
           {!product.isGiftCard && <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>}
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
-          {product.isGiftCard && <p>A digital gift for wine tours or charcuterie. No delivery window is needed when purchasing a gift card on its own.</p>}
+          {product.isGiftCard && <p>Gift cards can be used for both All ABoard VA wine tours and charcuterie orders. No delivery window is needed when purchasing a gift card on its own.</p>}
 
           <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
