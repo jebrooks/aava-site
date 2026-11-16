@@ -1540,6 +1540,10 @@ ol {
   width: 7rem;
 }
 
+.product-form:has([data-gift-card-recipient]) :is(select[name="variant"], input[name="quantity"]) {
+  font-size: 1rem;
+}
+
 .product-form .button {
   width: 100%;
 }
