@@ -116,7 +116,9 @@ desktop and mobile in the PR preview. Run the checks appropriate to the change, 
 behavior tests. Keep internal links relative so reviewers stay on the preview host.
 
 Policies are checked-in snapshots with source provenance. Preserve approved wording unless the
-task authorizes a policy change; unresolved tasting-fee wording needs a business decision.
+task authorizes a policy change. Approved amendments retain source/capture provenance and record
+`amendedAt` and `amendmentNote`. Private tours have no minimum guest count (maximum 10); the
+approved tasting-fee refund cutoff is 48 hours.
 Policy pages display the wording; they do not independently collect signed waivers.
 The `cleaning-damage` snapshot in `src/data/policies.json` supplies the Experience Guide’s
 Cleaning & Damage section; booking links directly to `/experience-guide#cleaning-damage`.

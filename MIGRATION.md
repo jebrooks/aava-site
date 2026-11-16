@@ -58,8 +58,9 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
 3. **Forms and waivers:** verify email recipients, custom-board draft workflow, consent records,
    spam protection, and any required signed-waiver collection or retention process.
 4. **Email marketing:** reconcile newsletter consent and destination lists before retiring old forms.
-5. **Content scope:** review every source route for migration, redirect, or retirement; resolve
-   conflicting tasting-fee policy wording with the business owner.
+5. **Content scope:** review every source route for migration, redirect, or retirement. Private-tour
+   minimum and tasting-fee policy discrepancies are reconciled to the approved rules: no minimum
+   private-tour guest count (maximum 10) and a 48-hour tasting-fee refund cutoff.
 6. **Hosting:** verify Vercel variables for **both Preview and Production**, redeploy after changes,
    and confirm production cron security, webhooks, logs, domain assignment, and DNS cutover.
 

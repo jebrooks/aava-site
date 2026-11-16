@@ -271,8 +271,9 @@ Shopify checkout, and service API URLs remain external.
 
 `PUBLIC_LEGACY_SITE_URL` is retired and can be removed from Vercel. The published policy pages
 are checked-in snapshots in `src/data/policies.json`, with source provenance; production does
-not fetch Squarespace. Their wording is preserved. Known conflicting tasting-fee cutoffs in
-the source policy need a separate business decision; this migration does not choose new terms.
+not fetch Squarespace. Approved amendments are recorded alongside source provenance. The
+cancellation policy now reflects no minimum private-tour guest count (maximum 10) and the
+approved 48-hour tasting-fee refund cutoff.
 
 Tour planning, custom estimates, booking help, and gift-certificate inquiries use local pages
 and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking
