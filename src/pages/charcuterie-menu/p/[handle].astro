@@ -6,6 +6,7 @@ import type { ShopifyProduct } from '../../../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
 import BoardCustomizer from '../../../components/BoardCustomizer.astro';
 import GiftCardRecipient from '../../../components/GiftCardRecipient.astro';
+import GiftCardPriceGuide from '../../../components/GiftCardPriceGuide.astro';
 
 export const prerender = false;
 
@@ -30,7 +31,9 @@ const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;
 const imageAlt = image?.altText || (image ? product?.title : DEFAULT_PRODUCT_IMAGE.alt);
 const imageWidth = image?.width || DEFAULT_PRODUCT_IMAGE.width;
 const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
-const variants = product?.variants.nodes || [];
+const variants = product?.isGiftCard
+  ? [...product.variants.nodes].sort((a, b) => Number(a.price.amount) - Number(b.price.amount))
+  : product?.variants.nodes || [];
 const initialVariant = variants.find((variant) => variant.availableForSale) || variants[0];
 const productSchema = product && initialVariant ? {
   '@context': 'https://schema.org',
@@ -76,7 +79,7 @@ const productSchema = product && initialVariant ? {
           {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
-          {product.isGiftCard && <p>Gift cards can be used for both All ABoard VA wine tours and charcuterie orders. No delivery window is needed when purchasing a gift card on its own.</p>}
+          {product.isGiftCard && <GiftCardPriceGuide />}
 
           <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (

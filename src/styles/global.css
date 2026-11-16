@@ -1507,6 +1507,52 @@ ol {
   margin-bottom: 0;
 }
 
+.gift-price-guide {
+  margin-block: 1.5rem;
+}
+
+.gift-price-guide h2 {
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
+}
+
+.gift-price-guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.gift-price-guide th,
+.gift-price-guide td {
+  padding: 0.65rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.gift-price-guide thead {
+  background: var(--cream);
+}
+
+.gift-price-guide thead th:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gift-price-guide tbody th {
+  font-weight: 440;
+}
+
+.gift-price-guide td {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gift-price-guide p {
+  margin-top: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+}
+
 .product-form,
 .delivery-form {
   display: grid;
