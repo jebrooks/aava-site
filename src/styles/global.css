@@ -1913,9 +1913,10 @@ ol {
 .tour-panel, .tour-summary { padding: clamp(1.25rem, 3vw, 2rem); border: 1px solid #e0dad3; border-radius: 10px; background: white; }
 .tour-panel__heading { display: flex; align-items: center; margin-bottom: 1.5rem; }
 .tour-panel__heading h2 { margin: 0; font-size: 1.7rem; }
-.tour-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.15rem; }
+.tour-fields-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 1.15rem; }
 .tour-panel .form-field { margin-bottom: 1.2rem; }
 .tour-panel .form-field label { display: block; margin-bottom: .45rem; }
+.tour-panel .form-field > :is(input, select) { height: var(--quantity-control-height); }
 .tour-panel input, .tour-panel select, .tour-panel textarea { max-width: 100%; }
 .tour-optional { color: #746e68; font-size: .85rem; font-weight: 400; }
 .tour-calendar { margin: 1.5rem 0 1rem; border: 1px solid #e4ddd6; border-radius: 8px; padding: 1rem; }
