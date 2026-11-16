@@ -513,7 +513,6 @@ ol {
   height: 86px;
   margin: 0 auto 1.5rem;
   object-fit: contain;
-  filter: invert(1);
 }
 
 .feature-card p:last-child {
