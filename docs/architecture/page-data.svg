@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1390" viewBox="0 0 1440 1390" role="img" aria-labelledby="title desc">
+<title id="title">What supplies the content on each page?</title><desc id="desc">Arrows show data flowing from its authoritative source into the Astro page or component.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#697488"/></marker></defs>
+<rect width="1440" height="1390" fill="#F6F7FA"/>
+<rect x="0" y="0" width="1440" height="9" fill="#8A1538"/>
+<text x="52" y="53" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#8A1538" text-anchor="start">ALL ABOARD VA  /  ARCHITECTURE 02</text>
+<text x="52" y="105" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#292B36" text-anchor="start">What supplies the content on each page?</text>
+<text x="52" y="142" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#596375" text-anchor="start">Arrows show data flowing from its authoritative source into the Astro page or component.</text>
+<text x="76" y="198" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#216747" text-anchor="start">AUTHORITATIVE SOURCE</text>
+<text x="822" y="198" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#5B45A0" text-anchor="start">CUSTOMER-FACING PAGE / COMPONENT</text>
+<rect x="52" y="228" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="228" width="6" height="146" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="248" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,255)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="23" rx="3"/><path d="M4 14h24M10 3v7m12-7v7M10 20h3m6 0h3m-12 5h3"/></g>
+<text x="134" y="278" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Announcement banners</text>
+<text x="76" y="324" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Shopify metaobject: announcement_banner</text>
+<text x="76" y="353" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Content + enabled flag + start/end dates</text>
+<rect x="778" y="228" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="228" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="248" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,255)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="278" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Header on every page</text>
+<text x="802" y="324" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Shared announcement banner</text>
+<text x="802" y="353" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Fetched via Admin API; 60-second cache</text>
+<path d="M662,301 L778,301" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="265" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="285" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<rect x="52" y="406" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="406" width="6" height="146" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="426" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,433)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="134" y="456" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Charcuterie catalog</text>
+<text x="76" y="502" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Collection + products + variants + images</text>
+<text x="76" y="531" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Product metafields: servings, ingredients, allergens</text>
+<rect x="778" y="406" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="406" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="426" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,433)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="456" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Menu + product pages</text>
+<text x="802" y="502" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">/charcuterie-menu and /charcuterie-menu/p/*</text>
+<text x="802" y="531" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Prices, choices, images and product descriptions</text>
+<path d="M662,479 L778,479" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="443" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="463" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<rect x="52" y="584" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="584" width="6" height="146" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="604" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,611)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="12" width="24" height="7" rx="1"/><path d="M6 19v10h20V19M16 12v17"/><path d="M16 12C3 12 7 0 13 6l3 6c13 0 9-12 3-6z"/></g>
+<text x="134" y="634" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Native gift-card product</text>
+<text x="76" y="680" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Shopify denominations + charcuterie prices</text>
+<text x="76" y="709" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Tour price settings: tour_schedule/default</text>
+<rect x="778" y="584" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="584" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="604" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,611)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="634" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Gift Cards</text>
+<text x="802" y="680" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">/gift-certificates → native product page</text>
+<text x="802" y="709" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Amount selector + automatic price examples</text>
+<path d="M662,657 L778,657" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="621" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="641" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<rect x="52" y="762" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="762" width="6" height="146" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="782" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,789)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="23" rx="3"/><path d="M4 14h24M10 3v7m12-7v7M10 20h3m6 0h3m-12 5h3"/></g>
+<text x="134" y="812" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Tours + shared closures</text>
+<text x="76" y="858" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">tour_schedule/default + booking_blackouts/default</text>
+<text x="76" y="887" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Dated seat/bus products: prices + live inventory</text>
+<rect x="778" y="762" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="762" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="782" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,789)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="812" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Planner + tour booking</text>
+<text x="802" y="858" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">/experiences planner → /booking</text>
+<text x="802" y="887" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Live calendar, seat availability and checkout</text>
+<path d="M662,835 L778,835" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="799" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="819" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<rect x="52" y="940" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="940" width="6" height="146" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="960" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,967)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="13"/><path d="M16 7v10l7 4"/></g>
+<text x="134" y="990" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Delivery + shared closures</text>
+<text x="76" y="1036" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">delivery_schedule/default + booking_blackouts/default</text>
+<text x="76" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Generated delivery-date product inventory</text>
+<rect x="778" y="940" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="940" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="960" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,967)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="990" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Cart delivery scheduling</text>
+<text x="802" y="1036" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">/cart → /api/delivery/availability</text>
+<text x="802" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">ZIP eligibility, dates, windows and capacity</text>
+<path d="M662,1013 L778,1013" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="977" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="997" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<rect x="52" y="1118" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="1118" width="6" height="146" rx="3" fill="#8A1538" stroke="#8A1538"/>
+<rect x="74" y="1138" width="46" height="46" rx="12" fill="#F9EDF1" stroke="#F9EDF1"/>
+<g transform="translate(81,1145)" stroke="#8A1538" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 8-8 8 8 8m10-16 8 8-8 8M19 3l-6 26"/></g>
+<text x="134" y="1168" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#8A1538" text-anchor="start">Files in this repository</text>
+<text x="76" y="1214" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">src/pages, src/data and public/images</text>
+<text x="76" y="1243" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Policies, copy, featured boards, ingredient choices</text>
+<rect x="778" y="1118" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="1118" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="1138" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,1145)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="860" y="1168" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Marketing + local content</text>
+<text x="802" y="1214" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Homepage, About, guides, FAQ and form wording</text>
+<text x="802" y="1243" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Homepage featured-board copy is curated in code</text>
+<path d="M662,1191 L778,1191" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="691.0" y="1155" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="1175" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>
+<text x="52" y="1365" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#596375" text-anchor="start">Dynamic prices update from Shopify without a code deployment. Repository-owned copy and layout require deployment.</text>
+</svg>
