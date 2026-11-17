@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1320" viewBox="0 0 1440 1320" role="img" aria-labelledby="title desc">
+<title id="title">Scheduled jobs keep Shopify ready for bookings.</title><desc id="desc">Vercel Cron runs on Production. Signed Shopify webhooks keep on-tour boards synchronized.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#697488"/></marker></defs>
+<rect width="1440" height="1320" fill="#F6F7FA"/>
+<rect x="0" y="0" width="1440" height="9" fill="#8A1538"/>
+<text x="52" y="53" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#8A1538" text-anchor="start">ALL ABOARD VA  /  ARCHITECTURE 03</text>
+<text x="52" y="105" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#292B36" text-anchor="start">Scheduled jobs keep Shopify ready for bookings.</text>
+<text x="52" y="142" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#596375" text-anchor="start">Vercel Cron runs on Production. Signed Shopify webhooks keep on-tour boards synchronized.</text>
+<rect x="52" y="192" width="610" height="166" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="192" width="6" height="166" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="212" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,219)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="24" height="23" rx="3"/><path d="M4 14h24M10 3v7m12-7v7M10 20h3m6 0h3m-12 5h3"/></g>
+<text x="134" y="242" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Delivery settings</text>
+<text x="76" y="288" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#292B36" text-anchor="start">delivery_schedule/default</text>
+<text x="76" y="317" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#292B36" text-anchor="start">Shared closures: booking_blackouts/default</text>
+<rect x="778" y="192" width="610" height="166" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="192" width="6" height="166" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="800" y="212" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(807,219)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="860" y="242" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Tour settings + board catalog</text>
+<text x="802" y="288" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#292B36" text-anchor="start">tour_schedule/default + shared closures</text>
+<text x="802" y="317" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#292B36" text-anchor="start">Published charcuterie products and source variants</text>
+<path d="M357,358 L357,431" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="261.5" y="383" width="191.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="357" y="403" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">read via Admin API</text>
+<path d="M1083,358 L1083,431" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="987.5" y="383" width="191.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="1083" y="403" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">read via Admin API</text>
+<rect x="52" y="431" width="610" height="242" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="431" width="6" height="242" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="74" y="451" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(81,458)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="13"/><path d="M16 7v10l7 4"/></g>
+<text x="134" y="481" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Daily delivery reconciliation</text>
+<text x="76" y="527" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">05:15 UTC · /api/cron/materialize-delivery</text>
+<text x="76" y="556" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Create dates entering the booking horizon</text>
+<text x="76" y="585" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Adjust capacity by delta; archive ineligible dates</text>
+<text x="76" y="614" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Preserve already-booked inventory</text>
+<rect x="778" y="431" width="610" height="242" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="431" width="6" height="242" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="800" y="451" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(807,458)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="13"/><path d="M16 7v10l7 4"/></g>
+<text x="860" y="481" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Daily tour reconciliation</text>
+<text x="802" y="527" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">03:00 UTC · /api/cron/materialize-tours</text>
+<text x="802" y="556" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Create / update seats and whole-bus bundles</text>
+<text x="802" y="585" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Archive dates outside the active schedule</text>
+<text x="802" y="614" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">After completed tour sync: sync on-tour boards</text>
+<path d="M357,673 L357,754" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="256.75" y="697" width="200.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="357" y="717" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">write via Admin API</text>
+<path d="M1083,673 L1083,754" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="982.75" y="697" width="200.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="1083" y="717" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">write via Admin API</text>
+<rect x="52" y="754" width="610" height="177" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="754" width="6" height="177" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="774" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,781)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="134" y="804" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Shopify delivery-date products</text>
+<text x="76" y="850" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Hidden, $0 variants enforce daily order capacity</text>
+<text x="76" y="879" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Published to Headless; window saved on the cart</text>
+<text x="76" y="908" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Shopify checkout consumes available inventory</text>
+<rect x="778" y="754" width="610" height="177" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="778" y="754" width="6" height="177" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="800" y="774" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(807,781)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="860" y="804" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Shopify tour products + variants</text>
+<text x="802" y="850" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Dated seats; bus bundle uses all 10 seats</text>
+<text x="802" y="879" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">On-tour board variants mirror delivery prices</text>
+<text x="802" y="908" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">On-tour boards do not require shipping</text>
+<rect x="52" y="994" width="1336" height="247" rx="22" fill="#EAF5EE" stroke="#EAF5EE"/>
+<text x="77" y="1034" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#216747" text-anchor="start">EVENT-DRIVEN SYNC · /api/shopify/webhooks</text>
+<rect x="77" y="1065" width="373" height="160" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="77" y="1065" width="6" height="160" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="99" y="1085" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(106,1092)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 2-12 17h10l-2 11 12-17H16z"/></g>
+<text x="159" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Shopify events</text>
+<text x="101" y="1161" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">products/create, products/update</text>
+<text x="101" y="1190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">collections/update</text>
+<rect x="537" y="1065" width="373" height="160" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="537" y="1065" width="6" height="160" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="559" y="1085" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(566,1092)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="13"/><path d="m9 16 5 5 10-11"/></g>
+<text x="619" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Verify + reconcile</text>
+<text x="561" y="1161" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">Validate HMAC + store identity</text>
+<text x="561" y="1190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">Sync affected product / collection</text>
+<rect x="997" y="1065" width="366" height="160" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="997" y="1065" width="6" height="160" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="1019" y="1085" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(1026,1092)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="1079" y="1115" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">On-tour variants</text>
+<text x="1021" y="1161" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">Mirror prices, options and tax</text>
+<text x="1021" y="1190" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#292B36" text-anchor="start">Retain source links + variant IDs</text>
+<path d="M450,1136 L537,1136" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M910,1136 L997,1136" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="52" y="1295" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#596375" text-anchor="start">Cron endpoints require CRON_SECRET. Schedule edits do not cancel orders; sync does not reset sold inventory.</text>
+</svg>

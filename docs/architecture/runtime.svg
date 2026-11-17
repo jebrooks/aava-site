@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1080" viewBox="0 0 1440 1080" role="img" aria-labelledby="title desc">
+<title id="title">The site runs on Vercel. Commerce lives in Shopify.</title><desc id="desc">Astro renders the experience; server-side APIs connect customers to commerce and email.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#697488"/></marker></defs>
+<rect width="1440" height="1080" fill="#F6F7FA"/>
+<rect x="0" y="0" width="1440" height="9" fill="#8A1538"/>
+<text x="52" y="53" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" fill="#8A1538" text-anchor="start">ALL ABOARD VA  /  ARCHITECTURE 01</text>
+<text x="52" y="105" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700" fill="#292B36" text-anchor="start">The site runs on Vercel. Commerce lives in Shopify.</text>
+<text x="52" y="142" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" fill="#596375" text-anchor="start">Astro renders the experience; server-side APIs connect customers to commerce and email.</text>
+<rect x="52" y="210" width="310" height="205" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="210" width="6" height="205" rx="3" fill="#275E96" stroke="#275E96"/>
+<rect x="74" y="230" width="46" height="46" rx="12" fill="#EBF2FA" stroke="#EBF2FA"/>
+<g transform="translate(81,237)" stroke="#275E96" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="134" y="260" font-family="Arial, Helvetica, sans-serif" font-size="23.409090909090907" font-weight="700" fill="#275E96" text-anchor="start">Customer browser</text>
+<text x="76" y="306" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Browse pages</text>
+<text x="76" y="335" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Boards, tours and gifts</text>
+<text x="76" y="364" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Cart edits and forms</text>
+<rect x="462" y="190" width="465" height="445" rx="22" fill="#F1EDFA" stroke="#F1EDFA"/>
+<rect x="485" y="210" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(492,217)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 4 14 24H2z"/></g>
+<text x="546" y="240" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#5B45A0" text-anchor="start">Vercel · Astro + TypeScript</text>
+<rect x="485" y="285" width="419" height="145" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="485" y="285" width="6" height="145" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="507" y="305" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(514,312)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
+<text x="567" y="335" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Pages + shared UI</text>
+<text x="509" y="381" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">HTML, CSS and browser scripts</text>
+<text x="509" y="410" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Server-rendered Shopify content</text>
+<rect x="485" y="455" width="419" height="155" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="485" y="455" width="6" height="155" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
+<rect x="507" y="475" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
+<g transform="translate(514,482)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="24" height="11" rx="3"/><rect x="4" y="18" width="24" height="11" rx="3"/><path d="M9 8h1m4 0h9M9 23h1m4 0h9"/></g>
+<text x="567" y="505" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Server-side endpoints</text>
+<text x="509" y="551" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Cart, delivery and tour booking</text>
+<text x="509" y="580" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Draft requests, cron and webhooks</text>
+<rect x="1047" y="190" width="341" height="445" rx="22" fill="#EAF5EE" stroke="#EAF5EE"/>
+<rect x="1070" y="210" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(1077,217)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="1130" y="240" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" fill="#216747" text-anchor="start">Shopify</text>
+<rect x="1070" y="285" width="295" height="145" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="1070" y="285" width="6" height="145" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="1092" y="305" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(1099,312)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="1152" y="335" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Storefront API</text>
+<text x="1094" y="381" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Catalog + prices</text>
+<text x="1094" y="410" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Inventory + carts</text>
+<rect x="1070" y="455" width="295" height="155" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="1070" y="455" width="6" height="155" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="1092" y="475" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(1099,482)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="24" height="11" rx="3"/><rect x="4" y="18" width="24" height="11" rx="3"/><path d="M9 8h1m4 0h9M9 23h1m4 0h9"/></g>
+<text x="1152" y="505" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Admin API</text>
+<text x="1094" y="551" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Metaobjects + drafts</text>
+<text x="1094" y="580" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Catalog / inventory sync</text>
+<path d="M362,310 L462,310" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="378.25" y="273" width="67.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="412" y="293" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">HTTPS</text>
+<path d="M927,355 L1047,355" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="934.25" y="317" width="105.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="987" y="337" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">API calls</text>
+<path d="M927,530 L1047,530" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="934.25" y="492" width="105.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="987" y="512" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">API calls</text>
+<rect x="52" y="785" width="410" height="210" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="52" y="785" width="6" height="210" rx="3" fill="#216747" stroke="#216747"/>
+<rect x="74" y="805" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
+<g transform="translate(81,812)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
+<text x="134" y="835" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Shopify checkout</text>
+<text x="76" y="881" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Hosted payment and order creation</text>
+<text x="76" y="910" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Gift-card issuance + native emails</text>
+<text x="76" y="939" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Shopify enforces sellable inventory</text>
+<rect x="515" y="785" width="410" height="210" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="515" y="785" width="6" height="210" rx="3" fill="#946016" stroke="#946016"/>
+<rect x="537" y="805" width="46" height="46" rx="12" fill="#FBF2E2" stroke="#FBF2E2"/>
+<g transform="translate(544,812)" stroke="#946016" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="26" height="21" rx="3"/><path d="m4 8 12 10L28 8"/></g>
+<text x="597" y="835" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#946016" text-anchor="start">Resend</text>
+<text x="539" y="881" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Contact inquiries → business inbox</text>
+<text x="539" y="910" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Sent by /api/contact</text>
+<text x="539" y="939" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Separate from Shopify gift emails</text>
+<rect x="978" y="785" width="410" height="210" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
+<rect x="978" y="785" width="6" height="210" rx="3" fill="#8A1538" stroke="#8A1538"/>
+<rect x="1000" y="805" width="46" height="46" rx="12" fill="#F9EDF1" stroke="#F9EDF1"/>
+<g transform="translate(1007,812)" stroke="#8A1538" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 8-8 8 8 8m10-16 8 8-8 8M19 3l-6 26"/></g>
+<text x="1060" y="835" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#8A1538" text-anchor="start">Repository content</text>
+<text x="1002" y="881" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Marketing copy, policies, images</text>
+<text x="1002" y="910" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Board options and brand styling</text>
+<text x="1002" y="939" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Published by a code deployment</text>
+<path d="M206,415 L206,785" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="120.0" y="590" width="172.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="206" y="610" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">Checkout handoff</text>
+<path d="M1218,635 L1218,700 L385,700 L385,785" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="351.25" y="666" width="257.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="480" y="686" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">Commerce stays in Shopify</text>
+<path d="M720,635 L720,785" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="648.25" y="734" width="143.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
+<text x="720" y="754" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">Inquiry email</text>
+<text x="52" y="1055" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#596375" text-anchor="start">API credentials stay on the server. Customers receive pages, cart identifiers and hosted-checkout links.</text>
+</svg>

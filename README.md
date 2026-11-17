@@ -6,6 +6,8 @@ payments, gift cards, draft-order invoices, and orders. The production runtime t
 
 ## Documentation
 
+- [Architecture diagrams](docs/architecture.md): graphical views of Shopify data sources,
+  scheduled synchronization, runtime services, and GitHub/Vercel deployments.
 - [Content management](docs/content-management.md): where to edit content, Shopify metaobjects,
   when edits take effect, and how to verify them.
 - [Deployments and preview review](docs/deployments.md): PR previews, production releases,
