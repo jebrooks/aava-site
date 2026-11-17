@@ -347,9 +347,32 @@ test("catalog boards resolve to non-shipping counterparts at the normal price wi
   assert.equal(state.cartInput.buyerIdentity.preferences, undefined);
   assert.ok(
     state.cartInput.lines[1].attributes.some(
-      (a) => a.key === "Tour food fulfillment",
+      (a) => a.key === "Fulfillment" && a.value === "Provided on the bus",
     ),
   );
+});
+test("only the tour line includes destination; board fulfillment is clear for public and private tours", async () => {
+  for (const tourType of ["public", "private"]) {
+    const { state, service } = fixture();
+    await service.checkout({
+      ...base,
+      tourType,
+      snack: "charcuterie",
+      boardVariantId: sourceId,
+      boardQuantity: 2,
+    });
+    const tourAttributes = state.cartInput.lines[0].attributes;
+    const boardAttributes = state.cartInput.lines[1].attributes;
+    const destination = { key: "Destination", value: "To coordinate by phone" };
+    assert.ok(tourAttributes.some(a => a.key === destination.key && a.value === destination.value));
+    assert.ok(state.cartInput.attributes.some(a => a.key === destination.key && a.value === destination.value));
+    assert.ok(!boardAttributes.some(a => a.key === "Destination"));
+    assert.ok(!boardAttributes.some(a => a.key === "Tour food fulfillment"));
+    assert.deepEqual(boardAttributes.find(a => a.key === "Fulfillment"), {
+      key: "Fulfillment", value: "Provided on the bus",
+    });
+    assert.equal(boardAttributes.find(a => a.key === "Tour date").value, base.date);
+  }
 });
 test("forged or direct On tour variant IDs cannot bypass catalog board selection", async () => {
   const { state, service } = fixture();

@@ -304,11 +304,11 @@ export function tourBookingService(deps: TourBookingDependencies) {
         merchandiseId: onTour.id,
         quantity: booking.boardQuantity,
         attributes: [
-          ...lineAttributes,
+          ...lineAttributes.filter((attribute) => attribute.key !== "Destination"),
           ...selections,
           {
-            key: "Tour food fulfillment",
-            value: "Bring with tour on " + booking.date,
+            key: "Fulfillment",
+            value: "Provided on the bus",
           },
         ],
       });

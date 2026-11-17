@@ -23,7 +23,9 @@ on the server.
   as Shopify's native cart-line properties; Shopify sends the gift-card emails.
 - **Tours:** `/booking` collects the registration and board choices. Availability checks Shopify
   schedule settings and inventory. Checkout validates those choices and creates a Shopify cart
-  containing the dated tour variant and any on-tour boards. Shopify handles payment and orders.
+  containing the dated tour variant and any on-tour boards. The destination coordination note
+  appears on the tour line, while board lines show **Fulfillment: Provided on the bus** and the
+  tour date. Shopify handles payment and orders.
 - **Custom boards:** `/custom-board-request` uses BotID verification and creates an Admin API draft
   order tagged for staff quoting. Staff sets the final price, reserves delivery capacity, and
   sends the invoice from Shopify; the form does not automatically complete a purchase.
