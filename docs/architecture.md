@@ -109,6 +109,8 @@ Sources: [delivery cron](../src/pages/api/cron/materialize-delivery.ts),
 [![Deployment architecture: branch PR, independent GitHub checks and Vercel preview, review and merge, Vercel production](architecture/deployments.svg)](architecture/deployments.svg)
 
 1. Commit changes on a branch and open a PR targeting `main`.
+   The same branch can be reviewed locally at `http://127.0.0.1:4330` with `npm run dev`;
+   this single local server follows the current checkout rather than keeping a preview per PR.
 2. Vercel's Git integration builds branch pushes into **Preview** deployments. Use the Vercel
    bot comment's **Preview** link, and confirm its deployment commit matches the latest PR head.
 3. Separately, GitHub's **Catalog parity** Actions workflow runs tests, an Astro production build,

@@ -15,6 +15,9 @@ project is [aava-site](https://vercel.com/jebrooks-projects/aava-site).
    column. **Ready** opens deployment details, where build status and logs can be inspected.
 5. Verify the deployment commit matches the current PR head before testing. Add the preview URL,
    affected routes, and validation results to the PR handoff.
+6. Provide matching local review links from `http://127.0.0.1:4330`, with the development server
+   running from this worktree on the PR branch. Leave that server running for the owner's review.
+   Local review is a second option alongside the Vercel preview, not a replacement for its check.
 
 For a verified example of these links, see the [Vercel comment on PR #18](https://github.com/jebrooks/aava-site/pull/18#issuecomment-6899782748).
 Use each PR's current comment rather than copying that example's hostname for another change.
@@ -29,6 +32,62 @@ There is a preview per branch/deployment, rather than one fixed hostname for eve
 unmerged work. Internal navigation stays on the host being visited. Canonicals, sitemap URLs, and
 social metadata deliberately use `https://www.allaboardva.com`, the intended canonical domain;
 that configuration alone does not establish that DNS cutover is complete.
+
+## Local PR review
+
+The local site runs with **`npm run dev`** at **`http://127.0.0.1:4330`**. It serves the files
+currently checked out in this worktree. A link such as `/booking` works on either host:
+
+- Local: `http://127.0.0.1:4330/booking`
+- Vercel: the current PR's Preview hostname followed by `/booking`
+
+Unlike Vercel's per-branch deployments, the single local URL is not a permanent preview of each
+PR. Switching branches changes what it serves, and uncommitted edits also appear locally. Confirm
+the branch and commit before review; do not switch away from unfinished work just to start a server.
+Local links work on this Mac while the server is running. The fixed `127.0.0.1` host does not expose
+the site to another computer or a phone.
+
+Use the existing worktree and one server:
+
+1. Check the current checkout with `git status --short` and `git branch --show-current`.
+   Use `git log -1 --oneline` to confirm the commit. To review an older PR, save current work
+   before switching to its branch (for example, `gh pr checkout <number>`).
+2. Check port 4330 with `lsof -nP -iTCP:4330 -sTCP:LISTEN`. Reuse this project's server if it is
+   already running with the intended branch/configuration; do not start another instance.
+3. Start only with `npm run dev`. The project fixes host/port and enables strict-port behavior.
+4. After switching branches or changing `.env`, stop the existing project server with
+   `npm run dev -- stop`, confirm the port is free, then start it again with `npm run dev`.
+5. Open the affected local page and check that its data loads. Include that link, the Vercel
+   page link, the PR link, and any configuration gaps in the handoff. Leave the local server
+   running for this requested review; stop it when local review is no longer needed.
+
+There is no extra Node API server, database, or Shopify import to start. Astro runs both pages and
+same-site API routes. Use `npm run dev` for local review: this project's Vercel adapter does not
+provide a portable standalone server through `npm run preview` or `.vercel/output`.
+
+### Local environment coverage
+
+Vercel environment variables do **not** automatically populate the ignored local `.env`. Keep
+`.env.example` as the variable-name contract, copy only the needed values from an authorized
+source, and restart the development server after edits. Do not overwrite a populated `.env`
+with the example or commit credentials. These are the functional groups:
+
+| Local feature | Configuration |
+| --- | --- |
+| Published catalog, product pages, gift amounts, carts | `PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`; use the intended API version and collection handle |
+| Announcements, gift-guide tour prices, booking/delivery settings and inventory | Same store plus `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (or the optional `SHOPIFY_ADMIN_ACCESS_TOKEN` fallback) |
+| Catalog, delivery and tour maintenance | Correct `SHOPIFY_DELIVERY_LOCATION_ID`, `SHOPIFY_STOREFRONT_PUBLICATION_ID`, and relevant collection IDs/handle |
+| Contact/inquiry email | `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` using an approved, verified sender |
+| Manual cron testing | `CRON_SECRET` and the relevant Shopify credentials/IDs; this performs catalog writes |
+| Webhook verification | `SHOPIFY_WEBHOOK_SECRET` or the configured app client secret; Shopify cannot deliver to a loopback-only URL |
+
+Browsing products and checking availability do not require Resend. A configured Admin client
+credential pair does not also require the legacy Admin access token. Cron does not run on a
+schedule locally; deployed webhooks and scheduled jobs continue to operate on their configured
+Vercel endpoints. BotID uses development behavior locally, so test its deployed protection on
+Vercel. Local checkout still hands off to Shopify-hosted checkout, and shared Shopify/email
+credentials can affect the same services as Production. Use read-only checks for ordinary local
+preview validation; verify service targets before any submission or reconciliation.
 
 ## What runs where
 

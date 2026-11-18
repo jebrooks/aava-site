@@ -26,6 +26,9 @@ npm run dev
 ```
 
 The local URL is fixed at `http://127.0.0.1:4330`.
+PR handoffs include matching local and Vercel page links. The local link follows the current
+checkout and needs the development server left running; see
+[local PR review and environment setup](docs/deployments.md#local-pr-review).
 
 Run the production checks and Vercel build output with:
 
