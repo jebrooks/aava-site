@@ -25,6 +25,7 @@
 - Check both the Vercel deployment status and the separate `Catalog parity` Actions check before merging.
 - Open the PR's Vercel bot comment → **Preview** to review the site. **Ready** opens deployment details. Confirm the deployment matches the latest PR commit and include the preview URL, affected routes, and validation results in the handoff.
 - In the final handoff, include both the PR link and a direct link to an affected page on the PR's Vercel preview site. For multiple affected pages, include the most useful review links.
+- Also include matching local review links at `http://127.0.0.1:4330` for affected pages. Before sharing them, verify the development server is running from this worktree on the PR branch and leave it running for the user's local review. State that local links follow the current checkout rather than preserving an independent preview for every PR, and report any missing local service configuration.
 - Set required Vercel environment variables for **both Preview and Production**, and redeploy each affected environment after changes. GitHub Actions credentials are configured separately.
 - Confirm the configured external services before write-based preview testing: shared Shopify or email credentials can affect live services. Keep internal navigation relative so reviews stay on the preview host.
 
@@ -42,4 +43,5 @@
 - If port 4330 already has this project's server, reuse `http://127.0.0.1:4330` and do not run `npm run dev` again.
 - Start the server only with `npm run dev`. Do not override its host or port; the project config fixes port 4330 and enables strict-port behavior to prevent automatic fallback to 4331 or later ports.
 - When a restart is necessary, stop the existing project server first, confirm port 4330 is free, and then start its replacement.
-- Stop any temporary server you started before handing the task back unless the user asked to leave it running.
+- Restart the project server after switching branches or changing `.env` so the local preview reflects the intended PR and configuration.
+- Leave the server running when providing the user's requested local PR preview. Stop other temporary validation servers before handing the task back unless the user asked to leave them running.
