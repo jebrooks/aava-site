@@ -22,7 +22,8 @@ Use each PR's current comment rather than copying that example's hostname for an
 If the comment is missing, open the Vercel project → Deployments, find the branch/commit with
 environment **Preview**, and open its deployment URL. If protection requests authentication,
 sign in with an account that has project access or ask the project owner for authorized access.
-Access-protection settings are managed in Vercel and are not defined in this repository.
+Manage Vercel Deployment Protection in the Vercel dashboard. The Astro storefront also supports
+an optional [shared password](#storefront-password) configured per environment.
 
 There is a preview per branch/deployment, rather than one fixed hostname for every PR.
 `https://aava-site.vercel.app` is the primary project alias; use the actual PR preview URL to review
@@ -68,6 +69,26 @@ write data. A Preview deployment is not a separate Shopify sandbox: with shared 
 forms, draft orders, bookings, catalog syncs, and email can affect the same external services as
 Production. Use an explicitly configured test store/payment setup for transaction testing.
 Current environment values and isolation must be checked in Vercel; they are not recorded here.
+
+## Storefront password
+
+To gate the Astro storefront, set `SITE_ACCESS_PASSWORD` as a sensitive server environment
+variable in Vercel. Use a long, randomly generated password. Configure Preview before pushing
+or redeploy the preview to test with the gate enabled. Set a separate value in Production before
+deploying the change there. The browser prompt uses the username `visitor` and the configured
+password. Use the HTTPS site URL and share the password through your password manager.
+
+Verify in a private window that the homepage and a deep link prompt for credentials, that a wrong
+password is rejected, and that the correct password opens the site. The gate covers Astro pages
+and APIs. Static assets are served by Vercel, and Shopify hosts its own checkout. The signed
+Shopify webhook and the two bearer-authenticated Vercel cron routes keep using their existing
+credentials. To confirm those routes reach their handlers without affecting Shopify, send an
+unsigned webhook POST with an `application/json` body and cron GETs without authorization. Each
+should return its own rejection without a browser password challenge.
+
+To change or remove the password, update or delete the variable and redeploy the affected
+environment. Previously generated deployment URLs retain their original configuration. Manage
+access to those URLs separately through Vercel Deployment Protection.
 
 ## Production and scheduled work
 
