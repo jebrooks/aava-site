@@ -19,6 +19,10 @@ project is [aava-site](https://vercel.com/jebrooks-projects/aava-site).
    running from this worktree on the PR branch. Leave that server running for the owner's review.
    Local review is a second option alongside the Vercel preview, not a replacement for its check.
 
+When presenting PR and preview review links (including local previews), open them in a new window
+of the system's default browser. Do not use the browser/display pane inside ChatGPT for these
+review links. Also include the PR and affected-page URLs in the final handoff for reference.
+
 For a verified example of these links, see the [Vercel comment on PR #18](https://github.com/jebrooks/aava-site/pull/18#issuecomment-6899782748).
 Use each PR's current comment rather than copying that example's hostname for another change.
 

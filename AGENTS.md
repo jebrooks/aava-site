@@ -25,6 +25,7 @@
 - Check both the Vercel deployment status and the separate `Catalog parity` Actions check before merging.
 - Open the PR's Vercel bot comment → **Preview** to review the site. **Ready** opens deployment details. Confirm the deployment matches the latest PR commit and include the preview URL, affected routes, and validation results in the handoff.
 - In the final handoff, include both the PR link and a direct link to an affected page on the PR's Vercel preview site. For multiple affected pages, include the most useful review links.
+- Open PR and preview review URLs (including local previews) in a new window of the system's default browser, rather than the browser/display pane inside ChatGPT. Keep the links in the final handoff for reference.
 - Also include matching local review links at `http://127.0.0.1:4330` for affected pages. Before sharing them, verify the development server is running from this worktree on the PR branch and leave it running for the user's local review. State that local links follow the current checkout rather than preserving an independent preview for every PR, and report any missing local service configuration.
 - Set required Vercel environment variables for **both Preview and Production**, and redeploy each affected environment after changes. GitHub Actions credentials are configured separately.
 - Confirm the configured external services before write-based preview testing: shared Shopify or email credentials can affect live services. Keep internal navigation relative so reviews stay on the preview host.
