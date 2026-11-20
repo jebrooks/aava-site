@@ -3,22 +3,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import TourPlanner from '../components/TourPlanner.astro';
+import { getTourPrices, type TourPrices } from '../lib/shopify/tour-prices';
 
 export const prerender = false;
+let prices: TourPrices | null = null;
+try {
+  prices = await getTourPrices();
+} catch {
+  console.error('Experiences tour prices unavailable.');
+}
+const money = (amount: string) => new Intl.NumberFormat('en-US', {
+  style: 'currency', currency: prices!.currencyCode, minimumFractionDigits: 0, maximumFractionDigits: 2,
+}).format(Number(amount));
+const unavailablePrice = prices && !prices.enabled
+  ? 'Tours currently unavailable'
+  : 'Check availability for current pricing';
 const tourTypes = [
   {
     tag: 'Meet new people',
     title: 'Public Tour',
     copy: 'A shared small-group experience through Virginia wine country for solo explorers, couples, and groups.',
     bullets: ['Up to 10 total guests', 'Curated winery visits', 'Transportation and a fresh sandwich', 'Charcuterie available as an add-on'],
-    price: 'Starting at $125 per person',
+    price: prices?.enabled ? `Starting at ${money(prices.seatPrice)} per person` : unavailablePrice,
   },
   {
     tag: 'Your group only',
     title: 'Private Tour',
     copy: 'An exclusive experience with personalized service, flexible timing, and the whole vehicle reserved for you.',
     bullets: ['No minimum guest count; up to 10 guests', 'Everything included in a public tour', 'Private vehicle for your group', 'More flexibility throughout the day'],
-    price: 'Starting at $1,250 per group',
+    price: prices?.enabled ? `Starting at ${money(prices.busPrice)} per group` : unavailablePrice,
   },
   {
     tag: 'Made for you',
@@ -38,6 +51,7 @@ const tourTypes = [
   <PageHero
     image="/images/hero-experiences.webp"
     title="Experiences"
+    cropped
     description="Slow down, unwind, and savor Virginia wine country—one winery, one handcrafted board, and one special moment at a time."
   >
     <div class="button-row">

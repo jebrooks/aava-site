@@ -5,6 +5,7 @@ interface Props {
   eyebrow?: string;
   description?: string;
   compact?: boolean;
+  cropped?: boolean;
   position?: string;
 }
 
@@ -14,14 +15,16 @@ const {
   eyebrow,
   description,
   compact = false,
+  cropped = false,
   position = 'center',
 } = Astro.props;
 ---
 
 <section
-  class:list={['page-hero', compact && 'page-hero--compact']}
+  class:list={['page-hero', compact && 'page-hero--compact', cropped && 'page-hero--cropped']}
   style={`--hero-image: url('${image}'); --hero-position: ${position};`}
 >
+  {cropped && <div class="page-hero__art" aria-hidden="true"></div>}
   <div class="page-hero__overlay"></div>
   <div class="page-hero__content container">
     {eyebrow && <p class="eyebrow eyebrow--light">{eyebrow}</p>}

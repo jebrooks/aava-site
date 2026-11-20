@@ -1,24 +1,9 @@
 ---
 import { listCharcuterieProducts } from '../lib/shopify/storefront';
-import { adminGraphql } from '../lib/shopify/client';
-import { parseTourSchedule } from '../lib/tour-schedule';
+import { getTourPrices } from '../lib/shopify/tour-prices';
 import { giftCardPriceGuide } from '../lib/gift-card-guide';
-import type { GiftTourPrices } from '../lib/gift-card-guide';
 
-async function tourPrices(): Promise<GiftTourPrices | null> {
-  const data = await adminGraphql<{
-    shop: { currencyCode: string };
-    metaobjectByHandle: { fields: Array<{ key: string; value: string | null }> } | null;
-  }>(`query GiftGuideTourPrices {
-    shop { currencyCode }
-    metaobjectByHandle(handle: { type: "tour_schedule", handle: "default" }) { fields { key value } }
-  }`);
-  if (!data.metaobjectByHandle) return null;
-  const schedule = parseTourSchedule(Object.fromEntries(data.metaobjectByHandle.fields.map(field => [field.key, field.value || ''])));
-  return { ...schedule, currencyCode: data.shop.currencyCode };
-}
-
-const [catalog, tours] = await Promise.allSettled([listCharcuterieProducts(), tourPrices()]);
+const [catalog, tours] = await Promise.allSettled([listCharcuterieProducts(), getTourPrices()]);
 if (catalog.status === 'rejected') console.error('Gift card guide catalog unavailable.');
 if (tours.status === 'rejected') console.error('Gift card guide tour prices unavailable.');
 const rows = giftCardPriceGuide(catalog.status === 'fulfilled' ? catalog.value.products.nodes : [],
