@@ -260,7 +260,7 @@ ol {
   z-index: 100;
   top: 0;
   height: 90px;
-  background: rgba(251, 251, 250, 0.95);
+  background: rgba(235, 231, 224, 0.97);
   border-bottom: 1px solid rgba(51, 47, 48, 0.08);
   backdrop-filter: blur(14px);
 }
