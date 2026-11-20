@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery } from '../src/lib/cart-edit.ts';
+import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery, cartCopyWithDeliveryWindow } from '../src/lib/cart-edit.ts';
 const fixture = () => ({
   attributes: [{key:'Checkout locked',value:'true'},{key:'Delivery ZIP',value:'22205'}],
   lines: {nodes: [
@@ -64,6 +64,25 @@ const deliveryCart = () => ({
     ]},
     {id:'slot',quantity:1,merchandise:{id:'slot-variant',requiresShipping:true,product:{handle:'delivery-slot-2026-11-20'}},attributes:[]},
   ]},
+});
+
+test('checkout displays the validated delivery window without changing the original checkout or gift details', () => {
+  const cart=deliveryCart();const original=structuredClone(cart);
+  cart.lines.nodes[1].attributes=[{key:'Delivery window',value:'Stale window'},{key:'Note',value:'Keep'}];
+  const snapshot=structuredClone(cart);
+  const input=cartCopyWithDeliveryWindow(cart,'slot',{date:'2026-12-02',label:'1:00–3:00 PM'});
+  assert.deepEqual(input.lines[1].attributes,[
+    {key:'Note',value:'Keep'},
+    {key:'Delivery date',value:'2026-12-02'},
+    {key:'Delivery window',value:'1:00–3:00 PM'},
+    {key:'Delivery timezone',value:'America/New_York'},
+  ]);
+  assert.deepEqual(input.lines[0].attributes,original.lines.nodes[0].attributes);
+  assert.ok(!input.attributes.some(a=>a.key==='Checkout locked'));
+  assert.deepEqual(cart,snapshot);
+  cart.lines.nodes[1].attributes=input.lines[1].attributes;
+  assert.equal(cartCopyWithDeliveryWindow(cart,'slot',{date:'2026-12-02',label:'1:00–3:00 PM'}),null);
+  assert.throws(()=>cartCopyWithDeliveryWindow(cart,'gift',{date:'2026-12-02',label:'1:00–3:00 PM'}),/reservation not found/);
 });
 
 test('digital-only cleanup drops the shipping slot and delivery metadata, preserving gifts and the original checkout', () => {
