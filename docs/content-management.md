@@ -111,6 +111,10 @@ charcuterie collection and are published to the configured Headless storefront. 
 details and the menu after edits. Automated delivery dates, tour seats, bus bundles, and on-tour
 board variants are maintained by synchronization code; do not use them as ordinary editable content.
 
+Catalog cards show an exact price when all currently available choices cost the same. Multi-size
+boards with different prices show “From” and the lowest available price. Other products with
+different prices, such as gift-card denominations, show a price range.
+
 Do not rerun the Squarespace importer to make routine product edits: applying an import resets
 imported inventory to the input file. Preserve inventory, bundle relationships, order history,
 and migration provenance. Provisioning and reconciliation details live in [SHOPIFY.md](../SHOPIFY.md).
