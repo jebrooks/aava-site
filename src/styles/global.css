@@ -869,6 +869,15 @@ ol {
   text-transform: uppercase;
 }
 
+.product-card .product-card__servings {
+  margin: 0.6rem 0 0.8rem;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .about-hero {
   overflow: hidden;
   background: linear-gradient(135deg, #dbe8e0, #efe9d7);

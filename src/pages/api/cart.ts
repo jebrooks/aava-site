@@ -5,6 +5,7 @@ import { ShopifyApiError } from '../../lib/shopify/client';
 import { assertDeliverySlotAvailable } from '../../lib/shopify/schedule';
 import { boardAttributes, assertBoardLine } from '../../lib/board-customization';
 import { giftCardAttributes, assertGiftCardLine } from '../../lib/gift-card';
+import { servingAttributes } from '../../lib/serving-size';
 import {
   addCartLine,
   assertCatalogVariant,
@@ -17,6 +18,7 @@ import {
   replaceDeliverySlot,
   updateCartAttributes,
   updateCartLine,
+  ensureCartServingCounts,
 } from '../../lib/shopify/storefront';
 
 export const prerender = false;
@@ -72,6 +74,7 @@ export const POST: APIRoute = async ({ request }) => {
         attributes = [
           ...boardAttributes(variant.product.handle, body.selections),
           ...giftCardAttributes(variant.product.isGiftCard, body.giftCard),
+          ...(!variant.product.isGiftCard ? servingAttributes(variant.product, variant) : []),
         ];
       } catch (error) {
         throw new ShopifyApiError((error as Error).message, 400);
@@ -188,6 +191,7 @@ export const POST: APIRoute = async ({ request }) => {
         );
       }
       cart = await removeUnusedDelivery(cart);
+      cart = await ensureCartServingCounts(cart);
       const lockedCart = isCheckoutLocked(cart)
         ? cart
         : await updateCartAttributes(cart.id, [

@@ -7,6 +7,7 @@ import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
 import BoardCustomizer from '../../../components/BoardCustomizer.astro';
 import GiftCardRecipient from '../../../components/GiftCardRecipient.astro';
 import GiftCardPriceGuide from '../../../components/GiftCardPriceGuide.astro';
+import { servingCount, variantServingLabel } from '../../../lib/serving-size';
 
 export const prerender = false;
 
@@ -77,19 +78,21 @@ const productSchema = product && initialVariant ? {
           <p class="eyebrow">{product.isGiftCard ? 'For wine tours & charcuterie' : 'Handcrafted charcuterie'}</p>
           <h1>{product.title}</h1>
           {!product.isGiftCard && <p class="product-detail__price" data-product-price>{formatMoney(initialVariant.price)}</p>}
-          {product.servingCount?.value && <p><strong>Serves:</strong> {product.servingCount.value}</p>}
+          {!product.isGiftCard && <p data-product-servings hidden={!servingCount(product, initialVariant)}>
+            <strong>Serves:</strong> <span data-serving-count>{servingCount(product, initialVariant)}</span>
+          </p>}
           <div class="product-description" set:html={product.descriptionHtml} />
 
           {product.isGiftCard && <GiftCardPriceGuide />}
 
-          <form class="product-form" data-product-form data-product-handle={handle} data-variants={JSON.stringify(variants)}>
+          <form class="product-form" data-product-form data-product-handle={handle} data-product-serving-count={product.servingCount?.value || ''} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
               <label>
                 <span>{product.isGiftCard ? 'Choose a gift card amount' : 'Choose an option'}</span>
                 <select name="variant" data-variant-select>
                   {variants.map((variant) => (
                     <option value={variant.id} disabled={!variant.availableForSale} selected={variant.id === initialVariant.id}>
-                      {product.isGiftCard ? formatMoney(variant.price) : `${variant.title} — ${formatMoney(variant.price)}`}{!variant.availableForSale ? ' — Sold out' : ''}
+                      {product.isGiftCard ? formatMoney(variant.price) : `${variantServingLabel(product, variant)} — ${formatMoney(variant.price)}`}{!variant.availableForSale ? ' — Sold out' : ''}
                     </option>
                   ))}
                 </select>
@@ -134,12 +137,14 @@ const productSchema = product && initialVariant ? {
     import type { Money, ProductVariant } from '../../../lib/shopify/types';
     import { boardAttributes, getBoardConfiguration } from '../../../lib/board-customization';
     import { giftCardAttributes } from '../../../lib/gift-card';
+    import { servingCount } from '../../../lib/serving-size';
 
     const form = document.querySelector<HTMLFormElement>('[data-product-form]');
     const variantSelect = document.querySelector<HTMLSelectElement | HTMLInputElement>('[data-variant-select]');
     const price = document.querySelector<HTMLElement>('[data-product-price]');
     const status = document.querySelector<HTMLElement>('[data-form-status]');
     const variants = JSON.parse(form?.getAttribute('data-variants') || '[]') as ProductVariant[];
+    const servingProduct = { servingCount: { value: form?.dataset.productServingCount || '' } };
     const money = (value: Money) => new Intl.NumberFormat('en-US', {
       style: 'currency', currency: value.currencyCode,
     }).format(Number(value.amount));
@@ -147,6 +152,13 @@ const productSchema = product && initialVariant ? {
     variantSelect?.addEventListener('change', () => {
       const variant = variants.find((item) => item.id === variantSelect.value);
       if (variant && price) price.textContent = money(variant.price);
+      const servings = document.querySelector<HTMLElement>('[data-product-servings]');
+      const count = variant ? servingCount(servingProduct, variant) : null;
+      if (servings) {
+        servings.hidden = !count;
+        const value = servings.querySelector('[data-serving-count]');
+        if (value) value.textContent = count ? String(count) : '';
+      }
     });
 
     form?.addEventListener('submit', async (event) => {

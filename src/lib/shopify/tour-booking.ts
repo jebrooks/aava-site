@@ -3,6 +3,7 @@ import { BLACKOUT_SOURCE } from '../blackout-dates.ts';
 import { isTourVariant, deliveryVariantTitle } from "../tour-fulfillment.ts";
 import { resolveTourBoard } from "./tour-board-sync.ts";
 import { randomUUID } from "node:crypto";
+import { productServingLabel, servingAttributes } from '../serving-size.ts';
 import {
   boardAttributes,
   getBoardConfiguration,
@@ -33,6 +34,7 @@ interface BookingVariant {
   requiresShipping: boolean;
   price: BookingMoney;
   selectedOptions: Array<{ name: string; value: string }>;
+  servingCount?: { value: string } | null;
 }
 interface BookingProduct {
   id: string;
@@ -57,7 +59,7 @@ export interface TourBookingDependencies {
   now?: () => Date;
   collectionHandle?: string;
 }
-const variantFields = `id title availableForSale quantityAvailable requiresShipping price{amount currencyCode} selectedOptions{name value}`;
+const variantFields = `id title availableForSale quantityAvailable requiresShipping price{amount currencyCode} selectedOptions{name value} servingCount:metafield(namespace:"custom",key:"serving_count"){value}`;
 export function tourBookingService(deps: TourBookingDependencies) {
   async function schedule() {
     const data = await deps.admin<{
@@ -86,6 +88,8 @@ export function tourBookingService(deps: TourBookingDependencies) {
       image: string | null;
       variants: BookingVariant[];
       customization: ReturnType<typeof getBoardConfiguration>;
+      servingCount?: { value: string } | null;
+      servingLabel: string;
     }> = [];
     let after: string | null = null;
     do {
@@ -96,6 +100,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
               BookingProduct & {
                 title: string;
                 featuredImage: { url: string } | null;
+                servingCount?: { value: string } | null;
               }
             >;
             pageInfo: { hasNextPage: boolean; endCursor: string | null };
@@ -103,7 +108,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
         } | null;
       } = await deps.storefront(
         `query TourCatalogBoards($handle:String!,$after:String){collection(handle:$handle){
-          products(first:50,after:$after){nodes{id handle title tags featuredImage{url} variants(first:100){nodes{${variantFields}}}}
+          products(first:50,after:$after){nodes{id handle title tags featuredImage{url} servingCount:metafield(namespace:"custom",key:"serving_count"){value} variants(first:100){nodes{${variantFields}}}}
             pageInfo{hasNextPage endCursor}}
         }}`,
         { handle: deps.collectionHandle || "charcuterie", after },
@@ -125,6 +130,8 @@ export function tourBookingService(deps: TourBookingDependencies) {
             image: product.featuredImage?.url || null,
             variants,
             customization: getBoardConfiguration(product.handle),
+            servingCount: product.servingCount,
+            servingLabel: productServingLabel({ ...product, variants: { nodes: variants } }),
           });
       }
       after = data.collection.products.pageInfo.hasNextPage
@@ -306,6 +313,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
         attributes: [
           ...lineAttributes.filter((attribute) => attribute.key !== "Destination"),
           ...selections,
+          ...servingAttributes(board, addon),
           {
             key: "Fulfillment",
             value: "Provided on the bus",

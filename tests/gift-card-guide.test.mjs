@@ -10,11 +10,11 @@ const tours = { enabled: true, seatPrice: '125.00', busPrice: '1250.00', currenc
 
 test('groups serving sizes from Shopify and rounds charcuterie guidance', () => {
   const rows = giftCardPriceGuide([
-    product('Custom vegetarian (serves 4)', [variant(40)]),
-    product('Signature boards', [variant(59, 'Small (serves 4)'), variant(175, 'Large (serves 10)')]),
-    product('Custom board (serves 8)', [variant(70)]),
-    product('Custom board (serves 15)', [variant(262)]),
-    product('Custom board (serves 6)', [variant(62)]),
+    product('Custom vegetarian', [variant(40)], { servingCount: { value: '4' } }),
+    product('Signature boards', [variant(59, 'Small', { servingCount: { value: '4' } }), variant(175, 'Large', { servingCount: { value: '10' } })]),
+    product('Custom board', [variant(70)], { servingCount: { value: '8' } }),
+    product('Custom board', [variant(262)], { servingCount: { value: '15' } }),
+    product('Custom board', [variant(62)], { servingCount: { value: '6' } }),
   ], tours);
   assert.deepEqual(rows.map(row => [row.label, row.minimum.amount, row.approximate]), [
     ['Charcuterie — serves 4', '50.00', true],
@@ -28,8 +28,8 @@ test('groups serving sizes from Shopify and rounds charcuterie guidance', () => 
 
 test('price changes flow into estimates and tour guidance without fixed price fallbacks', () => {
   const rows = giftCardPriceGuide([
-    product('Board (serves 4)', [variant(100)]),
-    product('Board (serves 10)', [variant(180), variant(210)]),
+    product('Board', [variant(100)], { servingCount: { value: '4' } }),
+    product('Board', [variant(180), variant(210)], { servingCount: { value: '10' } }),
   ], { ...tours, seatPrice: '140.00', busPrice: '1400.00' });
   assert.equal(rows[0].minimum.amount, '100.00');
   assert.deepEqual([rows[1].minimum.amount, rows[1].maximum.amount], ['200.00', '200.00']);
@@ -44,15 +44,15 @@ test('excludes unavailable variants, gift cards, tour counterparts and operation
     product('Delivery (serves 4)', [variant(1000)], { tags: ['delivery-slot'] }),
     product('Tour (serves 4)', [variant(1000)], { tags: ['scheduled-tour'] }),
     product('Board (serves 4)', [variant(59), variant(999, '', { availableForSale: false }),
-      variant(999, '', { selectedOptions: [{ name: 'Fulfillment', value: 'On tour' }] }), variant('invalid'), variant(0)]),
+      variant(999, '', { selectedOptions: [{ name: 'Fulfillment', value: 'On tour' }] }), variant('invalid'), variant(0)], { servingCount: { value: '4' } }),
   ], null);
   assert.equal(rows.length, 1);
   assert.equal(rows[0].minimum.amount, '50.00');
 });
 
-test('variant serving options override product-level servings; metadata supplies missing sizes', () => {
+test('variant serving fields override product fields; names do not supply missing sizes', () => {
   const rows = giftCardPriceGuide([
-    product('Board (serves 15)', [variant(175, 'Default Title', { selectedOptions: [{ name: 'Size', value: 'Large (serves 10)' }] })]),
+    product('Board (serves 15)', [variant(175, 'Large (serves 4)', { servingCount: { value: '10' } })], { servingCount: { value: '15' } }),
     product('Board', [variant(70)], { servingCount: { value: '8' } }),
     product('Unspecified board', [variant(500)]),
     product('Board (serves 10-15)', [variant(500)]),
@@ -62,6 +62,6 @@ test('variant serving options override product-level servings; metadata supplies
 
 test('never combines currencies into one price range', () => {
   const rows = giftCardPriceGuide([product('Board (serves 10)', [variant(175),
-    variant(200, '', { price: { amount: '200', currencyCode: 'CAD' } })])], null);
+    variant(200, '', { price: { amount: '200', currencyCode: 'CAD' } })], { servingCount: { value: '10' } })], null);
   assert.deepEqual(rows, []);
 });

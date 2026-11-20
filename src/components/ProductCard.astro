@@ -2,13 +2,25 @@
 import { formatMoney } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../lib/product-image';
+import { productServingLabel, servingCount } from '../lib/serving-size';
 
 interface Props {
   product: ShopifyProduct;
 }
 
 const { product } = Astro.props;
-const firstVariant = product.variants.nodes[0];
+const servings = productServingLabel(product);
+const availableVariants = product.variants.nodes.filter(variant => variant.availableForSale);
+const pricedVariants = [...(availableVariants.length ? availableVariants : product.variants.nodes)]
+  .sort((a, b) => Number(a.price.amount) - Number(b.price.amount));
+const minimum = pricedVariants[0]?.price;
+const maximum = pricedVariants.at(-1)?.price;
+const multipleSizes = product.options.some(option => option.name.toLowerCase() === 'size' && option.values.length > 1) ||
+  new Set(product.variants.nodes.map(variant => servingCount(product, variant)).filter(count => count !== null)).size > 1;
+const priceLabel = !minimum || !maximum ? 'View board'
+  : Number(minimum.amount) === Number(maximum.amount) ? formatMoney(minimum)
+  : multipleSizes ? `From ${formatMoney(minimum)}`
+  : `${formatMoney(minimum)}–${formatMoney(maximum)}`;
 const image = product.featuredImage;
 const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;
 const imageAlt = image?.altText || (image ? product.title : DEFAULT_PRODUCT_IMAGE.alt);
@@ -32,8 +44,9 @@ const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
   </div>
   <div class="product-card__body">
     <h3>{product.title}</h3>
+    {servings && <p class="product-card__servings">{servings}</p>}
     <p class="product-card__price">
-      {firstVariant ? `From ${formatMoney(firstVariant.price)}` : 'View board'}
+      {priceLabel}
     </p>
     {!product.availableForSale && <p class="stock-status">Currently unavailable</p>}
   </div>

@@ -1,4 +1,5 @@
 import { boardAttributes } from "../lib/board-customization";
+import { variantServingLabel } from '../lib/serving-size';
 import type { tourBookingService } from "../lib/shopify/tour-booking";
 type Availability = Awaited<
   ReturnType<ReturnType<typeof tourBookingService>["availability"]>
@@ -360,7 +361,7 @@ function initialize(root: HTMLElement) {
       for (const variant of board.variants) {
         const option = document.createElement("option");
         option.value = variant.id;
-        option.textContent = `${variant.title === "Default Title" ? "Standard board" : variant.title} — ${money(variant.price.amount, variant.price.currencyCode)}`;
+        option.textContent = `${variantServingLabel(board, variant)} — ${money(variant.price.amount, variant.price.currencyCode)}`;
         variants.append(option);
       }
       if (
@@ -401,7 +402,7 @@ function initialize(root: HTMLElement) {
     for (const product of data?.addons || []) {
       const option = document.createElement("option");
       option.value = product.handle;
-      option.textContent = product.title;
+      option.textContent = `${product.title}${product.servingLabel ? ` — ${product.servingLabel}` : ''}`;
       select.append(option);
     }
     const selected = data?.addons.find(

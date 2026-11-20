@@ -1,5 +1,5 @@
 import { relativeSiteLinks } from '../site-links';
-import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery } from '../cart-edit';
+import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery, cartCopyWithServingCounts } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
@@ -31,6 +31,7 @@ const PRODUCT_FIELDS = `#graphql
         price { amount currencyCode }
         compareAtPrice { amount currencyCode }
         image { url altText width height }
+        servingCount: metafield(namespace: "custom", key: "serving_count") { value }
       }
     }
     servingCount: metafield(namespace: "custom", key: "serving_count") { value }
@@ -69,7 +70,8 @@ const CART_FIELDS = `#graphql
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
             image { url altText width height }
-            product { handle title isGiftCard }
+            servingCount: metafield(namespace: "custom", key: "serving_count") { value }
+            product { handle title isGiftCard servingCount: metafield(namespace: "custom", key: "serving_count") { value } }
           }
         }
       }
@@ -153,12 +155,14 @@ export async function assertCatalogVariant(variantId: string) {
     node: {
       id: string;
       availableForSale: boolean;
+      servingCount?: { value: string } | null;
       selectedOptions: Array<{name:string;value:string}>;
       product: {
         handle: string;
         isGiftCard: boolean;
         tags: string[];
         collections: { nodes: Array<{ handle: string }> };
+        servingCount?: { value: string } | null;
       };
     } | null;
   }>(
@@ -169,7 +173,8 @@ export async function assertCatalogVariant(variantId: string) {
           id
           availableForSale
           selectedOptions {name value}
-          product { handle isGiftCard tags collections(first: 20) { nodes { handle } } }
+          servingCount: metafield(namespace: "custom", key: "serving_count") { value }
+          product { handle isGiftCard tags collections(first: 20) { nodes { handle } } servingCount: metafield(namespace: "custom", key: "serving_count") { value } }
         }
       }
     }`,
@@ -257,6 +262,11 @@ export function copyCartWithAddedLine(cart: ShopifyCart, merchandiseId: string, 
 
 export function removeUnusedDelivery(cart: ShopifyCart) {
   const input = cartCopyWithoutUnusedDelivery(cart);
+  return input ? createCartCopy(input) : Promise.resolve(cart);
+}
+
+export function ensureCartServingCounts(cart: ShopifyCart) {
+  const input = cartCopyWithServingCounts(cart);
   return input ? createCartCopy(input) : Promise.resolve(cart);
 }
 

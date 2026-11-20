@@ -13,7 +13,8 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Tour operating days, notice, horizon, enabled state, prices | Shopify → Content → Metaobjects → Tour schedule, handle `default` | No; reconcile generated date products after edits |
 | Business closures for both tours and delivery | Shopify → Content → Metaobjects → Blackout dates → Business blackout dates | No; availability checks use the list directly; catalog reconciliation follows |
 | Products, descriptions, product images, variants, prices, inventory | Shopify → Products; charcuterie collection and Headless publication | No; verify storefront visibility |
-| Serving counts, ingredients, allergens, dietary labels, preparation hours | Shopify product metafields under `custom` | No |
+| Serving counts | Shopify product/variant `custom.serving_count`; see Serving sizes below | No |
+| Ingredients, allergens, dietary labels, preparation hours | Shopify product metafields under `custom` | No |
 | Marketing copy, FAQs, inquiry prompts, page-specific SEO | Matching files in `src/pages/`; shared components in `src/components/` | Yes |
 | Company contact details, navigation, social links, featured boards | `src/data/site.ts` | Yes |
 | Build-your-own ingredient options and size limits | `src/data/board-customizations.json` | Yes |
@@ -110,9 +111,68 @@ charcuterie collection and are published to the configured Headless storefront. 
 details and the menu after edits. Automated delivery dates, tour seats, bus bundles, and on-tour
 board variants are maintained by synchronization code; do not use them as ordinary editable content.
 
+Catalog cards show an exact price when all currently available choices cost the same. Multi-size
+boards with different prices show “From” and the lowest available price. Other products with
+different prices, such as gift-card denominations, show a price range.
+
 Do not rerun the Squarespace importer to make routine product edits: applying an import resets
 imported inventory to the input file. Preserve inventory, bundle relationships, order history,
 and migration provenance. Provisioning and reconciliation details live in [SHOPIFY.md](../SHOPIFY.md).
+
+### Serving sizes
+
+Keep serving counts in Shopify **Serving count** (`custom.serving_count`), as a positive whole
+number such as `4`, not `Serves 4`. Both definitions use `single_line_text_field` and must have
+Storefront access set to `PUBLIC_READ`.
+
+- Single-size boards: set the product metafield. All its fulfillment variants inherit that count.
+- Multi-size boards: leave the product field blank and set each variant's metafield. For example,
+  both Delivery and On tour variants of Small serve `4`; both Large variants serve `10`.
+- Spell out size names such as Small, Medium, Large, and Extra Extra Large where they distinguish choices; remove serving
+  counts from titles, size-option names, and descriptions. Do not infer counts from size names:
+  existing Medium custom boards have different documented counts.
+
+The site renders counts from these fields on product cards, the selected product option, the cart,
+and tour board selectors. Variant counts take precedence over product counts. The gift-card guide
+also uses these fields; it does not parse titles or option names. Product pages update the count
+when the selected variant changes. On-tour synchronization copies variant serving counts from
+delivery variants to their counterparts. Maintain the delivery source and let synchronization
+maintain generated counterparts; see the Shopify runbook.
+
+New cart and tour add-on lines receive a server-derived **Serves** line property, per board, so
+the count travels with the Shopify checkout/order line. Before handoff, older carts missing the
+property are copied with current counts while preserving delivery, gift and ingredient selections;
+the original open checkout is left intact. Previously placed orders are not edited. Custom email
+notification templates may need separate review to ensure they display line properties.
+
+#### Migrating existing copy
+
+Use `scripts/shopify/migrate-serving-sizes.mjs`, rather than rerunning setup/import scripts.
+It derives counts only from explicit existing serving statements and stops for missing or
+conflicting data. Review its snapshot and proposed title/description/option changes before writes.
+
+```sh
+node --env-file=.env scripts/shopify/migrate-serving-sizes.mjs --phase=plan --snapshot=/absolute/path/serving-sizes.json
+node --env-file=.env scripts/shopify/migrate-serving-sizes.mjs --phase=fields --snapshot=/absolute/path/serving-sizes.json
+```
+
+The plan step is read-only in Shopify and creates a new local snapshot without overwriting an
+existing file. The fields step creates/exposes the definitions and populates counts while keeping
+all copy unchanged. Verify the counts through Storefront and review the new site display in a PR.
+**Deploy the site support before removing the old copy**; the older production gift-card guide
+and tour selector still depend on names. Then run:
+
+```sh
+node --env-file=.env scripts/shopify/migrate-serving-sizes.mjs --phase=cleanup --snapshot=/absolute/path/serving-sizes.json --production-url=https://aava-site.vercel.app
+```
+
+Use the verified production host. Cleanup checks production product pages for field-aware display,
+confirms the populated fields, and preserves product handles, option-value IDs, variant IDs,
+prices, inventory settings, and tour source relationships. It changes existing option values in
+place with `LEAVE_AS_IS`; it does not recreate variants. Re-running the same snapshot resumes
+completed cleanup steps, but unrelated catalog edits stop it for review. Keep the snapshot outside
+source control for recovery. Verify catalog cards, product choices, cart, gift guide and tour
+board choices after cleanup. `npm run test:cart` and `npm run test:booking` cover this behavior.
 
 ## Repository content changes
 
@@ -143,8 +203,8 @@ or unconfigured, the page offers a gift-certificate inquiry instead.
 Gift-card amount choices are read directly from the product's Shopify variants and sorted by
 price; add or remove denominations in Shopify, with no code change needed. The price guide on
 the gift-card product page also reads Shopify on each page request. Charcuterie prices come
-from available, published delivery variants grouped by serving count in variant options,
-variant titles, `custom.serving_count`, or product titles (in that order). Gift cards, delivery
+from available, published delivery variants grouped by variant `custom.serving_count`, falling
+back to the product's `custom.serving_count`. Gift cards, delivery
 slots, scheduled tours, and on-tour variants are excluded. The displayed groups are serves 4,
 8, 10, and 15. All charcuterie groups show approximate guidance: the midpoint of the current
 price range, rounded to the nearest $25 (minimum $25).

@@ -63,6 +63,7 @@ function fixture() {
   });
   const source = {
     ...makeVariant(sourceId, "59.00", true),
+    servingCount: { value: '4' },
     quantityAvailable: 0,
     selectedOptions: [{name: "Fulfillment", value: "Delivery"}],
   };
@@ -344,12 +345,24 @@ test("catalog boards resolve to non-shipping counterparts at the normal price wi
   });
   assert.equal(state.cartInput.lines[1].merchandiseId, tourId);
   assert.equal(state.cartInput.lines[1].quantity, 2);
+  assert.ok(state.cartInput.lines[1].attributes.some(attribute => attribute.key === 'Serves' && attribute.value === '4'));
   assert.equal(state.cartInput.buyerIdentity.preferences, undefined);
   assert.ok(
     state.cartInput.lines[1].attributes.some(
       (a) => a.key === "Fulfillment" && a.value === "Provided on the bus",
     ),
   );
+});
+
+test('tour board availability carries variant counts and product fallback counts', async () => {
+  const { product, service } = fixture();
+  const available = await service.availability('public', 2);
+  assert.equal(available.addons[0].servingLabel, 'Serves 4');
+  assert.equal(available.addons[0].variants[0].servingCount.value, '4');
+  delete product.variants.nodes[0].servingCount;
+  product.servingCount = { value: '10' };
+  const single = await service.availability('public', 2);
+  assert.equal(single.addons[0].servingLabel, 'Serves 10');
 });
 test("only the tour line includes destination; board fulfillment is clear for public and private tours", async () => {
   for (const tourType of ["public", "private"]) {

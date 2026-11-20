@@ -1,5 +1,6 @@
 import type { ShopifyProduct, Money } from './shopify/types.ts';
 import { isTourVariant } from './tour-fulfillment.ts';
+import { servingCount } from './serving-size.ts';
 
 export interface GiftPriceRow {
   label: string;
@@ -14,22 +15,13 @@ export interface GiftTourPrices {
   enabled: boolean;
 }
 
-function servings(value: string): number | null {
-  const match = value.match(/\bserves\s+(\d+)(?![\d–-])/i);
-  return match ? Number(match[1]) : null;
-}
-
 export function giftCardPriceGuide(products: ShopifyProduct[], tours: GiftTourPrices | null): GiftPriceRow[] {
   const groups = new Map<number, Money[]>();
   for (const product of products) {
     if (product.isGiftCard || product.tags.includes('delivery-slot') || product.tags.includes('scheduled-tour')) continue;
     for (const variant of product.variants.nodes) {
       if (!variant.availableForSale || isTourVariant(variant)) continue;
-      const metadata = product.servingCount?.value.trim() || '';
-      const count = servings(variant.selectedOptions.map(option => option.value).join(' / '))
-        ?? servings(variant.title)
-        ?? (/^\d+$/.test(metadata) ? Number(metadata) : servings(metadata))
-        ?? servings(product.title);
+      const count = servingCount(product, variant);
       const amount = Number(variant.price.amount);
       if (!count || ![4, 8, 10, 15].includes(count) || !Number.isFinite(amount) || amount <= 0) continue;
       groups.set(count, [...(groups.get(count) || []), variant.price]);
