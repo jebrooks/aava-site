@@ -1298,11 +1298,11 @@ ol {
   }
 
   .about-hero__inner {
-    padding-top: 3rem;
+    padding-top: clamp(3rem, 6vw, 5.5rem);
   }
 
   .about-hero__copy {
-    padding: 2rem 0 0;
+    padding: 0;
     text-align: center;
   }
 
@@ -1348,6 +1348,10 @@ ol {
 
   .section {
     padding-block: 2.75rem;
+  }
+
+  .about-hero__inner {
+    padding-top: 2.75rem;
   }
 
   .announcement {
