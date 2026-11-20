@@ -11,6 +11,12 @@ export function cleanServingText(text) {
     .trim();
 }
 
+export function cleanProductTitle(title) {
+  const sizes = { S: 'Small', M: 'Medium', L: 'Large', XL: 'Extra Large', XXL: 'Extra Extra Large' };
+  return cleanServingText(title).replace(/(\(\s*|[-–—]\s*)(XXL|XL|L|M|S)(?=\s*\)?$)/gi,
+    (_match, prefix, size) => `${prefix}${sizes[size.toUpperCase()]}`);
+}
+
 export function servingSizePlan(product) {
   if (product.productType !== 'Charcuterie' || product.tags.includes('scheduled-tour') ||
     product.tags.includes('delivery-slot') || product.variants.pageInfo.hasNextPage) {
@@ -43,6 +49,6 @@ export function servingSizePlan(product) {
   const metafields = counts.length === 1 ? [{ ownerId: product.id, value: String(counts[0]), current: product.servingCount }]
     : variants.map(variant => ({ ownerId: variant.id, value: String(variant.count), current: variant.current }));
   return { id: product.id, handle: product.handle, before: product,
-    title: cleanServingText(product.title), descriptionHtml: cleanServingText(product.descriptionHtml),
+    title: cleanProductTitle(product.title), descriptionHtml: cleanServingText(product.descriptionHtml),
     options, metafields, counts };
 }

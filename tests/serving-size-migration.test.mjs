@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanServingText, servingSizePlan } from '../scripts/shopify/serving-size-plan.mjs';
+import { cleanServingText, servingSizePlan, cleanProductTitle } from '../scripts/shopify/serving-size-plan.mjs';
 
 const variant = (id, size) => ({ id, selectedOptions: [{ name: 'Size', value: size }], servingCount: null });
 const product = changes => ({ id: 'board', handle: 'board', productType: 'Charcuterie', tags: [],
@@ -16,6 +16,10 @@ test('single-size migration uses explicit evidence and retains size names and de
   assert.deepEqual(plan.metafields.map(({ ownerId, value }) => ({ ownerId, value })), [{ ownerId: 'board', value: '10' }]);
   assert.equal(cleanServingText('Custom board - XXL (serves 15)'), 'Custom board - XXL');
   assert.equal(cleanServingText('Small (serves ~4)'), 'Small');
+  assert.equal(cleanProductTitle('Custom Vegetarian Board - M (serves 8)'), 'Custom Vegetarian Board - Medium');
+  assert.equal(cleanProductTitle('Custom Vegetarian Board - S (serves 4)'), 'Custom Vegetarian Board - Small');
+  assert.equal(cleanProductTitle('Custom Charcuterie - XXL (serves 15)'), 'Custom Charcuterie - Extra Extra Large');
+  assert.equal(cleanProductTitle('Build-Your-Own (S)'), 'Build-Your-Own (Small)');
 });
 
 test('multi-size migration populates each existing variant and renames option values in place', () => {

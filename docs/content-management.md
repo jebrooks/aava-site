@@ -124,7 +124,7 @@ Storefront access set to `PUBLIC_READ`.
 - Single-size boards: set the product metafield. All its fulfillment variants inherit that count.
 - Multi-size boards: leave the product field blank and set each variant's metafield. For example,
   both Delivery and On tour variants of Small serve `4`; both Large variants serve `10`.
-- Keep size names such as Small, Large, M, and XXL where they distinguish choices; remove serving
+- Spell out size names such as Small, Medium, Large, and Extra Extra Large where they distinguish choices; remove serving
   counts from titles, size-option names, and descriptions. Do not infer counts from size names:
   existing Medium custom boards have different documented counts.
 

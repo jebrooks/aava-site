@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { adminGraphql, assertUserErrors } from './lib.mjs';
-import { servingSizePlan } from './serving-size-plan.mjs';
+import { servingSizePlan, cleanProductTitle } from './serving-size-plan.mjs';
 
 const args = process.argv.slice(2);
 const phase = args.find(arg => arg.startsWith('--phase='))?.slice(8) || 'plan';
@@ -39,7 +39,8 @@ if (phase === 'plan') {
   process.exit(0);
 }
 
-const plans = JSON.parse(await readFile(snapshot, 'utf8'));
+const plans = JSON.parse(await readFile(snapshot, 'utf8'))
+  .map(plan => ({ ...plan, title: cleanProductTitle(plan.before.title) }));
 if (phase === 'fields') {
   // Serving counts are customer-facing product information, explicitly exposed to Headless.
   for (const ownerType of ['PRODUCT', 'PRODUCTVARIANT']) {
