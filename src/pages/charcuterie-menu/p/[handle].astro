@@ -64,15 +64,15 @@ const productSchema = product && initialVariant ? {
   {productSchema && <script is:inline type="application/ld+json" set:html={JSON.stringify(productSchema)} />}
   {product && initialVariant ? (
     <section class="section product-detail">
-      <div class="container product-detail__grid">
-        <div class="product-gallery">
+      <div class:list={['container', 'product-detail__grid', product.isGiftCard && 'product-detail__grid--gift-card']}>
+        {!product.isGiftCard && <div class="product-gallery">
           <img
             src={imageSrc}
             alt={imageAlt}
             width={imageWidth}
             height={imageHeight}
           />
-        </div>
+        </div>}
         <div class="product-detail__content">
           <p class="eyebrow">{product.isGiftCard ? 'For wine tours & charcuterie' : 'Handcrafted charcuterie'}</p>
           <h1>{product.title}</h1>

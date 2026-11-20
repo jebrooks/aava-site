@@ -121,11 +121,11 @@ ol {
 }
 
 .section {
-  padding-block: clamp(4.5rem, 9vw, 8.5rem);
+  padding-block: clamp(3rem, 6vw, 5.5rem);
 }
 
 .section--tight {
-  padding-block: clamp(3.5rem, 6vw, 5.5rem);
+  padding-block: clamp(2.5rem, 4vw, 4rem);
 }
 
 .section--cream {
@@ -462,6 +462,26 @@ ol {
 
 .page-hero--compact {
   min-height: clamp(410px, 58vw, 620px);
+}
+
+.page-hero--cropped {
+  --hero-art-height: min(760px, calc(100svh - 124px));
+  min-height: 440px;
+  background-image: none;
+}
+
+/* Retain the full-height hero's artwork scale, clipping its top and bottom. */
+.page-hero__art {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: max(100%, var(--hero-art-height));
+  transform: translateY(-50%);
+  background: var(--hero-image) var(--hero-position) / cover;
+}
+
+.page-hero--cropped .page-hero__content {
+  padding-block: 2rem;
 }
 
 .page-hero__overlay {
@@ -856,14 +876,14 @@ ol {
 
 .about-hero__inner {
   display: grid;
-  min-height: min(690px, calc(100svh - 124px));
+  min-height: min(580px, calc(100svh - 124px));
   grid-template-columns: 0.85fr 1.15fr;
   gap: 2rem;
   align-items: center;
 }
 
 .about-hero__copy {
-  padding-block: 5rem;
+  padding-block: 3rem;
 }
 
 .about-hero__copy h1 {
@@ -871,11 +891,13 @@ ol {
 }
 
 .about-hero__art {
-  align-self: end;
+  align-self: center;
+  margin-top: -3rem;
 }
 
 .about-hero__art img {
   width: 100%;
+  height: auto;
   max-height: 660px;
   object-fit: contain;
   object-position: center bottom;
@@ -1290,6 +1312,7 @@ ol {
 
   .about-hero__art {
     width: min(100%, 650px);
+    margin-top: -1rem;
     margin-inline: auto;
   }
 
@@ -1324,7 +1347,7 @@ ol {
   }
 
   .section {
-    padding-block: 4rem;
+    padding-block: 2.75rem;
   }
 
   .announcement {
@@ -1338,6 +1361,11 @@ ol {
 
   .page-hero--compact {
     min-height: 470px;
+  }
+
+  .page-hero--cropped {
+    --hero-art-height: 590px;
+    min-height: 440px;
   }
 
   .page-hero__overlay {
@@ -1479,6 +1507,11 @@ ol {
   grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.95fr);
   gap: clamp(2rem, 7vw, 7rem);
   align-items: start;
+}
+
+.product-detail__grid--gift-card {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: var(--narrow);
 }
 
 .product-gallery {
