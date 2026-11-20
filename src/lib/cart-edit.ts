@@ -2,6 +2,29 @@ import type { LineAttribute } from './board-customization';
 import type { ShopifyCart } from './shopify/types';
 import { servingAttributes } from './serving-size.ts';
 
+// Line properties are visible in Shopify checkout; cart attributes alone are not.
+export function cartCopyWithDeliveryWindow(cart: ShopifyCart, lineId: string, slot: { date: string; label: string }) {
+  const line = cart.lines.nodes.find(candidate => candidate.id === lineId);
+  if (!line?.merchandise.product.handle.startsWith('delivery-slot-')) throw new Error('Delivery reservation not found.');
+  const details = [
+    { key: 'Delivery date', value: slot.date },
+    { key: 'Delivery window', value: slot.label },
+    { key: 'Delivery timezone', value: 'America/New_York' },
+  ];
+  const keys = new Set(details.map(detail => detail.key));
+  if (JSON.stringify(line.attributes.filter(attribute => keys.has(attribute.key))) === JSON.stringify(details)) return null;
+  return {
+    attributes: cart.attributes.filter(attribute => attribute.key !== 'Checkout locked'),
+    lines: cart.lines.nodes.map(candidate => ({
+      merchandiseId: candidate.merchandise.id,
+      quantity: candidate.quantity,
+      attributes: candidate.id === lineId
+        ? [...candidate.attributes.filter(attribute => !keys.has(attribute.key)), ...details]
+        : candidate.attributes,
+    })),
+  };
+}
+
 // Copy older carts to add Shopify-sourced serving details without changing an open checkout.
 export function cartCopyWithServingCounts(cart: ShopifyCart) {
   let changed = false;

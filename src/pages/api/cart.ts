@@ -19,6 +19,7 @@ import {
   updateCartAttributes,
   updateCartLine,
   ensureCartServingCounts,
+  ensureCartDeliveryWindow,
 } from '../../lib/shopify/storefront';
 
 export const prerender = false;
@@ -184,11 +185,12 @@ export const POST: APIRoute = async ({ request }) => {
         const attributes = Object.fromEntries(
           cart.attributes.map((attribute) => [attribute.key, attribute.value]),
         );
-        await assertDeliverySlotAvailable(
+        const slot = await assertDeliverySlotAvailable(
           attributes['Delivery ZIP'] || '',
           slotLines[0].merchandise.id,
           attributes['Delivery slot key'] || '',
         );
+        cart = await ensureCartDeliveryWindow(cart, slotLines[0].id, slot);
       }
       cart = await removeUnusedDelivery(cart);
       cart = await ensureCartServingCounts(cart);

@@ -32,6 +32,11 @@ test('delivery availability, checkout checks, and catalog synchronization use th
   }
   if(query.includes('mutation PublishDeliverySlot')){if(state.failPublish)throw new Error('Publication unavailable');return {publishablePublish:{userErrors:[]}};}
   if(query.includes('mutation SetDeliverySlotStatus')){state.products.find(p=>p.id===v.identifier.id).status=v.input.status;return {productSet:{product:{id:v.identifier.id},userErrors:[]}};}
+  if(query.includes('mutation RenameDeliveryReservation')){
+   assert.deepEqual(Object.keys(v.product).sort(),['id','title'],'Renaming must not write inventory or variants');
+   state.products.find(p=>p.id===v.product.id).title=v.product.title;
+   return {productUpdate:{userErrors:[]}};
+  }
   throw new Error('Unexpected delivery mutation/query: '+query);
  };
  const server=await createServer({configFile:false,server:{middlewareMode:true,watch:null,ws:false},optimizeDeps:{noDiscovery:true,include:[]},define:{'import.meta.env.SHOPIFY_DELIVERY_LOCATION_ID':JSON.stringify('location'),'import.meta.env.SHOPIFY_STOREFRONT_PUBLICATION_ID':JSON.stringify('publication'),'import.meta.env.DELIVERY_SCHEDULE_JSON':JSON.stringify(JSON.stringify(config))},plugins:[{name:'delivery-fixtures',enforce:'pre',resolveId(id){if(id==='./client')return '\0delivery-client';},load(id){if(id==='\0delivery-client')return `export class ShopifyApiError extends Error { constructor(message,status=502){super(message);this.status=status;} } export function adminGraphql(...args){return globalThis.__sharedDeliveryTest.graphql(...args);}`;}}]});
@@ -44,6 +49,10 @@ test('delivery availability, checkout checks, and catalog synchronization use th
  await assert.rejects(()=>service.assertDeliverySlotAvailable('22205',blocked.variants.nodes[0].id,'2026-11-14:09:00',now),/no longer available/);
  state.paginate=true;
  const closed=await service.materializeDeliverySlots(now);assert.ok(closed.archived.includes(blocked.handle));assert.equal(blocked.status,'ARCHIVED');assert.equal(blocked.variants.nodes[0].inventoryQuantity,2);
+ assert.ok(state.products.every(p=>p.title==='Delivery Time Reservation — '+p.handle.slice('delivery-slot-'.length)));
+ const renames=state.calls.filter(c=>c.query.includes('mutation RenameDeliveryReservation')).length;
+ await service.materializeDeliverySlots(now);
+ assert.equal(state.calls.filter(c=>c.query.includes('mutation RenameDeliveryReservation')).length,renames,'Correct titles must not be rewritten each run');
  state.blackouts='';state.failPublish=true;await assert.rejects(()=>service.materializeDeliverySlots(now),/Publication unavailable/);assert.equal(blocked.status,'ARCHIVED');state.failPublish=false;const reopened=await service.materializeDeliverySlots(now);assert.ok(reopened.reopened.includes(blocked.handle));assert.equal(blocked.status,'ACTIVE');assert.deepEqual(blocked.variants,original.variants);assert.equal(blocked.id,original.id);assert.equal(reopened.created.length,0);
  state.missing=true;state.failDelivery=true;const writes=state.calls.filter(c=>c.query.includes('mutation')).length;
  await assert.rejects(()=>service.getAvailableDeliverySlots('22205',now),/booking_blackouts\/default/);

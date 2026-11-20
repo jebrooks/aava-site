@@ -1,5 +1,5 @@
 import { relativeSiteLinks } from '../site-links';
-import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery, cartCopyWithServingCounts } from '../cart-edit';
+import { cartCopyWithLineChange, cartCopyWithAddedLine, cartCopyWithoutUnusedDelivery, cartCopyWithServingCounts, cartCopyWithDeliveryWindow } from '../cart-edit';
 import { isTourVariant, deliveryVariantTitle } from '../tour-fulfillment';
 import { SHOPIFY_COLLECTION_HANDLE } from './config';
 import { ShopifyApiError, storefrontGraphql } from './client';
@@ -267,6 +267,11 @@ export function removeUnusedDelivery(cart: ShopifyCart) {
 
 export function ensureCartServingCounts(cart: ShopifyCart) {
   const input = cartCopyWithServingCounts(cart);
+  return input ? createCartCopy(input) : Promise.resolve(cart);
+}
+
+export function ensureCartDeliveryWindow(cart: ShopifyCart, lineId: string, slot: { date: string; label: string }) {
+  const input = cartCopyWithDeliveryWindow(cart, lineId, slot);
   return input ? createCartCopy(input) : Promise.resolve(cart);
 }
 

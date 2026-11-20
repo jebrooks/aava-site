@@ -54,6 +54,18 @@ Edit eligible ZIP codes, daily order capacity, lead time in hours, horizon in da
 windows JSON. Weekday keys use Sunday `0` through Saturday `6`; window times use 24-hour `HH:mm`.
 Capacity is shared across all windows on the same date. Delivery uses Eastern Time.
 
+ZIP-based delivery fees are maintained separately in **Settings → Shipping and delivery →
+Local delivery → the fulfillment location**, using delivery zones. Keep those ZIP codes aligned
+with this schedule. Conventional Standard/Express shipping is disabled in **Markets → United
+States → Shipping**; local delivery remains configured separately. Automatic delivery estimates
+are off because a generic fulfillment estimate does not represent a reserved delivery window.
+At checkout handoff, the site copies the validated date, window, and timezone onto the delivery
+reservation's line properties so they appear in Shopify's order summary. Existing open checkouts
+are preserved; return through the site checkout button to create an updated checkout when needed.
+The scheduled process names the shared daily product **Delivery Time Reservation — YYYY-MM-DD**
+and reconciles older names using title-only updates. Time windows belong to individual order
+lines, not the shared product title, because multiple windows use the same daily capacity.
+
 Closures belong in the shared Blackout dates entry. `DELIVERY_SCHEDULE_JSON` is a setup/local
 fallback, not the routine content source. `npm run shopify:setup` writes its values into the
 schedule, including an existing entry; do not rerun it with stale environment defaults.

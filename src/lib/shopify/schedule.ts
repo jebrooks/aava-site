@@ -10,6 +10,7 @@ interface AdminSlotProduct {
   status: 'ACTIVE' | 'ARCHIVED' | 'DRAFT';
   id: string;
   handle: string;
+  title: string;
   configuredCapacity: { value: string } | null;
   variants: {
     nodes: Array<{
@@ -228,7 +229,7 @@ async function getSlotProducts(includeArchived = false) {
       `query DeliverySlotProducts($query: String!, $after: String) {
         products(first: 100, after: $after, query: $query) {
           nodes {
-            id handle status
+            id handle title status
             configuredCapacity: metafield(namespace: "delivery", key: "daily_capacity") { value }
             variants(first: 10) { nodes { id title inventoryQuantity inventoryItem { id } } }
           }
@@ -315,7 +316,7 @@ async function createSlotProduct(
     {
       identifier: { handle },
       input: {
-        title: `Delivery — ${date}`,
+        title: `Delivery Time Reservation — ${date}`,
         handle,
         descriptionHtml: '<p>Shared daily capacity for scheduled local delivery.</p>',
         productType: 'Delivery Slot',
@@ -494,6 +495,23 @@ export async function materializeDeliverySlots(now = new Date()) {
   const [config, existingProducts] = await Promise.all([
     getDeliveryScheduleConfig(), getSlotProducts(true),
   ]);
+  for (const product of existingProducts) {
+    const date = /^delivery-slot-(\d{4}-\d{2}-\d{2})$/.exec(product.handle)?.[1];
+    if (!date) continue;
+    const title = `Delivery Time Reservation — ${date}`;
+    if (product.title === title) continue;
+    const result = await adminGraphql<{
+      productUpdate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation RenameDeliveryReservation($product: ProductUpdateInput!) {
+        productUpdate(product: $product) { userErrors { message } }
+      }`,
+      { product: { id: product.id, title } },
+    );
+    if (result.productUpdate.userErrors.length) {
+      throw new ShopifyApiError(result.productUpdate.userErrors.map(error => error.message).join('; '));
+    }
+  }
   const today = localDateString(now);
   const blocked = new Set(config.blackoutDates);
   const eligibleDates = getEligibleDates(config, now);
