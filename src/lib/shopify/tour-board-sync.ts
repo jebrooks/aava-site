@@ -22,6 +22,7 @@ export interface SyncVariant {
     inventoryLevels?: { nodes: Array<{ location: { id: string } }> };
   };
   source: { value: string } | null;
+  servingCount?: { value: string } | null;
 }
 export interface SyncProduct {
   id: string;
@@ -34,7 +35,7 @@ export interface SyncProduct {
 const fields = `id handle options{id name} collections(first:100){nodes{handle}}
   lock:metafield(namespace:"tour",key:"variant_sync_lock"){value compareDigest}
   variants(first:100){nodes{id price compareAtPrice taxable taxCode inventoryPolicy selectedOptions{name value}
-    inventoryItem{id tracked requiresShipping sku inventoryLevels(first:5){nodes{location{id}}}} source:metafield(namespace:"tour",key:"source_variant"){value}}
+    inventoryItem{id tracked requiresShipping sku inventoryLevels(first:5){nodes{location{id}}}} source:metafield(namespace:"tour",key:"source_variant"){value} servingCount:metafield(namespace:"custom",key:"serving_count"){value}}
     pageInfo{hasNextPage}}`;
 function check(
   payload: { userErrors: Array<{ message: string }> },
@@ -108,6 +109,7 @@ export function tourBoardPlan(product: SyncProduct) {
       target.compareAtPrice !== source.compareAtPrice ||
       target.taxable !== source.taxable ||
       target.taxCode !== source.taxCode ||
+      (source.servingCount?.value && target.servingCount?.value !== source.servingCount.value) ||
       target.inventoryPolicy !== source.inventoryPolicy ||
       target.inventoryItem.requiresShipping ||
       target.inventoryItem.tracked
@@ -158,6 +160,7 @@ function mirrored(source: SyncVariant) {
     inventoryPolicy: source.inventoryPolicy,
     inventoryItem: { tracked: false, requiresShipping: false },
     metafields: [
+      ...(source.servingCount?.value ? [{ namespace: 'custom', key: 'serving_count', type: 'single_line_text_field', value: source.servingCount.value }] : []),
       {
         namespace: "tour",
         key: "source_variant",
@@ -317,14 +320,7 @@ export async function syncTourBoardProduct(
               optionName: o.name,
               name: o.name === FULFILLMENT_OPTION ? TOUR_FULFILLMENT : o.value,
             })),
-            metafields: [
-              {
-                namespace: "tour",
-                key: "source_variant",
-                type: "single_line_text_field",
-                value: source.id,
-              },
-            ],
+            metafields: mirrored(source).metafields,
           })),
         },
       );

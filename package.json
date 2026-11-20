@@ -17,7 +17,7 @@
     "test:links": "node --experimental-strip-types --test tests/site-links.test.mjs",
     "check:links": "node scripts/check-site-links.mjs",
     "test:contact": "node --experimental-strip-types --test tests/contact-form.test.mjs",
-    "test:cart": "node --experimental-strip-types --test tests/cart-edit.test.mjs tests/gift-card.test.mjs tests/gift-card-guide.test.mjs",
+    "test:cart": "node --experimental-strip-types --test tests/cart-edit.test.mjs tests/gift-card.test.mjs tests/gift-card-guide.test.mjs tests/serving-size.test.mjs tests/serving-size-migration.test.mjs",
     "test:boards": "node --experimental-strip-types --test tests/board-customization.test.mjs",
     "test:announcement": "node --experimental-strip-types --test tests/announcement.test.mjs tests/rich-text.test.mjs",
     "shopify:setup-announcement": "node --env-file=.env scripts/shopify/setup-announcement.mjs",

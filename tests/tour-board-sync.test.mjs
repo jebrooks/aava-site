@@ -54,6 +54,12 @@ test("identifies missing and changed counterparts, and orphaned references", () 
   );
   assert.equal(tourBoardPlan(product([target])).orphaned.length, 1);
 });
+
+test('serving fields on source variants are reconciled onto on-tour counterparts', () => {
+  const withCount = { ...source, servingCount: { value: '4' } };
+  assert.equal(tourBoardPlan(product([withCount, target])).changes.length, 1);
+  assert.equal(tourBoardPlan(product([withCount, { ...target, servingCount: { value: '4' } }])).changes.length, 0);
+});
 test("refuses duplicate mappings and tracked board inventory instead of duplicating stock", () => {
   assert.throws(
     () => tourBoardPlan(product([source, target, { ...target, id: "other" }])),

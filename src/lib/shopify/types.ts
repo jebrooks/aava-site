@@ -25,6 +25,7 @@ export interface ProductVariant {
   price: Money;
   compareAtPrice: Money | null;
   image: ShopifyImage | null;
+  servingCount?: ProductMetafield | null;
 }
 
 export interface ProductOption {
@@ -65,7 +66,7 @@ export interface CartLine {
   attributes: Array<{ key: string; value: string }>;
   cost: { totalAmount: Money };
   merchandise: ProductVariant & {
-    product: Pick<ShopifyProduct, 'handle' | 'title' | 'isGiftCard'>;
+    product: Pick<ShopifyProduct, 'handle' | 'title' | 'isGiftCard'> & { servingCount?: ProductMetafield | null };
   };
 }
 

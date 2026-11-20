@@ -1,5 +1,25 @@
 import type { LineAttribute } from './board-customization';
 import type { ShopifyCart } from './shopify/types';
+import { servingAttributes } from './serving-size.ts';
+
+// Copy older carts to add Shopify-sourced serving details without changing an open checkout.
+export function cartCopyWithServingCounts(cart: ShopifyCart) {
+  let changed = false;
+  const lines = cart.lines.nodes.map(line => {
+    const serving = servingAttributes(line.merchandise.product, line.merchandise);
+    if (line.merchandise.product.isGiftCard ||
+      line.merchandise.product.handle.startsWith('delivery-slot-')) {
+      return { merchandiseId: line.merchandise.id, quantity: line.quantity, attributes: line.attributes };
+    }
+    const existing = line.attributes.filter(attribute => attribute.key === 'Serves');
+    if (JSON.stringify(existing) !== JSON.stringify(serving)) changed = true;
+    return { merchandiseId: line.merchandise.id, quantity: line.quantity,
+      attributes: [...line.attributes.filter(attribute => attribute.key !== 'Serves'), ...serving] };
+  });
+  return changed ? {
+    attributes: cart.attributes.filter(attribute => attribute.key !== 'Checkout locked'), lines,
+  } : null;
+}
 
 const deliveryAttributes = new Set([
   'Delivery ZIP', 'Delivery date', 'Delivery window', 'Delivery slot key', 'Delivery timezone',

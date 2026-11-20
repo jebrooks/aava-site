@@ -28,6 +28,12 @@ The complete variable contract and a one-line schedule example are in `.env.exam
 
 ## 2. Configure catalog metadata and delivery rules
 
+Serving counts use `custom.serving_count` on products (single size) or variants (multiple sizes),
+with Storefront `PUBLIC_READ` access on both definitions. Maintain counts as fields, not in names
+or descriptions. For the staged snapshot → populate fields → deploy → clean copy workflow, see
+[Serving sizes](docs/content-management.md#serving-sizes). Do not remove serving copy before the
+field-aware site is deployed, and do not rerun the catalog importer for this maintenance.
+
 Create a real `DELIVERY_SCHEDULE_JSON` using approved ZIP codes, selectable windows, lead time,
 shared daily capacity, and horizon. Manage closures in `booking_blackouts/default`, not this
 environment fallback. Weekday keys use JavaScript numbering: Sunday `0`

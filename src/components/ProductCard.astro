@@ -2,12 +2,14 @@
 import { formatMoney } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../lib/product-image';
+import { productServingLabel } from '../lib/serving-size';
 
 interface Props {
   product: ShopifyProduct;
 }
 
 const { product } = Astro.props;
+const servings = productServingLabel(product);
 const firstVariant = product.variants.nodes[0];
 const image = product.featuredImage;
 const imageSrc = image?.url || DEFAULT_PRODUCT_IMAGE.src;
@@ -32,6 +34,7 @@ const imageHeight = image?.height || DEFAULT_PRODUCT_IMAGE.height;
   </div>
   <div class="product-card__body">
     <h3>{product.title}</h3>
+    {servings && <p class="product-card__servings">{servings}</p>}
     <p class="product-card__price">
       {firstVariant ? `From ${formatMoney(firstVariant.price)}` : 'View board'}
     </p>
