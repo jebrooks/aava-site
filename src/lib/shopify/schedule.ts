@@ -333,10 +333,10 @@ async function createSlotProduct(
           },
         ],
         productOptions: [
-          { name: 'Delivery capacity', values: [{ name: 'Daily order' }] },
+          { name: 'Delivery capacity', values: [{ name: 'Reservation' }] },
         ],
         variants: [{
-          optionValues: [{ optionName: 'Delivery capacity', name: 'Daily order' }],
+          optionValues: [{ optionName: 'Delivery capacity', name: 'Reservation' }],
           price: 0,
           taxable: false,
           inventoryItem: { tracked: true, requiresShipping: true },
