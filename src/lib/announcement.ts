@@ -34,6 +34,13 @@ function validDate(value: string) {
     new Date(value).toISOString().slice(0, 10) === value;
 }
 
+// Only announcement selection uses this clock; booking and delivery dates stay real.
+export function announcementDate(previewDate: string | undefined, development: boolean, now = new Date()): Date {
+  return development && previewDate && validDate(previewDate)
+    ? new Date(`${previewDate}T12:00:00-05:00`)
+    : now;
+}
+
 export function activeAnnouncement(
   fields: Record<string, string>,
   now = new Date(),

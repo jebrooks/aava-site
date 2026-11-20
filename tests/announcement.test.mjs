@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { activeAnnouncement, selectAnnouncement } from '../src/lib/announcement.ts';
+import { activeAnnouncement, announcementDate, selectAnnouncement } from '../src/lib/announcement.ts';
+
+test('announcement preview date works only in development and rejects invalid dates', () => {
+  const now = new Date('2026-11-19T12:00:00Z');
+  const christmas = entry('christmas', { start_date: '2026-12-20', end_date: '2027-01-02' });
+  assert.ok(selectAnnouncement([christmas], announcementDate('2026-12-20', true, now)));
+  assert.equal(selectAnnouncement([christmas], announcementDate('2026-12-20', false, now)), null);
+  for (const value of [undefined, '', 'invalid', '2026-02-30']) {
+    assert.equal(announcementDate(value, true, now), now);
+  }
+});
 
 const fields = {
   enabled: 'true', message: 'Seasonal offer',

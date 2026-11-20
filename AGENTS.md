@@ -16,6 +16,7 @@
 - Shopify products, product metafields, collections, and publication settings own the commerce catalog. Generated date products, bundles, and on-tour variants are managed by synchronization code.
 - Marketing copy lives in `src/pages/`; company details and featured boards in `src/data/site.ts`; ingredient options in `src/data/board-customizations.json`; tour choices in `src/data/tour-options.ts`; policies and source/amendment metadata in `src/data/policies.json`; and press in `src/data/press.ts`.
 - Announcement edits take about a minute to appear. Schedule edits need catalog reconciliation as described in the guide; shared blackout checks read the list directly. Repository edits require deployment.
+- Preview scheduled announcements locally with `ANNOUNCEMENT_PREVIEW_DATE=YYYY-MM-DD` in the ignored `.env`, then restart the development server. Clear it afterward; deployed builds ignore it. See the content guide.
 - Preserve booked inventory, bundle relationships, and order history. Schedule edits do not cancel existing bookings. Do not rerun setup/import scripts with stale defaults for routine maintenance.
 - Update the relevant guide when content ownership, fields, behavior, or maintenance workflows change. Keep `README.md` as the documentation index, `SHOPIFY.md` as the integration runbook, and `MIGRATION.md` as cutover/history context. Use linked guides for detail; no separate `.ai/rules/` layer is needed for this project.
 

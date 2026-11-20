@@ -1,4 +1,4 @@
-import { selectAnnouncement, defaultAnnouncement, type AnnouncementEntry } from '../announcement';
+import { announcementDate, selectAnnouncement, defaultAnnouncement, type AnnouncementEntry } from '../announcement';
 import { adminGraphql } from './client';
 import { getAdminConfig } from './config';
 
@@ -51,5 +51,7 @@ export async function getAnnouncement() {
     await pending;
   }
   // Evaluate dates on every page request, even when the content is cached.
-  return selectAnnouncement(cached!.entries);
+  return selectAnnouncement(cached!.entries, announcementDate(
+    import.meta.env.ANNOUNCEMENT_PREVIEW_DATE, import.meta.env.DEV,
+  ));
 }

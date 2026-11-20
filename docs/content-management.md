@@ -44,6 +44,12 @@ alphabetical handle; undated entries have lowest priority. The application cache
 about a minute for edits to appear. Invalid or unavailable configured content hides the banner.
 Local development without Admin credentials displays a sample announcement.
 
+To preview a scheduled Shopify announcement locally before its start date, set
+`ANNOUNCEMENT_PREVIEW_DATE=2026-12-20` (or another `YYYY-MM-DD` date) in the ignored `.env`
+and restart `npm run dev`. Only announcement selection uses that date; booking and delivery
+continue using the actual date. This setting is ignored in deployed builds. Clear it and
+restart the server to restore normal local selection. Content still comes from Shopify.
+
 `npm run shopify:setup-announcement` provisions or migrates the definition. It is a schema/setup
 operation, not the routine way to edit a message. Verify rendering with `npm run test:announcement`.
 
