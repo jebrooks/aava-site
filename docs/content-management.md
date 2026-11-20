@@ -62,6 +62,9 @@ are off because a generic fulfillment estimate does not represent a reserved del
 At checkout handoff, the site copies the validated date, window, and timezone onto the delivery
 reservation's line properties so they appear in Shopify's order summary. Existing open checkouts
 are preserved; return through the site checkout button to create an updated checkout when needed.
+The scheduled process names the shared daily product **Delivery Time Reservation — YYYY-MM-DD**
+and reconciles older names using title-only updates. Time windows belong to individual order
+lines, not the shared product title, because multiple windows use the same daily capacity.
 
 Closures belong in the shared Blackout dates entry. `DELIVERY_SCHEDULE_JSON` is a setup/local
 fallback, not the routine content source. `npm run shopify:setup` writes its values into the
