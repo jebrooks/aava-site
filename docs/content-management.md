@@ -68,6 +68,11 @@ Edit Enabled, Minimum days in advance, Months ahead to create products, Operatin
 seat price, and Whole bus price. Prices are in USD. Booking dates use Eastern Time. The horizon
 defaults to six calendar months and accepts one to twelve months.
 
+The Experiences page's public/private starting prices and the gift-card price guide read these
+prices from Shopify on each page request, using the shop currency. Maintain them here rather
+than in page copy. The Experiences page shows an availability message when tours are disabled
+or prices cannot be loaded; the gift-card guide omits unavailable tour rows.
+
 The shared ten-seat capacity is defined by `TOUR_CAPACITY` in `src/lib/tour-schedule.ts`; it is not
 an editable metaobject field. Changing capacity requires reviewing bundle and fulfillment behavior.
 
