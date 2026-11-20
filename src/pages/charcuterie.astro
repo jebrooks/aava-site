@@ -30,11 +30,11 @@ const quickPick = shopifyProducts.find((product) =>
     title="Charcuterie"
     description="Beautifully arranged boards crafted to elevate any occasion, big or small."
   >
-    <Button href="#menu" variant="light">Explore our menu</Button>
+    <Button href="/charcuterie-menu" variant="light">Explore our menu</Button>
   </PageHero>
 
   <section class="section">
-    <div class="container--narrow section-heading">
+    <div class="container--narrow section-heading section-heading--standalone">
       <p class="eyebrow">From casual gatherings to elegant affairs</p>
       <h2>Designed to be served, shared, and savored.</h2>
       <p class="lede">
@@ -60,25 +60,14 @@ const quickPick = shopifyProducts.find((product) =>
   </nav>
 
   <section class="section" id="quick-pick">
-    <div class="container split">
-      <div class="split__media">
-        <img
-          src="/images/board-quick-pick.webp"
-          alt="Quick Pick charcuterie board"
-          width="1000"
-          height="750"
-          loading="lazy"
-        />
-      </div>
-      <div class="split__content">
-        <p class="eyebrow">In a hurry?</p>
-        <h2>Try our Quick Pick.</h2>
-        <p class="lede">
-          Leave the selections to us. We’ll create a crowd-pleasing mix of artisan cheeses, cured
-          meats, fruit, and accompaniments using the best ingredients available.
-        </p>
-        <Button href={quickPick ? `/charcuterie-menu/p/${quickPick.handle}` : '/charcuterie-menu/p/chefs-choice-charcuterie'}>Order Quick Pick</Button>
-      </div>
+    <div class="container--narrow center">
+      <p class="eyebrow">In a hurry?</p>
+      <h2>Try our Quick Pick.</h2>
+      <p class="lede">
+        Leave the selections to us. We’ll create a crowd-pleasing mix of artisan cheeses, cured
+        meats, fruit, and accompaniments using the best ingredients available.
+      </p>
+      <Button href={quickPick ? `/charcuterie-menu/p/${quickPick.handle}` : '/charcuterie-menu/p/chefs-choice-charcuterie'}>Order Quick Pick</Button>
     </div>
   </section>
 
