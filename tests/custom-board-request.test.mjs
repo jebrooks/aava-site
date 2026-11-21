@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
 
-test('custom-board submissions verify visitors before creating Shopify drafts', async (t) => {
+test('custom-board submissions verify visitors before emailing staff', async (t) => {
   const state = {
     result: { isHuman: true, isBot: false },
     error: null,
     checks: [],
-    drafts: [],
+    emails: [],
+    emailError: null,
   };
   const fixtureKey = '__customBoardBotIdTest';
   globalThis[fixtureKey] = state;
@@ -21,7 +22,7 @@ test('custom-board submissions verify visitors before creating Shopify drafts', 
       enforce: 'pre',
       resolveId(id) {
         if (id === 'botid/server') return '\0test-botid';
-        if (id === '../../lib/shopify/draft-orders') return '\0test-drafts';
+        if (id === '../../lib/custom-board-request') return '\0test-email';
       },
       load(id) {
         if (id === '\0test-botid') return `
@@ -32,10 +33,14 @@ test('custom-board submissions verify visitors before creating Shopify drafts', 
             return state.result;
           }
         `;
-        if (id === '\0test-drafts') return `
-          export async function createCustomBoardDraft(submission) {
-            globalThis.${fixtureKey}.drafts.push(submission);
-            return { name: '#TEST' };
+        if (id === '\0test-email') return `
+          export class CustomBoardEmailError extends Error {
+            constructor(status) { super('Your request could not be sent. Please try again or email allaboardva.tours.charcuterie@gmail.com.'); this.status = status; }
+          }
+          export async function sendCustomBoardRequest(submission, reference) {
+            const state = globalThis.${fixtureKey};
+            if (state.emailError) throw new CustomBoardEmailError(state.emailError);
+            state.emails.push({ submission, reference });
           }
         `;
       },
@@ -58,36 +63,36 @@ test('custom-board submissions verify visitors before creating Shopify drafts', 
       body: JSON.stringify({
         name: 'Test Visitor', email: 'visitor@example.com', phone: '555-0100',
         requestedDate: '2099-12-01', address: 'Test address', zip: '22201',
-        guestCount: 10, ...overrides,
+        guestCount: 10, consent: 'on', submissionId: '12345678-1234-4123-8123-123456789abc', ...overrides,
       }),
     }),
   });
 
-  await t.test('human submission creates a draft with Basic verification', async () => {
+  await t.test('human submission emails staff with Basic verification', async () => {
     const response = await submit();
-    assert.equal(response.status, 201);
-    assert.deepEqual(await response.json(), { ok: true, reference: '#TEST' });
-    assert.equal(state.drafts.length, 1);
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { ok: true, reference: '12345678-1234-4123-8123-123456789abc' });
+    assert.equal(state.emails.length, 1);
     assert.equal(state.checks[0].advancedOptions.checkLevel, 'basic');
     assert.equal(state.checks[0].advancedOptions.headers.origin, 'https://example.com');
   });
 
-  await t.test('bots and visitors not classified as human cannot create drafts', async () => {
+  await t.test('bots and visitors not classified as human cannot send email', async () => {
     for (const result of [{ isBot: true, isHuman: false }, { isBot: false, isHuman: false }]) {
       state.result = result;
       const response = await submit();
       assert.equal(response.status, 403);
       assert.match((await response.json()).error, /refresh the page/);
     }
-    assert.equal(state.drafts.length, 1);
+    assert.equal(state.emails.length, 1);
   });
 
-  await t.test('verification outage returns a retryable error without creating a draft', async () => {
+  await t.test('verification outage returns a retryable error without sending email', async () => {
     state.error = new Error('Verification unavailable');
     const response = await submit();
     assert.equal(response.status, 503);
     assert.match((await response.json()).error, /try again shortly/);
-    assert.equal(state.drafts.length, 1);
+    assert.equal(state.emails.length, 1);
     state.error = null;
     state.result = { isBot: false, isHuman: true };
   });
@@ -97,12 +102,30 @@ test('custom-board submissions verify visitors before creating Shopify drafts', 
     assert.equal((await submit({ company: 'spam' })).status, 200);
     assert.equal((await submit({}, 'https://other.example')).status, 403);
     assert.equal(state.checks.length, checksBefore);
-    assert.equal(state.drafts.length, 1);
+    assert.equal(state.emails.length, 1);
   });
 
   await t.test('human submissions still require valid form fields', async () => {
     assert.equal((await submit({ email: 'invalid' })).status, 400);
-    assert.equal(state.drafts.length, 1);
+    assert.equal(state.emails.length, 1);
+  });
+
+  await t.test('requires contact consent, a valid date and a valid retry reference', async () => {
+    for (const changes of [{ consent: false }, { requestedDate: '2099-02-31' }, { submissionId: 'invalid' }]) {
+      assert.equal((await submit(changes)).status, 400);
+    }
+    assert.equal(state.emails.length, 1);
+  });
+
+  await t.test('email configuration and provider failures never report success', async () => {
+    for (const status of [502, 503]) {
+      state.emailError = status;
+      const response = await submit();
+      assert.equal(response.status, status);
+      assert.match((await response.json()).error, /could not be sent/);
+    }
+    state.emailError = null;
+    assert.equal(state.emails.length, 1);
   });
 
   await t.test('repeated requests from the same IP are rate limited before verification', async () => {
@@ -112,6 +135,6 @@ test('custom-board submissions verify visitors before creating Shopify drafts', 
     }
     assert.equal((await submit({}, undefined, '192.0.2.200')).status, 429);
     assert.equal(state.checks.length, checksBefore + 5);
-    assert.equal(state.drafts.length, 1);
+    assert.equal(state.emails.length, 1);
   });
 });

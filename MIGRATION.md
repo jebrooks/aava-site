@@ -14,12 +14,15 @@ history and cutover verification; code coverage alone does not establish live se
 - Added page titles, descriptions, canonical URLs, social metadata, structured business data,
   robots rules, sitemap, keyboard focus styles, reduced-motion support, and a 404 page.
 - Replaced the initial contact email fallback with server-side Resend delivery for contact and
-  inquiry forms; custom-board requests create Shopify draft orders with Vercel BotID protection.
+  inquiry forms. Custom-board requests now email the business with Vercel BotID protection;
+  staff review the request before manually preparing a Shopify invoice.
 - Began with a hosting-neutral static build, then adopted the Vercel adapter for trusted commerce
   endpoints and server-rendered Shopify routes.
 - Added a headless Shopify storefront, cart proxy, Vercel server runtime, delivery-slot inventory,
-  custom-board draft orders, webhook verification, and catalog migration tooling. Delivery-slot
-  inventory and its daily cron were retired on 2026-11-21; the old reservation products are archived.
+  custom-board draft orders, webhook verification, and catalog migration tooling. Automatic
+  custom-board draft creation was replaced by request email and a staff invoice helper on
+  2026-11-21; deployment and inbox verification are tracked in the transactional results.
+  Delivery-slot inventory and its daily cron were retired on 2026-11-21; the old reservation products are archived.
   Delivery now uses schedule/blackout validation with no order cap. The cart calendar selects the date and a separate time dropdown saves the
   selected window directly; physical board line properties carry the date/time into Shopify checkout.
 
@@ -43,8 +46,9 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
 - Marketing, FAQs, policies, waivers, press, booking help, and custom-estimate inquiry pages are local.
 - Tour planning on `/experiences` continues to `/booking`; Shopify seat inventory and whole-bus
   bundles enforce availability. There is no separate external tour scheduler in this implementation.
-- Products, checkout, orders, and operational settings depend on Shopify; contact/inquiry email
-  depends on Resend. These external services remain required after Squarespace retirement.
+- Products, checkout, orders, and operational settings depend on Shopify; contact, inquiry and
+  custom-board request email depends on Resend. The custom-board form does not write to Shopify;
+  staff create any quoted invoice manually. These services remain required after Squarespace retirement.
 - Policy pages are checked-in snapshots with provenance; displaying a waiver is not a signed-waiver
   collection system. Verify the required consent and operational records before cutover.
 - Gift-card navigation opens the native Shopify product, with an inquiry fallback. Purchase,
@@ -58,7 +62,7 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
    delivery rules, gift cards, payments, and order email against approved business records.
 2. **Tours:** verify public/private booking, seat/bus inventory sharing, minimum notice, closures,
    board fulfillment, cancellations, refunds, and existing reservation handling end to end.
-3. **Forms and waivers:** verify email recipients, custom-board draft workflow, consent records,
+3. **Forms and waivers:** verify email recipients, emailed custom requests and staff invoice workflow, consent records,
    spam protection, and any required signed-waiver collection or retention process.
 4. **Email marketing:** reconcile newsletter consent and destination lists before retiring old forms.
 5. **Content scope:** review every source route for migration, redirect, or retirement. Private-tour

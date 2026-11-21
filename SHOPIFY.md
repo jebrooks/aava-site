@@ -16,9 +16,9 @@ provisioning or deliberate repairs, not a checklist to rerun against an operatin
 4. Create a custom storefront/publication and a Storefront API token with product, inventory, and
    cart access. Record the publication GraphQL ID.
 5. Create a Dev Dashboard Admin API app with the minimum scopes needed for products, inventory,
-   locations, publications, metaobject definitions, metaobjects, draft orders, and webhook
-   subscriptions. The application exchanges its Client ID and secret for a cached 24-hour Admin
-   token automatically.
+   locations, publications, metaobject definitions, metaobjects, and webhook subscriptions.
+   The application exchanges its Client ID and secret for a cached 24-hour Admin token
+   automatically. Custom-board request email does not require draft-order API access.
 6. Put the IDs and tokens into `.env` locally and Vercel’s encrypted environment variables for
    **both Preview and Production**. A Production-only variable is unavailable to PR previews.
    Redeploy each affected environment after changing variables. Never commit `.env`. Configure
@@ -54,6 +54,9 @@ choose a date, then a time in the select box; the delivery ZIP is validated when
 saves the window immediately without a reservation button. The chosen delivery date/window/timezone is stored as cart metadata and visible physical
 board line properties in Shopify checkout and orders. Delivery does not consume inventory or need generated products or a cron job.
 The legacy `daily_capacity` metaobject field is ignored and no longer provisioned on new stores.
+Maintain customer order-confirmation and staff new-order email templates in Shopify separately;
+both must show the saved delivery date, window, and timezone. See the
+[notification maintenance instructions](docs/content-management.md#delivery-schedule--delivery_scheduledefault).
 
 Deploy the reservation-free code to Production **before** retiring old reservation products:
 
@@ -103,21 +106,30 @@ after live sales without a fresh reconciliation.
 - Custom-board requests use Vercel BotID Basic, explicitly selected in both browser and API code.
   No Cloudflare widget or keys are needed. Vercel handles the challenge routes automatically.
   Keep Vercel OIDC enabled in the project settings so the server can authenticate BotID checks.
-  Redeploy after installing the integration, then verify a browser submission creates a draft
-  order and a direct POST without a browser challenge is rejected. Check BotID results in the
-  project's Firewall traffic view. Verification failures block draft creation.
+  Redeploy after installing the integration, then verify a browser submission sends the request
+  email and a direct POST without a browser challenge is rejected. Check BotID results in the
+  project's Firewall traffic view. Verification failures block email sending.
   Local `npm run dev` uses the SDK's development behavior (allows humans without a live check);
   production protection must be tested on a Vercel deployment, including Preview.
-  Run `npm run test:forms` for API regression tests with simulated verification results and drafts.
+  Run `npm run test:forms` for API regression tests with simulated verification and email delivery.
 - Add a Vercel Firewall rate-limit rule for `/api/custom-board-request` (five requests per ten
   minutes per IP). The application includes a best-effort instance-local limiter, but serverless
   instances do not share that memory.
 - Register the Shopify topics needed for operational visibility—product/inventory changes, paid
   orders, cancellations, and refunds—against `https://DOMAIN/api/shopify/webhooks`. Use the custom
   app client secret as `SHOPIFY_WEBHOOK_SECRET` and verify test deliveries in Vercel logs.
-- Configure a Shopify Flow or staff order view for the `custom-board-request` and `needs-quote`
-  draft-order tags. Staff must price the draft, record the agreed delivery date and window, and send the
-  invoice from Shopify Admin.
+- Custom-board requests use Resend (`RESEND_API_KEY` and `CONTACT_EMAIL_FROM`) to email
+  `allaboardva.tours.charcuterie@gmail.com`; the customer is the reply-to address. No Shopify
+  draft, invoice, inventory reservation, or order is created by submitting the form. The staff
+  email includes the request reference, all submitted details, and an Admin link to the new
+  draft-order editor. Opening the link only opens that blank editor; it does not prefill, save,
+  or send an invoice. An optional copyable Sidekick prompt includes the request reference and
+  JSON details to help staff prepare an unsaved draft. The prompt treats customer fields as data
+  and the budget as guidance, and asks staff to confirm availability, final price, delivery
+  date/window, fees and taxes before saving or sending. Staff review any Sidekick output and
+  intentionally prepare/send the invoice from Shopify Admin; the website never runs the prompt.
+  See [custom-board request maintenance](docs/content-management.md#custom-board-requests).
+  Do not add draft-order app scopes solely for this email workflow.
 - Enable a native Shopify gift-card product, include it in the charcuterie collection, and publish
   it to the Headless storefront. `/gift-certificates` redirects to the first native gift card in
   collection order; no product-type or tag conventions are required. Amounts, copy, and images
@@ -156,9 +168,11 @@ check before merging. Vercel production deployments should continue to track onl
 1. Run `npm run build`, deploy a Vercel preview, and use Shopify test mode.
 2. Reconcile product/variant/image/SKU/price/inventory counts against the approved export.
 3. Test eligible and rejected ZIP codes, lead-time boundaries, blackout dates, every delivery
-   window, the final unit of slot inventory, regular inventory, discounts, taxes, email, refunds,
-   cancellations, and intentional restocking.
-4. Submit a custom request, edit its draft order, reserve inventory, send the invoice, and pay it.
+   window, repeated orders choosing the same delivery window without a capacity limit, regular
+   inventory, discounts, taxes, email, refunds, cancellations, and intentional restocking.
+4. Submit a custom request and verify staff email receipt with no automatic Shopify draft/order.
+   Open its staff invoice link, manually prepare and review the quote and delivery details,
+   send the Shopify invoice, and pay it. See the [transactional test plan](docs/transactional-test-plan.md).
 5. Buy and redeem a new gift card, then test every legacy replacement case.
 6. Crawl Squarespace and the preview domain, add redirects for all renamed/retired routes, and
    validate the dynamic sitemap.

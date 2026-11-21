@@ -1,12 +1,14 @@
 import type { APIRoute } from 'astro';
+import { randomUUID } from 'node:crypto';
 import { checkBotId } from 'botid/server';
 import { apiError, assertSameOrigin, json, readJson } from '../../lib/http';
 import { allowRequest } from '../../lib/rate-limit';
 import { ShopifyApiError } from '../../lib/shopify/client';
 import {
-  createCustomBoardDraft,
+  CustomBoardEmailError,
+  sendCustomBoardRequest,
   type CustomBoardRequest,
-} from '../../lib/shopify/draft-orders';
+} from '../../lib/custom-board-request';
 import { normalizeZip } from '../../lib/shopify/schedule';
 
 export const prerender = false;
@@ -56,12 +58,16 @@ export const POST: APIRoute = async ({ request }) => {
     if (body.company) return json({ ok: true });
     await verifyVisitor(request);
 
+    if (body.consent !== 'on' && body.consent !== true) {
+      throw new ShopifyApiError('Please agree that we may contact you about this request.', 400);
+    }
     const email = requiredText(body.email, 'Email', 254).toLowerCase();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)) {
       throw new ShopifyApiError('Enter a valid email address.', 400);
     }
     const requestedDate = requiredText(body.requestedDate, 'Requested date', 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)) {
+    const parsedDate = new Date(`${requestedDate}T12:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(requestedDate) || !Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== requestedDate) {
       throw new ShopifyApiError('Enter a valid requested date.', 400);
     }
     if (new Date(`${requestedDate}T23:59:59-04:00`).getTime() < Date.now()) {
@@ -87,9 +93,17 @@ export const POST: APIRoute = async ({ request }) => {
       theme: optionalText(body.theme, 500),
       notes: optionalText(body.notes),
     };
-    const draft = await createCustomBoardDraft(submission);
-    return json({ ok: true, reference: draft.name }, { status: 201 });
+    const reference = body.submissionId === undefined ? randomUUID() : requiredText(body.submissionId, 'Submission ID', 36);
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reference)) {
+      throw new ShopifyApiError('Please reload the page and try again.', 400);
+    }
+    await sendCustomBoardRequest(submission, reference, {
+      apiKey: import.meta.env.RESEND_API_KEY || process.env.RESEND_API_KEY,
+      from: import.meta.env.CONTACT_EMAIL_FROM || process.env.CONTACT_EMAIL_FROM,
+    });
+    return json({ ok: true, reference });
   } catch (error) {
+    if (error instanceof CustomBoardEmailError) return json({ error: error.message }, { status: error.status });
     return apiError(error);
   }
 };

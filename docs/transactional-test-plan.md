@@ -3,6 +3,9 @@
 Cover charcuterie, public and private tours, gift cards, custom invoices, customer emails,
 inventory, cancellations, and refunds through the deployed All ABoard VA storefront.
 
+The [November 21, 2026 results](transactional-test-results-2026-11-21.md) record focused delivery
+checkout and email verification, with explicit coverage gaps. They do not mark this full plan complete.
+
 ## Approach
 
 Run three stages:
@@ -69,7 +72,12 @@ serving counts, selections, and relevant booking details. Check inbox and spam f
 | C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order results, with the saved delivery date/window/timezone visible on physical board lines and no reservation product. |
 | C8 | Discount, if offered | Valid and invalid codes, eligible products, totals, and refund amounts behave correctly. |
 
-**Email acceptance for C3:** the real order-confirmation email shows `Serves`, `Board preference`,
+**Email acceptance for delivery orders:** both the real customer order-confirmation email and
+staff new-order notification show the saved `Delivery date`, `Delivery window`, and
+`Delivery timezone` from physical board line properties. Compare these values with checkout and
+the Shopify order; gift-card-only and on-tour orders must not show blank delivery labels.
+
+**Additional email acceptance for C3:** the real order-confirmation email shows `Serves`, `Board preference`,
 `Cheeses`, `Meats`, and `Accompaniments` when supplied. Empty fields are omitted. Shopify's sample
 notification preview is not evidence that real order properties reached the email.
 
@@ -113,8 +121,22 @@ they use the same issuance path. Keep gift-card codes and recipient details in p
 
 ## 4. Custom requests and operations
 
-- [ ] Complete one custom-board request through request → Shopify draft → staff pricing and
-  agreed delivery window → invoice email → payment → confirmation.
+Custom-board requests now follow **request → staff email → staff review/quote → manually
+prepared Shopify invoice → payment → confirmation**. The public form must not create a draft
+order or require Shopify credentials. Record email delivery and staff invoice/payment as
+separate acceptance steps.
+
+| ID | Scenario | Acceptance criteria |
+| --- | --- | --- |
+| CB1 | Submit a valid custom request | The actual staff email reaches `allaboardva.tours.charcuterie@gmail.com` with a request reference and every submitted contact, requested date, address/ZIP, guest count, budget, dietary, theme and notes value. Reply-To is the customer; sender and recipient are server-owned. Optional blank fields are clear. The visitor sees only a request-sent-for-review confirmation after provider acceptance. No Shopify draft/order, invoice or reservation is created. |
+| CB2 | Staff invoice helper and optional Sidekick prompt | The link in the received staff email opens the intended store's blank new draft-order editor after normal staff authentication. It contains no customer data in its URL and creates/sends nothing on click. Verify the copyable Sidekick prompt includes the exact reference and submitted details in a JSON data block, treats customer text only as data and the budget only as guidance, and requires availability, final prices, delivery date/window, fees and taxes to be confirmed before staff save or send. The website must not execute the prompt. Inspecting its content is sufficient for this check; executing Sidekick is optional and not required for QA. |
+| CB3 | Manual quote and Shopify invoice | Staff confirm availability and agree the board/price, delivery date/window, fee and taxes. Staff add the customer and required details, review any optionally prepared Sidekick draft, manually save/send the Shopify invoice, then complete an approved test payment. Compare the invoice, checkout, order and actual customer/staff emails; retain the request reference for reconciliation. No automatic invoice should be sent when the public request is submitted. |
+| CB4 | Email service unavailable | Missing configuration, provider rejection, timeout or network failure produces a safe retry/contact error, preserves the entered request and never falsely reports success or exposes provider/credential details. No Shopify draft/order exists as a fallback. |
+| CB5 | Validation, consent and spam protection | Reject missing/invalid required fields and consent; verify same-origin checks, BotID Basic, rate limiting and the spam trap prevent unwanted email. BotID failure/outage must not send the request. Direct unverified Production POST is rejected. |
+| CB6 | Repeat/retry and staff handling | Check an unchanged retry and double submit do not produce unintended duplicate work; references remain usable for staff reconciliation. Replies go to the customer. Verify there are no automated draft-order tags/Flow dependencies for request intake. |
+
+Continue with the operational checks below:
+
 - [ ] Complete a full cancellation/refund with intentional restocking.
 - [ ] Partially refund a board or add-on while keeping the tour intact.
 - [ ] Verify the actual local-delivery completion notification used by staff.
@@ -136,7 +158,7 @@ Target approximately **8–10 completed orders**, combining compatible scenarios
 6. Gift card scheduled for a near-future date.
 7. A board purchase using a gift card, with partial or split redemption.
 8. A tour purchase using remaining gift-card value where practical.
-9. A custom-board invoice purchase.
+9. One emailed custom-board request followed by a staff-created Shopify invoice purchase (CB1–CB3).
 10. An additional payment-method or mixed-cart purchase if not covered above.
 
 Use purchased gift-card balances toward later tests rather than funding every order again.
@@ -154,7 +176,7 @@ Do not change production prices or introduce broad discounts just to reduce test
 - [ ] Cancel/refund designated orders and intentionally restore the correct tour capacity.
 - [ ] Confirm inventory returns to the expected baseline, accounting for legitimate concurrent bookings.
 - [ ] Resolve remaining test gift-card liabilities through the appropriate Shopify workflow.
-- [ ] Close test drafts and abandoned operational tasks without removing required audit records.
+- [ ] Close only staff-created test drafts and abandoned operational tasks; reconcile request emails/references without removing required audit records. The public custom-board form creates no draft to clean up.
 - [ ] Remove temporary test discounts or settings; ensure live payment mode is restored if changed.
 - [ ] Confirm no unintended fulfillment or scheduled recipient emails remain pending.
 - [ ] Recheck storefront availability after cleanup.
@@ -170,3 +192,5 @@ is insufficient. Record unresolved failures and retest affected scenarios after 
 - [Migration and remaining cutover verification](../MIGRATION.md)
 - [Shopify: Processing a test order](https://help.shopify.com/en/manual/checkout-settings/test-orders/processing-test-order)
 - [Shopify: Testing Shopify Payments](https://help.shopify.com/en/manual/payments/shopify-payments/testing-shopify-payments)
+- [Shopify: Creating draft orders](https://help.shopify.com/en/manual/fulfillment/managing-orders/create-orders/create-draft)
+- [Shopify: Sending draft-order invoices](https://help.shopify.com/en/manual/fulfillment/managing-orders/create-orders/send-draft)

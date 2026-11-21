@@ -28,7 +28,7 @@
     "test:booking": "node --experimental-strip-types --test tests/tour-booking.test.mjs tests/tour-board-sync.test.mjs",
     "shopify:sync-tour-boards": "node --env-file=.env --experimental-strip-types scripts/shopify/sync-tour-boards.mjs",
     "shopify:register-tour-webhooks": "node --env-file=.env scripts/shopify/register-tour-board-webhooks.mjs",
-    "test:forms": "node --test tests/custom-board-request.test.mjs"
+    "test:forms": "node --test tests/custom-board-request.test.mjs tests/custom-board-email.test.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "11.0.5",

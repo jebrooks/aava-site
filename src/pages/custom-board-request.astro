@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { randomUUID } from 'node:crypto';
+import { site } from '../data/site';
 ---
 
 <BaseLayout
@@ -12,10 +14,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="section-heading">
         <p class="eyebrow">Designed for your gathering</p>
         <h1>Request a custom board</h1>
-        <p class="lede">Share the details below. We’ll confirm availability and email a Shopify invoice after pricing your request.</p>
+        <p class="lede">Email us the details of your gathering. We’ll confirm availability, your delivery window, and pricing before sending a secure Shopify invoice.</p>
       </div>
 
       <form class="request-form" data-custom-request-form>
+        <input type="hidden" name="submissionId" value={randomUUID()} />
         <div class="form-grid">
           <label><span>Name</span><input name="name" autocomplete="name" required maxlength="120" /></label>
           <label><span>Email</span><input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
@@ -36,6 +39,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </label>
         <button class="button button--primary" type="submit">Send request</button>
         <p class="form-status" data-request-status role="status"></p>
+        <p class="form-help">You can also email <a href={`mailto:${site.customBoardEmail}`}>{site.customBoardEmail}</a>.</p>
       </form>
     </div>
   </section>
@@ -54,6 +58,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   const form = document.querySelector<HTMLFormElement>('[data-custom-request-form]');
   const status = document.querySelector<HTMLElement>('[data-request-status]');
+  let sending = false;
+  form?.addEventListener('input', () => {
+    (form.elements.namedItem('submissionId') as HTMLInputElement).value = crypto.randomUUID();
+  });
   const requestedDate = form?.elements.namedItem('requestedDate') as HTMLInputElement | null;
   if (requestedDate) {
     const localToday = new Date();
@@ -62,6 +70,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (sending || !form.reportValidity()) return;
+    sending = true;
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (button) button.disabled = true;
     if (status) status.textContent = 'Sending your request…';
@@ -72,14 +82,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       const response = await fetch('/api/custom-board-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(30_000),
         body: JSON.stringify(payload),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Your request could not be sent.');
+      if (!response.ok || !result.ok) throw new Error(result.error || 'Your request could not be sent.');
       form.reset();
-      if (status) status.textContent = `Thank you. Your request ${result.reference || ''} is now in our queue.`;
+      (form.elements.namedItem('submissionId') as HTMLInputElement).value = crypto.randomUUID();
+      if (status) status.textContent = `Thank you. Your request has been emailed. We’ll contact you to confirm availability and pricing.${result.reference ? ` Reference: ${result.reference}.` : ''}`;
     } catch (error) {
       if (status) status.textContent = error instanceof Error ? error.message : 'Your request could not be sent.';
+    } finally {
+      sending = false;
       if (button) button.disabled = false;
     }
   });
