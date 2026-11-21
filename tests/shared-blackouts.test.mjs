@@ -47,6 +47,11 @@ test('delivery selection has no inventory dependency and rechecks shared blackou
  await assert.rejects(()=>service.assertDeliverySlotAvailable('99999','2026-11-16:09:00',now),/outside/);
  await assert.rejects(()=>service.assertDeliverySlotAvailable('22205','2026-11-16:08:00',now),/no longer available/);
  state.blackouts='';
+ fields.horizon_days='120';
+ const extended=await service.getDeliveryCalendar(now);
+ assert.ok(extended.slots.some(slot=>slot.date==='2027-03-10'),'A 120-day Shopify horizon extends beyond January');
+ assert.ok(!extended.slots.some(slot=>slot.date==='2027-03-11'),'The configured horizon still bounds availability');
+ fields.horizon_days='7';
  assert.ok((await service.getAvailableDeliverySlots('22205',now)).slots.some(s=>s.date==='2026-11-15'));
  state.failDelivery=true;
  assert.ok((await service.getAvailableDeliverySlots('22205',now)).slots.length,'Environment fallback works without capacity');

@@ -46,7 +46,7 @@ function validateSchedule(value: unknown): DeliveryScheduleConfig {
     Number(candidate.leadTimeHours) < 0 ||
     !Number.isInteger(candidate.horizonDays) ||
     Number(candidate.horizonDays) < 1 ||
-    Number(candidate.horizonDays) > 90 ||
+    Number(candidate.horizonDays) > 180 ||
     !candidate.weeklyWindows ||
     typeof candidate.weeklyWindows !== 'object'
   ) {

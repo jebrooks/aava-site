@@ -50,7 +50,8 @@ operation, not the routine way to edit a message. Verify rendering with `npm run
 
 ### Delivery schedule — `delivery_schedule/default`
 
-Edit eligible ZIP codes, lead time in hours, horizon in days, and weekly windows JSON.
+Edit eligible ZIP codes, lead time in hours, horizon in days (1–180), and weekly windows JSON.
+The horizon is a rolling number of calendar days from today, not a fixed ending month.
 Weekday keys use Sunday `0` through Saturday `6`; window times use 24-hour `HH:mm`.
 Delivery uses Eastern Time. There is no daily or per-window reservation limit, and no delivery
 reservation product is added to the cart. The legacy `daily_capacity` field is ignored.
