@@ -270,8 +270,8 @@ export function ensureCartServingCounts(cart: ShopifyCart) {
   return input ? createCartCopy(input) : Promise.resolve(cart);
 }
 
-export function ensureCartDeliveryWindow(cart: ShopifyCart, lineId: string, slot: { date: string; label: string }) {
-  const input = cartCopyWithDeliveryWindow(cart, lineId, slot);
+export function ensureCartDeliveryWindow(cart: ShopifyCart, slot: { date: string; label: string }, delivery?: LineAttribute[]) {
+  const input = cartCopyWithDeliveryWindow(cart, slot, delivery);
   return input ? createCartCopy(input) : Promise.resolve(cart);
 }
 
@@ -340,17 +340,6 @@ export async function updateCartAttributes(
   );
 
   return checkedCart(data.cartAttributesUpdate);
-}
-
-export async function replaceDeliverySlot(
-  id: string,
-  previousSlotLineIds: string[],
-  slotVariantId: string,
-  attributes: Array<{ key: string; value: string }>,
-) {
-  let cart = previousSlotLineIds.length ? await removeCartLines(id, previousSlotLineIds) : null;
-  cart = await addCartLine(id, slotVariantId, 1);
-  return updateCartAttributes(cart.id, attributes);
 }
 
 export function formatMoney(amount: { amount: string; currencyCode: string }) {

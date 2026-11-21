@@ -97,7 +97,6 @@ export interface DeliveryWindow {
 export interface DeliveryScheduleConfig {
   timezone: 'America/New_York';
   eligibleZips: string[];
-  dailyCapacity: number;
   leadTimeHours: number;
   horizonDays: number;
   blackoutDates: string[];
@@ -110,6 +109,5 @@ export interface DeliverySlot {
   label: string;
   start: string;
   end: string;
-  variantId: string;
   available: boolean;
 }
