@@ -2,8 +2,15 @@
 
 **The full [transactional test plan](transactional-test-plan.md) is not complete.** This run
 has covered delivery and customized-board checkout, declined-payment recovery, gift-card
-issuance/redemption, and public/private tour purchases. Several email and operational gaps
-remain. It is not full release acceptance.
+issuance/redemption, and public/private tour purchases. The four reported cart/email findings
+subsequently passed actual regressions in the continuation below. Tax and additional boundary
+checks remain; this is not full release acceptance.
+
+**Current owner-confirmed scope:** verify our Shopify handoff, item/totals and required
+properties, inventory, actual notifications and cart recovery. Native wallet/card-brand,
+processor/authentication, refund settlement, manual Shopify invoice payment and waiting for a
+future native gift send are outside the Astro release gate. Earlier references to those tests
+are historical coverage boundaries, not current launch blockers.
 
 ## Environment and evidence
 
@@ -22,6 +29,10 @@ remain. It is not full release acceptance.
   links, customer contact/address details, and payment credentials are excluded from this report.
 
 ## Results and coverage boundaries
+
+This table preserves the original purchase run. Later fixes and additional evidence are
+recorded in the continuation section below; an implementation change does not by itself turn
+an earlier failed email or browser case into a passed retest.
 
 | Area | Result | Verified scope and remaining boundary |
 | --- | --- | --- |
@@ -93,8 +104,9 @@ received prompt is part of CB2; executing Sidekick is not a required QA step.
 
 The updated plan separates actual request-email receipt (CB1), helper-link/prompt behavior (CB2),
 manual invoice/payment (CB3), provider failures (CB4), validation/spam controls (CB5) and retry/staff
-handling (CB6). The following Preview observations verify the replacement intake; the manual
-invoice/payment path remains a separate, uncompleted acceptance step.
+handling (CB6). The following Preview observations verify the replacement intake. The owner
+subsequently excluded native manual invoice/payment from the site's required QA; its original
+CB3 inclusion is retained as historical plan context, not a current acceptance blocker.
 
 ### November 21, 2026 — PR #50 Preview email verification
 
@@ -107,8 +119,8 @@ received Gmail message and Shopify draft list. No invoice or test payment was cr
 | --- | --- | --- |
 | CB1: request submission and staff email | Passed for the submitted case. Browser success followed the actual UI submission. Gmail received all 11 submitted values and request reference `cef9ed0a-4710-4e34-aab5-374e55fadcff`. The server-controlled From was `website@allaboardva.com`, To was the business inbox, and Reply-To matched the controlled customer alias. | Other optional-field combinations and retry cases remain separate checks. No private customer values or alias are retained in this report. |
 | No automatic Shopify draft | Passed for the submitted case. Shopify's draft list contained the existing #D4 both before and after submission; no new draft appeared. | This request test did not create an invoice, reserve inventory, or execute a payment. |
-| CB2: email helper and prompt content | Passed for link opening and received-prompt inspection. The actual email contains the blank-editor Admin URL and the copyable Sidekick JSON prompt with data-only, budget-guidance and review-before-save/send safeguards. The link opened the intended Shopify store's Create order screen with empty products, customer and notes, and a $0.00 total. No invoice was created or sent. | Sidekick execution is optional and was not performed or counted as passed. The separate CB3 manual invoice/payment path remains pending. |
-| CB3: manual quote, invoice and payment | Not performed. | Staff-created invoice, payment, and the resulting customer/staff notification checks remain pending. |
+| CB2: email helper and prompt content | Passed for link opening and received-prompt inspection. The actual email contains the blank-editor Admin URL and the copyable Sidekick JSON prompt with data-only, budget-guidance and review-before-save/send safeguards. The link opened the intended Shopify store's Create order screen with empty products, customer and notes, and a $0.00 total. No invoice was created or sent. | Sidekick execution was not performed; it and native CB3 manual invoice/payment are outside the current site integration gate. |
+| CB3: manual quote, invoice and payment | Not performed; subsequently excluded from required site QA by the owner. | Native manual invoicing/payment is optional operations work, not an unresolved Astro acceptance case. |
 | CB4: missing email configuration | Passed locally for missing Resend configuration: a safe failure appeared and the entered values were retained. | Local development has no Resend API key/sender configured. Provider rejection, timeout and network-failure browser cases on Preview remain untested. |
 | CB5: validation and spam protection | The 16 form tests passed, and the protected Preview browser submission succeeded. | Separate live direct-POST rejection, rate-limit and spam cases have not been established by this successful submission. |
 | CB6: repeat/retry and staff handling | Not completed. | Duplicate/retry behavior and actual reply handling remain to be verified. |
@@ -118,7 +130,158 @@ the actual email evidence above comes from Preview. The local development server
 branch but lacks those local email settings, so its controlled missing-configuration result
 must not be mistaken for successful email delivery.
 
-## Final cleanup observation
+## November 21, 2026 — continuation after the four findings
+
+### Implemented fixes and actual purchase regressions
+
+Cart recovery was implemented in commit `0f972c6` and reviewed on its Ready Vercel Preview.
+The shared Shopify customer Order confirmation and staff New order templates were saved with
+actual guest/tour attributes and coordination/waiver next steps, staff board preparation
+properties and explicit payment labels. The new paid orders below exercised those changes.
+Shopify Admin showed Test order and the test gateway; the payment settings UI was confirmed in
+test mode before these purchases. No live card/wallet/processor acceptance is claimed or needed
+for the owner-confirmed integration scope.
+
+| Order/scenario | Observed integration result | Boundary |
+| --- | --- | --- |
+| #1009 — R1 mixed delivery | Passed for two Small boards ($118, serving 4 each), one Large ($175, serving 10), one Small build-your-own ($59, serving 4), and two $50 gift cards, plus $5 delivery: $457 total. The real buyer and staff emails, HTML and plain-text, retained serving counts on all three physical line groups, the submitted ingredients/preference, and November 23, 1:00–3:00 PM, America/New_York delivery fields. One gift card was for self and one was scheduled for November 22; the actual buyer receipt retained that future date, and no early recipient email was observed. | Tax was $0 before the subsequent tax configuration, not approval of tax correctness. Native future sending was not awaited and is outside the integration gate; the queued QA send was later canceled during cleanup. |
+| #1009 — input and cart recovery | Passed actual browser checks: three cheeses on the Small build-your-own board were rejected with `Choose 1–2 cheeses`; six accompaniments were rejected with `Choose 1–5 accompaniments`. ZIP 99999 was rejected; retrying with 22205 saved the chosen time. Returning to the same browser's cart after payment showed an empty cart, Cart 0 and no delivery calendar or stale-cart error. A local screenshot was retained outside Git. | These specific ingredient/ZIP cases passed; other validation combinations have separate unit/API evidence and must not all be labeled browser-tested. |
+| #1010 — nine-seat public tour plus board | Passed checkout and both actual buyer/staff emails in HTML/plain-text: December 3, Guest count 9, Public seats, Ballston Metro pickup, charcuterie snack, board quantity 1/Serves 4 and phone-coordination/waiver next steps. Total $1,184 ($1,125 seats + $59 board); the emails explicitly identified gift card $50 and Visa $1,134. No delivery date/window/timezone labels appeared. | Plain-text site links pointed to the correct Astro routes. The exact tracked order-status, waiver and booking-updates links were subsequently opened at 390px and 1280px widths; they reached the correct pages without horizontal overflow. The canceled order status was viewed without submissions. |
+| #1011 — last-seat competition | Passed the tested T5 race. After #1010, one December 3 seat remained. Two independent browser checkout sessions were ready for that seat at $125, then completion was submitted concurrently. One completed as #1011; the other displayed `Some items are no longer available.`, with no completed order ID and no resubmission. The actual customer/staff emails also passed for December 3, Guest count 1, $125 and the explicit Mastercard payment label. | Evidence is this two-session race, not arbitrary concurrency stress. |
+| #1012 — two-guest private tour | Passed checkout at the flat $1,250 whole-bus price for December 4. Both actual buyer/staff emails in HTML/plain-text explicitly showed Guest count 2, Private whole bus, an explanation that capacity components are not actual passengers, the custom pickup address, included Caprese sandwich, and phone-coordination/waiver next steps and links. No delivery labels appeared. | The QA address and private links remain outside Git. Native payment-provider behavior was not a separate test. |
+
+The original staff build-your-own fields, public/private guest/coordination details,
+split-payment labels and post-purchase cart findings are now addressed and passed by the
+applicable actual regressions above. The earlier failure rows are retained as history.
+
+### Mobile cart and email-link continuation
+
+At a 390×844 mobile viewport, a fresh board after the completed cart had no old delivery window
+or ingredients. November 23, 13:00–15:00 was saved and survived reload; changing to November 24,
+15:00–17:00 saved the replacement. Returning from an unpaid checkout showed Resume and retained
+the window. Keyboard quantity 3 updated the line to $177 and cleared the prior checkout-ready
+state; reload retained quantity 3 and the window. Shopify's mobile order summary showed
+quantity 3, $177, November 24, 15:00–17:00, America/New_York and Serves 4. The temporary line was
+removed afterward, leaving an empty cart, Cart 0 and no calendar. No new payment was made.
+
+The exact tracked order-status, waiver and booking-updates links from #1010's actual email were
+opened at mobile 390px and desktop 1280px widths. All landed correctly without horizontal
+overflow; the canceled order status was viewed without further submissions. This closes the
+previously pending desktop/mobile link check for these actual links and the tested mobile
+cart-edit/reload/interruption path.
+
+### Cleanup of the continuation orders
+
+| Order/item | Verified cleanup | Native settlement status, outside the integration gate |
+| --- | --- | --- |
+| #1009 | Local delivery was marked delivered/fulfilled and archived for QA. The actual delivered notification arrived and showed the three physical line groups/quantities; it omitted delivery/ingredient properties, so it is not evidence of those fields in that notification. Full $457 refund submitted. | Original Visa refund pending at the observation. |
+| #1010 | Canceled, fulfillment not required, with intentional restocking. The full $50 gift-card portion was returned. | $1,134 original-card refund pending. |
+| #1011 | Canceled, fulfillment not required, with intentional restocking. | $125 original-card refund pending. |
+| #1012 | Canceled, fulfillment not required, with intentional restocking. | $1,250 original-card refund pending. |
+| Test gift cards | All four test cards were verified Deactivated, including the two new $50 cards at restored $50 balances. The scheduled card explicitly showed that its November 22 recipient send was canceled, and Send gift card was disabled. No active QA gift liability or queued recipient email remains. | The native future scheduled send was deliberately canceled, not failed. G3 integration handoff passed from the selected date and actual buyer receipt. |
+| Tour capacity | Shopify Admin and Production availability were checked after cleanup: December 3 and 4 each returned to ten public seats and one private bus. A separate local API recheck at 11:41 AM also showed 10/1 for both dates. | Capacity restoration is verified separately from native card-refund settlement. |
+| Optional invoice exploration | The unsaved manual draft was discarded before Save; the draft list retained only the pre-existing #D4. | No manual invoice or payment was created. This native workflow is outside the site's required QA scope. |
+
+### Tax configuration and actual unpaid estimates
+
+The owner confirmed Virginia registration, Arlington preparation of ready-to-eat platters as
+catering, and stated that delivery/tour service should be Virginia-only. The DC-zone audit
+below shows that current delivery configuration does not yet enforce that scope. Virginia
+collection was enabled in Shopify;
+the optional Sales tax ID field was left blank and the UI shows Missing ID for owner follow-up.
+No account number was invented. All 338 generated tour seat/bus variants were set non-taxable
+and audited without price or inventory changes; food remains taxable.
+Commit `ab0eb75` maintains this service exemption for new/existing dates, but still requires
+PR merge and Production deployment. Until then, the older deployed synchronizer can create
+new date variants with Shopify's default taxable flag.
+
+The manual, unpublished **Arlington Prepared Food (Tax Only)** collection contains 22 board
+products (`496413835418`). Its Virginia 11% replacement override was saved, together with a 0%
+Virginia shipping override. The food rate combines 6% Northern Virginia sales tax and 5%
+Arlington meals tax in one Shopify replacement line; the business must allocate/report/remit
+those liabilities separately.
+
+| Unpaid checkout case | Actual tax/total | Result |
+| --- | --- | --- |
+| $59 board + $5 delivery to Virginia, Virginia billing | $6.49 tax; $70.49 total | Passed the tested delivery case. |
+| Same Virginia delivery, DC billing | $6.49 tax; $70.49 total | Passed; the Virginia shipping address supplies delivery sourcing. |
+| Nine public seats ($1,125) + $59 board on a Virginia tour, Virginia billing | $6.49 tax; $1,190.49 total | Passed the tested split between exempt service and taxable food. |
+| Same Virginia tour/board, DC billing | $0 tax; $1,184 total | **Failed — open integration blocker.** Non-shipping on-tour food is sourced from billing, although fulfilled in Virginia. |
+
+No additional payment was made for these tax estimates. Full tax acceptance is not passed.
+The owner explicitly confirmed there is no public pickup location. Native pickup is therefore
+incompatible with this workflow, and the private warehouse must not be enabled or exposed as a
+shortcut. A supported alternative remains under investigation; a valid non-Virginia billing
+address must remain usable with correct Virginia food tax. Prior zero-tax orders are not tax
+approval. See [Virginia tax maintenance](virginia-tax-maintenance.md) for source-backed treatment,
+configuration ownership, remittance allocation and the unresolved sourcing issue.
+
+### Delivery-area mismatch — owner resolution pending
+
+The Shopify UI audit found an active **Local Delivery – D.C. (Zone 5)** with ten postal codes
+and a $20 fee. Its exact ten codes also appear in the authoritative
+`delivery_schedule/default.eligible_zips` list of 112 codes: `20001`, `20003`, `20005`, `20006`,
+`20007`, `20008`, `20009`, `20024`, `20036`, `20037`. This is a second open configuration/integration
+mismatch with the owner's previously stated Virginia-only scope. The owner asked for an audit;
+no delivery-zone or schedule changes have been made in response, pending their resolution.
+ZIP `20598` is not part of this DC set and has not been removed. The tax estimates above used
+Virginia shipping and do not establish tax treatment for a DC delivery.
+
+The paid QA cleanup above remains verified: #1009's full refund was submitted; #1010–#1012
+were canceled/refunded with restocking, all test cards were deactivated, the queued gift send
+was canceled, and December 3/4 capacity returned to 10 public seats / 1 bus. Pending native
+refund settlement is outside the owner-confirmed integration gate.
+
+### Automated evidence for the continuation
+
+| Verification | Result | Boundary |
+| --- | --- | --- |
+| Cart regression suite | 40 tests passed; Astro/TypeScript check and production build passed for the cart change. | Uses local fixtures/mocks; does not prove same-browser post-payment recovery or notification delivery. |
+| Booking, blackout, tour and board suites | `test:booking` 22, `test:blackouts` 3, `test:tours` 14 and `test:boards` 7 passed in this continuation: 46 tests, zero failures. | Covers invalid contact/guest/date/conditional booking input and acknowledgments, ingredient constraints/forgery, shared blackout fail-closed behavior, checkout revalidation, no delivery inventory limit and schedule/catalog rules with fixtures. It does not establish a real last-seat race. |
+| Latest tour-suite rerun | `test:tours` subsequently passed 16 tests after the horizon/service-tax changes. | This later run supersedes the earlier 14-test tour run for the changed code; the earlier 46-test batch is preserved as its own observation, not added to this run. |
+| Safe custom-request abuse checks | Empty cross-origin POSTs returned HTTP 403 locally and in Production with `Cross-origin requests are not allowed.` A same-origin Production POST without BotID verification returned HTTP 403 and a useful verify/retry error. | No email/order writes occurred. No valid local POST was attempted because the inherited email-service credentials were not conclusively isolated. Provider failures, rate limits and retry/reply handling remain separate checks. |
+| Custom-request form suite | The earlier PR #50 verification passed 16 form tests, as recorded above. | This is previous evidence, not an additional fresh run or a reason to sum historical suite totals into a new total. |
+
+The continuation suites used the existing ARM64 Node environment. An initial cart invocation
+through the system x64 Node could not load the installed ARM64 Rolldown binding; that was an
+environment failure, followed by the separately reported passing cart run with the correct
+runtime. No dependencies or Shopify business settings were changed to run these checks.
+
+### Read-only availability boundaries
+
+On November 21 at approximately 11:05 AM America/New_York, **29 local HTTP GET requests and
+27 assertions passed** against `http://127.0.0.1:4330`. Read-only Shopify Admin queries supplied
+the authoritative schedule and shared blackout values for comparison. Unauthenticated HTTP
+requests to the branch Preview redirected to Vercel login, so the following boundary evidence
+is local API evidence against the shared Shopify store, not an authenticated Preview browser
+or checkout test. No form emails, carts, orders or inventory writes were made by these checks.
+
+| Input/check | Observed result | Coverage boundary |
+| --- | --- | --- |
+| Delivery `calendar=1`; eligible ZIP `22205` | Both returned HTTP 200 and the same 543 available slots, from November 22 at 13:00 through March 20, 2027 at 17:00. The complete key set matched Shopify's 24-hour notice, 120-calendar-day horizon and configured windows. No slot was on/after March 21. | Evaluates availability at this observed time; changing clocks and checkout enforcement are distinct checks. |
+| Delivery ZIP `22205-1234` and whitespace-padded `22205` | HTTP 200, `eligible: true`, and identical slots to `22205`. | ZIP normalization at the GET API; not shipping-address validation. |
+| Delivery ZIP `99999`, missing ZIP, `ABCDE`, `2220` | HTTP 200, `eligible: false`, empty slots. | Rejection is represented by eligibility, not an HTTP error; no checkout was attempted. |
+| Shared business blackouts | No delivery slots or public/private tour dates on November 25–30 or December 24–27, 2026: all ten configured closures were excluded. Both APIs identify `booking_blackouts/default`. | Read-only list exclusion; the passing fixture suites separately cover server revalidation and fail-closed behavior. |
+| Every configured delivery window on December 3 | All five starts/ends appeared: 09:00–11:00, 11:00–13:00, 13:00–15:00, 15:00–17:00 and 17:00–19:00. All returned slots were marked available without variant/reservation inventory. | No order was placed in these windows. |
+| Tour `guests=0`, `-1`, `11`, `1.5`, `abc`; `type=vip` | HTTP 400 with a useful valid-type/guest-count error for each input. | Availability input validation; no registration/checkout POST was made. |
+| Tour `month=2026-13`, `2026-2`, `invalid` | HTTP 400 with a valid-calendar-month error. Both public/private `guests=10` requests for December were accepted with HTTP 200. | Tests format/count bounds at availability GET. |
+| Public/private month queries for October/November/December 2026 and May/June 2027 | October and June returned no dates; November returned only November 24, shown sold out with zero remaining. December returned 27 dates, excluding its four closures. No date before the three-day November 24 minimum or beyond the reported May 21 maximum appeared. | Missing acknowledgments and full invalid registration cases were exercised in fixtures, not browser submission. The original final-day catalog gap was subsequently fixed and reverified below. |
+| Candidate unused-capacity dates | December 3, 4 and 5 each showed ten public seats at $125 and one private bus at $1,250, available for the requested group size. | A snapshot of current unreserved capacity, not proof of no historical canceled bookings. Recheck immediately before tests. |
+
+**Catalog horizon finding — fixed and reverified:** the original read-only run reported
+May 21, 2027 as the inclusive maximum, but catalog results ended on May 20 and Admin had no
+May 21 seat/bus products. After the reviewed horizon synchronization, read-only Admin verification
+found both May 21 products Active: seat `15538217418906` with quantity 10 and bus `15538217451674`
+with quantity 1. Subsequent local public and private availability GETs for `month=2027-05`
+report maximumDate May 21 and return that date available, with public remaining 10 and private
+remaining 1. The original gap is resolved for the observed boundary; the initial test's no-write
+scope remains historical evidence.
+
+## Initial purchase-run cleanup observation
+
+This subsection preserves the #1003–#1008 observations before the continuation and tax-setting
+changes above. Native pending refund settlement is recorded for audit, outside the current
+Astro release gate.
 
 | Test order | Verified cleanup | Remaining settlement boundary |
 | --- | --- | --- |
@@ -134,24 +297,24 @@ Existing orders **#1001 and #1002 were left unchanged**. No production prices, s
 permissions, or payment-mode settings were changed. Pending simulated-card settlement is
 recorded separately from verified inventory and gift-card restoration.
 
-## Outstanding acceptance work
+## Outstanding integration acceptance work
 
-- Resolve the staff customized-board email and customer/staff tour email gaps, then repeat
-  affected actual notifications.
-- Fix and retest the post-purchase `Cart not found.`/stale badge/calendar behavior.
-- Verify final simulated-card refund settlements for #1003/#1004/#1005/#1006/#1008. Inventory,
-  gift-card refunds, restored balances, and issued-card deactivation were verified separately.
-- Complete last-seat competition (T5), full multi-size combinations (C2), multiple-board/quantity
-  cases (C4), invalid booking/cart/browser boundary cases, scheduled gift delivery (G3), and
-  a completed mixed physical/gift purchase. The selected mixed-cart/removal transition (G4/G5)
-  has passed at the cart stage.
-- Complete the remaining custom-request CB1–CB6 boundaries above, including failure/spam/retry
-  cases and the manually created Shopify invoice/payment with actual emails. Preview request
-  submission, actual staff-email receipt, no automatic draft creation, and the blank-editor
-  helper/prompt inspection passed for the recorded case. Do not add draft-order app access to
-  restore the retired workflow.
-- Complete the delivery-completion notification and intended alternative payment methods.
-  Business tax correctness still requires approval.
+- Resolve the on-tour food tax-sourcing blocker for legitimate non-Virginia billing. The saved
+  11% food/0% shipping overrides and the tested delivery estimates passed; a Virginia tour with
+  DC billing still incorrectly shows zero food tax. No public pickup location exists, so native
+  pickup is incompatible; investigate a supported alternative without exposing the warehouse.
+  Enter the owner's real Virginia tax ID securely as account follow-up.
+- Resolve the mismatch between the stated Virginia-only delivery scope and the active DC zone
+  plus ten matching schedule ZIPs. The audit made no configuration change and did not test DC
+  delivery tax; await the owner's decision on the intended service area.
+- Complete the remaining relevant custom-request provider-failure/rate-limit/retry checks
+  (CB4–CB6), retaining the passed actual email/helper, cross-origin rejection and no-BotID
+  Production rejection evidence. Existing unit tests cover the failure/validation logic;
+  additional live outage/retry checks have not been claimed. Native manual invoice/payment
+  (CB3) and optional Sidekick execution are outside the site's required integration QA.
+- Check valid/invalid discounts only if an offered code and its business rules apply. Native
+  card-brand/wallet/processor/settlement coverage and waiting for Shopify's future scheduled
+  gift send are excluded by the owner, not unresolved Astro failures.
 
 Record each result separately. Verified purchase paths do not establish full-plan completion.
 

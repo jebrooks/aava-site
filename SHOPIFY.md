@@ -4,6 +4,8 @@ This runbook covers Shopify provisioning, integrations, and catalog migration. F
 use [Content management](docs/content-management.md); for PR review, environment scoping, and
 release procedures, use [Deployments](docs/deployments.md). Setup steps below are for initial
 provisioning or deliberate repairs, not a checklist to rerun against an operating store.
+For registered Virginia collection, tour-service taxability and the prepared-food override,
+see [Virginia tax maintenance](docs/virginia-tax-maintenance.md).
 
 ## 1. Create the Shopify resources
 
@@ -138,8 +140,9 @@ after live sales without a fresh reconciliation.
   recipient email, optional name/message, and a send date up to 90 days ahead. The cart carries
   Shopify’s native recipient properties through checkout. Shopify’s Online Store theme settings
   do not configure this custom form. Verify that New gift card and Gift card receipt notification
-  templates support recipients, then verify paid issuance and scheduled delivery with an approved
-  end-to-end test. Gift-card-only carts skip delivery scheduling; cart edits and checkout remove
+  templates support recipients, then verify issuance and the recipient/send-date handoff with
+  actual buyer receipts. Waiting for native future delivery is outside the owner-confirmed site
+  QA gate. Gift-card-only carts skip delivery scheduling; cart edits and checkout remove
   delivery metadata and any legacy reservation lines when no physical products remain. An already-open
   checkout is preserved and the site saves the replacement cart ID. See the
   [content guide](docs/content-management.md#gift-cards) for maintenance and fallback behavior.
@@ -172,10 +175,11 @@ check before merging. Vercel production deployments should continue to track onl
    window, repeated orders choosing the same delivery window without a capacity limit, regular
    inventory, discounts, taxes, email, refunds, cancellations, and intentional restocking.
 4. Submit a custom request and verify staff email receipt with no automatic Shopify draft/order.
-   Open its staff invoice link, manually prepare and review the quote and delivery details,
-   send the Shopify invoice, and pay it. See the [transactional test plan](docs/transactional-test-plan.md).
+   Open its staff helper link and inspect the optional prompt. Native manual invoice/payment
+   testing is outside this site's integration gate. See the [transactional test plan](docs/transactional-test-plan.md).
 5. Buy and redeem a new gift card, then test every legacy replacement case.
 6. Crawl Squarespace and the preview domain, add redirects for all renamed/retired routes, and
    validate the dynamic sitemap.
-7. Complete a low-value live payment before DNS cutover. Keep Squarespace reachable on a legacy
-   hostname for the agreed 30-day rollback and reconciliation window.
+7. Verify the site's checkout handoff, inventory, emails and cart recovery; native payment
+   methods/processor settlement are outside the owner-confirmed integration scope. Keep
+   Squarespace reachable on a legacy hostname for the agreed 30-day rollback and reconciliation window.

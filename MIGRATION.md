@@ -59,11 +59,14 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
 ## Verification needed before full cutover
 
 1. **Commerce:** verify store/app configuration, imported products, inventory, taxes, discounts,
-   delivery rules, gift cards, payments, and order email against approved business records.
+   delivery rules, gift-card recipient/send-date handoff, checkout items/totals and actual order
+   email against approved business records. Native payment-provider/settlement testing and
+   waiting for future Shopify gift delivery are outside the owner-confirmed site QA scope.
 2. **Tours:** verify public/private booking, seat/bus inventory sharing, minimum notice, closures,
    board fulfillment, cancellations, refunds, and existing reservation handling end to end.
-3. **Forms and waivers:** verify email recipients, emailed custom requests and staff invoice workflow, consent records,
-   spam protection, and any required signed-waiver collection or retention process.
+3. **Forms and waivers:** verify email recipients, emailed custom requests and staff helper/prompt,
+   consent records, spam protection, and any required signed-waiver collection or retention
+   process. Native manual invoice/payment testing is optional operations work.
 4. **Email marketing:** reconcile newsletter consent and destination lists before retiring old forms.
 5. **Content scope:** review every source route for migration, redirect, or retirement. Private-tour
    minimum and tasting-fee policy discrepancies are reconciled to the approved rules: no minimum

@@ -17,6 +17,8 @@ payments, gift cards, draft-order invoices, and orders. The production runtime t
   board preparation fields, payment labels, and actual-email verification.
 - [Transactional test plan](docs/transactional-test-plan.md): purchase, email, inventory, gift-card,
   cancellation, and refund acceptance scenarios.
+- [Virginia tax maintenance](docs/virginia-tax-maintenance.md): registered collection, tour/food
+  treatment, prepared-food override, and checkout verification boundaries.
 - [MIGRATION.md](MIGRATION.md): migration history and remaining cutover verification.
 - [AGENTS.md](AGENTS.md): project instructions for coding agents and maintenance conventions.
 

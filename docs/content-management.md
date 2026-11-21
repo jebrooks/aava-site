@@ -141,6 +141,12 @@ affected bookings separately in Shopify and contact customers through the establ
 
 ## Product maintenance
 
+Maintain tax registration, normal product taxability and prepared-food collection overrides in
+Shopify. Tour synchronization owns generated seat/bus variants and keeps their service fees
+non-taxable; on-tour board synchronization preserves the source board's taxability. See
+[Virginia tax maintenance](virginia-tax-maintenance.md) for the owner's confirmed business
+facts, current configuration status and checkout checks.
+
 Edit normal catalog products in Shopify. Ensure intended products belong to the configured
 charcuterie collection and are published to the configured Headless storefront. Check product
 details and the menu after edits. Automated tour seats, bus bundles, and on-tour
@@ -240,7 +246,8 @@ preserve entered details and avoid reporting success. The success message means 
 was sent for review; it must not promise a confirmed booking, availability, price or invoice.
 The web form needs no Shopify credentials or draft-order write scope. Run `npm run test:forms`
 and verify a real controlled staff email, its reply-to and reference, and its invoice link before
-release. Test the manual invoice and payment steps separately; they do not prove request email delivery.
+release. Native manual invoice/payment testing is optional operations work, outside the site's
+integration gate, and does not prove request email delivery.
 
 ## Repository content changes
 
