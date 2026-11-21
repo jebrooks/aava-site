@@ -25,7 +25,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <h2>Delivery and checkout</h2>
           <div class="selected-delivery" data-selected-delivery hidden></div>
           <button class="text-button" type="button" data-change-delivery hidden>Change delivery window</button>
-          <form class="delivery-form" data-delivery-form>
+          <form class="delivery-form" data-delivery-form hidden>
             <label>
               <span>Delivery ZIP code</span>
               <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" required />
@@ -68,9 +68,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   import type { DeliverySlot, ShopifyCart, CartLine } from '../lib/shopify/types';
   import { servingCount } from '../lib/serving-size';
   import { deliveryCalendarMonth } from '../lib/delivery-calendar';
+  import { CART_ID_KEY, CART_COUNT_KEY, isMissingCartResponse, loadStoredCart } from '../lib/cart-session';
 
-  const CART_ID_KEY = 'aava-shopify-cart-id';
-  const CART_COUNT_KEY = 'aava-shopify-cart-count';
   const linesRoot = document.querySelector<HTMLElement>('[data-cart-lines]');
   const subtotal = document.querySelector<HTMLElement>('[data-subtotal]');
   const total = document.querySelector<HTMLElement>('[data-total]');
@@ -184,6 +183,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       body: JSON.stringify(body),
     });
     const result = await response.json();
+    if (isMissingCartResponse(response, result)) return null;
     if (!response.ok) throw new Error(result.error || 'The cart could not be updated.');
     return result.cart as ShopifyCart;
   }
@@ -287,9 +287,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return row;
   }
 
-  function renderCart(cart: ShopifyCart) {
+  function renderCart(value: ShopifyCart | null) {
+    const cart = value || {
+      id: '', checkoutUrl: '', totalQuantity: 0, attributes: [], lines: { nodes: [] },
+      cost: {
+        subtotalAmount: { amount: '0', currencyCode: 'USD' },
+        totalAmount: { amount: '0', currencyCode: 'USD' },
+      },
+    };
     currentCart = cart;
-    localStorage.setItem(CART_ID_KEY, cart.id);
+    if (cart.id) localStorage.setItem(CART_ID_KEY, cart.id);
+    else localStorage.removeItem(CART_ID_KEY);
     const quantity = customerQuantity(cart);
     localStorage.setItem(CART_COUNT_KEY, String(quantity));
     window.dispatchEvent(new CustomEvent('aava:cart-updated', { detail: { ...cart, totalQuantity: quantity } }));
@@ -349,25 +357,24 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   async function loadCart() {
-    const id = localStorage.getItem(CART_ID_KEY);
-    if (!id) {
-      renderCart({
-        id: '', checkoutUrl: '', totalQuantity: 0, attributes: [], lines: { nodes: [] },
-        cost: {
-          subtotalAmount: { amount: '0', currencyCode: 'USD' },
-          totalAmount: { amount: '0', currencyCode: 'USD' },
-        },
-      });
-      return;
-    }
     try {
-      const response = await fetch(`/api/cart?id=${encodeURIComponent(id)}`);
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Cart not found.');
-      renderCart(result.cart);
+      renderCart(await loadStoredCart(localStorage));
     } catch (error) {
-      localStorage.removeItem(CART_ID_KEY);
-      if (linesRoot) linesRoot.textContent = error instanceof Error ? error.message : 'Could not load the cart.';
+      currentCart = null;
+      for (const section of [deliveryForm, selectedDelivery, changeDelivery, deliveryCalendar, slotField]) {
+        if (section) section.hidden = true;
+      }
+      if (checkout) checkout.disabled = true;
+      if (subtotal) subtotal.textContent = '—';
+      if (total) total.textContent = '—';
+      if (cartStatus) cartStatus.textContent = '';
+      const message = element('p');
+      message.textContent = error instanceof Error ? error.message : 'Could not load the cart.';
+      const retry = element('button', 'button button--primary');
+      retry.type = 'button';
+      retry.textContent = 'Try again';
+      retry.addEventListener('click', () => { void initializeCart(); });
+      linesRoot?.replaceChildren(message, retry);
     }
   }
 
@@ -423,12 +430,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (checkout) checkout.disabled = true;
     if (deliveryStatus) deliveryStatus.textContent = 'Saving your delivery window…';
     try {
-      renderCart(await cartRequest({
+      const cart = await cartRequest({
         action: 'setDelivery',
         cartId: currentCart.id,
         zip: zipInput?.value,
         slotKey: slotSelect.value,
-      }));
+      });
+      renderCart(cart);
+      if (!cart) return;
       if (deliveryStatus) deliveryStatus.textContent = 'Delivery window added to your order.';
     } catch (error) {
       if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Delivery selection failed.';
@@ -454,6 +463,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     })
       .then(async (response) => {
         const result = await response.json();
+        if (isMissingCartResponse(response, result)) {
+          renderCart(null);
+          return;
+        }
         if (!response.ok) throw new Error(result.error || 'Checkout is not ready.');
         renderCart(result.cart);
         window.location.assign(result.checkoutUrl);

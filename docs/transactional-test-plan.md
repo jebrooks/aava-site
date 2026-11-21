@@ -65,11 +65,11 @@ serving counts, selections, and relevant booking details. Check inbox and spam f
 | --- | --- | --- |
 | C1 | Single-size board | Exact price, separate serving count, eligible delivery date/window, correct address and delivery fee. |
 | C2 | Multi-size board | Small and Large retain correct prices and serving counts on product page, cart, checkout, order, and email. Both sizes can be combined in one purchase. |
-| C3 | Build-your-own board | Cheese, meat, accompaniment, and board-preference selections survive checkout and appear in the order and confirmation email. Invalid or incomplete selections are rejected. |
+| C3 | Build-your-own board | Cheese, meat, accompaniment, board-preference and serving-count selections survive checkout and appear in the Shopify order, real customer confirmation and real staff new-order email. Compare both plain-text and HTML bodies; omit empty fields. Invalid or incomplete selections are rejected. |
 | C4 | Multiple boards and quantities | Quantities, totals, and per-board serving counts are clear. The selected delivery window appears on every physical board line without a reservation product. Multiple orders may choose the same window. |
 | C5 | Cart changes | Change size/quantity, remove an item, refresh, and return later. The delivery calendar loads available dates automatically without a Check dates button or ZIP lookup, selects a date and the time dropdown shows only that date’s windows. Choosing a time saves immediately with a valid delivery ZIP, without a reservation button. Choosing a time before entering a ZIP prompts for the ZIP and saves after entering it. Check month navigation, disabled blackout/notice/horizon dates, and changing a date before saving a time. Changing a window updates the saved selection; failed saves can be retried. No stale price, ingredient selection, or delivery time remains. |
 | C6 | Delivery restrictions | Reject unsupported ZIP codes, insufficient notice, blackouts, and out-of-horizon dates. Delivery windows have no daily or per-window order cap. Check every configured window without paying for each. |
-| C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order results, with the saved delivery date/window/timezone visible on physical board lines and no reservation product. |
+| C7 | Checkout interruption and completed-cart recovery | Abandon checkout, return, and complete once. Exactly one paid order results, with the saved delivery date/window/timezone visible on physical board lines and no reservation product. After purchase, return to the same browser's cart and refresh: show an empty cart, Cart 0 and no delivery calendar or stale-cart error. A new add-to-cart operation starts a usable cart with the correct badge and no prior ingredients or delivery selection. |
 | C8 | Discount, if offered | Valid and invalid codes, eligible products, totals, and refund amounts behave correctly. |
 
 **Email acceptance for delivery orders:** both the real customer order-confirmation email and
@@ -77,26 +77,31 @@ staff new-order notification show the saved `Delivery date`, `Delivery window`, 
 `Delivery timezone` from physical board line properties. Compare these values with checkout and
 the Shopify order; gift-card-only and on-tour orders must not show blank delivery labels.
 
-**Additional email acceptance for C3:** the real order-confirmation email shows `Serves`, `Board preference`,
-`Cheeses`, `Meats`, and `Accompaniments` when supplied. Empty fields are omitted. Shopify's sample
-notification preview is not evidence that real order properties reached the email.
+**Additional email acceptance for C3:** both the real customer order-confirmation email and
+staff new-order notification show `Serves`, `Board preference`, `Cheeses`, `Meats`, and
+`Accompaniments` when supplied, in plain-text and HTML. Compare them with the paid order's line
+properties. Empty fields are omitted. Shopify's sample notification preview is not evidence
+that real order properties reached either email.
 
 ## 2. Tours
 
 | ID | Scenario | Acceptance criteria |
 | --- | --- | --- |
-| T1 | Public tour for multiple guests | Correct per-person total; seat inventory decreases by guest count; date, passenger count, pickup, contact information, and acknowledgments are retained. |
-| T2 | Public tour with snacks and a board | Correct options, quantities, serving counts, ingredients, and totals. No local-delivery scheduling or shipping charge is introduced. |
-| T3 | Private tour with fewer than ten guests | Charges one whole-bus booking, records actual passenger count, and consumes shared ten-seat capacity. |
+| T1 | Public tour for multiple guests | Correct per-person total; seat inventory decreases by guest count; date, actual guest count, pickup preference, contact information and acknowledgments are retained. The real customer and staff emails explicitly show the actual guest count, pickup preference and applicable coordination/waiver next steps. |
+| T2 | Public tour with snacks and a board | Correct options, quantities, serving counts, ingredients and totals. Both real customer and staff emails show the selected snack/sandwich details and board serving count/customizations when supplied. No local-delivery scheduling, blank delivery labels or shipping charge is introduced. |
+| T3 | Private tour with fewer than ten guests | Charges one whole-bus booking, records actual guest count and consumes shared ten-seat capacity. Both real customer and staff emails explicitly show the actual guest count, pickup preference, included/selected sandwich details and applicable coordination/waiver next steps. Ten bundle seat components must not imply ten actual passengers. |
 | T4 | Shared public/private availability | Buying public seats prevents a whole-bus booking on that date. Buying the bus prevents public-seat purchases on that date. |
 | T5 | Last-seat competition | Two browser sessions attempt remaining capacity. Only the permitted quantity can be purchased; the other session receives a useful error. |
 | T6 | Invalid booking | Reject zero/over-capacity guests, missing required fields or acknowledgments, blackouts, insufficient notice, and unavailable dates. |
 | T7 | Cart independence | Starting a tour booking does not overwrite an existing ordinary delivery cart. |
 | T8 | Cancellation and partial refund | Verify money and seat restoration separately. Do not assume refunding money alone reopens seats. |
 
-Check whether the customer confirmation provides enough trip information, including date,
-passenger count, pickup, and next steps. The recent email-template change covers board counts
-and ingredients; it does not establish that all tour details appear in the email.
+For both public and private purchases, compare the actual customer and staff notifications
+with the Shopify order in plain-text and HTML. Require the tour date, explicit actual guest
+count, pickup preference, applicable snack/sandwich details and phone-coordination/waiver next
+steps. Require board serving counts and customizations when present, and no empty delivery
+labels. Bundle quantities are inventory components, not a substitute for actual guest count.
+Do not treat a sample notification preview or one tour type as evidence for both types.
 
 Verify tour follow-up emails, waiver instructions, and staff handling separately. A displayed
 policy or recorded acknowledgment does not by itself establish signed-waiver collection.
@@ -160,6 +165,42 @@ Target approximately **8–10 completed orders**, combining compatible scenarios
 8. A tour purchase using remaining gift-card value where practical.
 9. One emailed custom-board request followed by a staff-created Shopify invoice purchase (CB1–CB3).
 10. An additional payment-method or mixed-cart purchase if not covered above.
+
+### Continuation after the November 21 findings
+
+The rows below group remaining checks into a small continuation run. They are proposed work,
+not passed results. First confirm the deployed fixes and test-mode state, record unused tour
+dates and current inventory, and complete validation/restriction checks without payment.
+Do not repeat earlier successful payment families unless a changed path needs regression.
+
+| Run | Combined purchase or check | Coverage and evidence to collect |
+| --- | --- | --- |
+| R1 | One delivery order with two sizes, quantity greater than one, a build-your-own board and a recipient gift card scheduled for the next practical date | C2–C4, G3/G4 and the staff-ingredient fix. Record each physical line's servings/customizations and delivery fields in checkout, order and both actual emails. Verify the gift recipient receives nothing early; retain the order/card until actual scheduled delivery is observed. After payment, test same-browser empty-cart recovery and a fresh add-to-cart (C7), then remove the temporary item. Before paying, rehearse last-board removal/re-addition and confirm gift recipient settings survive (G5). |
+| R2 | Public tour with snacks and a board, using nine seats on an otherwise unused ten-seat date; then two sessions compete for the final seat | T1/T2/T4/T5 and public-tour email fixes. Record the starting capacity; after the nine-seat purchase expect one public seat and no private bus. Bring both independent sessions to the last-seat attempt; only one additional single-seat order may complete, and the other must receive a useful sold-out/retry result without payment. Compare customer/staff emails, actual guest counts, pickup, snack/board details and next steps. This uses two successful public-tour orders; do not lower inventory solely to manufacture the race. |
+| R3 | One private tour for fewer than ten actual guests with the included/selected sandwich option | T3/T4 and private-tour email fixes. Record the flat price, actual guest count, all bundle effects and both actual emails. Verify no public seats remain after purchase; cancel/restock only after evidence is captured and confirm both public/private capacity returns to baseline. |
+| R4 | One staff-created invoice from a received custom-request reference, then customer payment | CB3. Enter an agreed test quote and delivery date/window, fees and tax treatment; include the request reference and customer-visible delivery details. Inspect invoice, checkout, order and actual buyer/staff emails. This draft is created intentionally by staff; the public request still creates none. Sidekick execution remains optional. |
+| R5 | Browser restrictions and operational recovery around the orders above | C5/C6/C8/T6, CB4–CB6 and remaining operations. Check invalid/max ingredient choices, every configured window, ZIP, notice/blackout/horizon boundaries, cart edits/refresh/interruption, booking invalid/over-capacity input and missing acknowledgments. Use existing valid/invalid discount cases if the business offers discounts. Check actual order-status links on desktop/mobile, delivery-completion email, remaining refund settlement and appropriate cancellation/restocking. Provider-failure/spam cases must not send unintended staff email. |
+
+R1 can combine mixed-cart and scheduled-gift coverage only if Shopify retains the recipient's
+selected send date through the mixed checkout; otherwise keep the mixed purchase and add a
+separate scheduled gift-card order. If no suitable nine-seat date can be used without affecting
+customers, record the last-seat race as pending rather than silently replacing it with a
+single-session sold-out check. Capture inventory before either competing checkout and after
+both attempts, and distinguish temporary checkout holds from completed bookings.
+
+The base continuation is five successful orders: R1, two public-tour orders, R3 and R4.
+Additional payment-method orders are needed only for customer payment methods not covered by
+those purchases. A returning-customer or mobile session can be used for one of these orders;
+record the actual device/session rather than claiming either from a desktop guest purchase.
+Use a supported enabled method for one planned order where possible; test-mode simulated-card
+success does not establish that accelerated wallets or real payment processing work.
+
+Scheduled gift delivery requires waiting until the selected date and observing the recipient
+message before refund/deactivation. Tax correctness requires the business's expected taxable
+products, locations and rates; a displayed zero is not approval. Valid discounts require an
+existing offered code and its intended rules. Confirm intended payment methods and any external
+follow-up/waiver process with the business if those expectations are not already documented.
+Keep these dependencies explicit in the report and continue independent checks while waiting.
 
 Use purchased gift-card balances toward later tests rather than funding every order again.
 Keep the full-price private-tour purchase to one successful transaction because its processing

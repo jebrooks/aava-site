@@ -6,6 +6,7 @@ import { assertDeliverySlotAvailable } from '../../lib/shopify/schedule';
 import { boardAttributes, assertBoardLine } from '../../lib/board-customization';
 import { giftCardAttributes, assertGiftCardLine } from '../../lib/gift-card';
 import { servingAttributes } from '../../lib/serving-size';
+import { CART_NOT_FOUND } from '../../lib/cart-session';
 import {
   addCartLine,
   assertCatalogVariant,
@@ -22,6 +23,8 @@ import {
 } from '../../lib/shopify/storefront';
 
 export const prerender = false;
+
+const missingCart = () => json({ error: 'Cart not found.', code: CART_NOT_FOUND }, { status: 404 });
 
 function publicCart<T extends { checkoutUrl: string }>(cart: T) {
   return { ...cart, checkoutUrl: '' };
@@ -52,7 +55,7 @@ export const GET: APIRoute = async ({ url }) => {
   try {
     const cartId = id(url.searchParams.get('id'), 'Cart ID');
     const cart = await getCart(cartId);
-    if (!cart) return json({ error: 'Cart not found.' }, { status: 404 });
+    if (!cart) return missingCart();
     return json({ cart: publicCart(cart) });
   } catch (error) {
     return apiError(error);
@@ -94,7 +97,8 @@ export const POST: APIRoute = async ({ request }) => {
       const lineId = id(body.lineId, 'Line ID');
       const amount = quantity(body.quantity);
       const current = await getCart(cartId);
-      const line = current?.lines.nodes.find((candidate) => candidate.id === lineId);
+      if (!current) return missingCart();
+      const line = current.lines.nodes.find((candidate) => candidate.id === lineId);
       if (!line) throw new ShopifyApiError('Cart line not found.', 404);
       if (line.merchandise.product.handle.startsWith('delivery-slot-')) {
         throw new ShopifyApiError('Choose delivery through the delivery scheduler.', 400);
@@ -111,7 +115,8 @@ export const POST: APIRoute = async ({ request }) => {
       const cartId = id(body.cartId, 'Cart ID');
       const lineId = id(body.lineId, 'Line ID');
       const current = await getCart(cartId);
-      const line = current?.lines.nodes.find((candidate) => candidate.id === lineId);
+      if (!current) return missingCart();
+      const line = current.lines.nodes.find((candidate) => candidate.id === lineId);
       if (!line) throw new ShopifyApiError('Cart line not found.', 404);
       if (line.merchandise.product.handle.startsWith('delivery-slot-')) {
         throw new ShopifyApiError('Choose delivery through the delivery scheduler.', 400);
@@ -128,7 +133,7 @@ export const POST: APIRoute = async ({ request }) => {
       const zip = String(body.zip || '');
       const slot = await assertDeliverySlotAvailable(zip, slotKey);
       const current = await getCart(cartId);
-      if (!current) throw new ShopifyApiError('Cart not found.', 404);
+      if (!current) return missingCart();
       if (!current.lines.nodes.some((line) =>
         !line.merchandise.product.handle.startsWith('delivery-slot-') && line.merchandise.requiresShipping
       )) {
@@ -146,7 +151,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (action === 'checkout') {
       let cart = await getCart(id(body.cartId, 'Cart ID'));
-      if (!cart) throw new ShopifyApiError('Cart not found.', 404);
+      if (!cart) return missingCart();
       const catalogLines = cart.lines.nodes.filter(
         (line) => !line.merchandise.product.handle.startsWith('delivery-slot-'),
       );
