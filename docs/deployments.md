@@ -75,7 +75,7 @@ with the example or commit credentials. These are the functional groups:
 | Local feature | Configuration |
 | --- | --- |
 | Published catalog, product pages, gift amounts, carts | `PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`; use the intended API version and collection handle |
-| Announcements, gift-guide tour prices, booking/delivery settings and inventory | Same store plus `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (or the optional `SHOPIFY_ADMIN_ACCESS_TOKEN` fallback) |
+| Announcements, gift-guide tour prices, delivery settings, tour settings and tour inventory | Same store plus `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (or the optional `SHOPIFY_ADMIN_ACCESS_TOKEN` fallback) |
 | Catalog, delivery and tour maintenance | Correct `SHOPIFY_DELIVERY_LOCATION_ID`, `SHOPIFY_STOREFRONT_PUBLICATION_ID`, and relevant collection IDs/handle |
 | Contact/inquiry email | `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` using an approved, verified sender |
 | Manual cron testing | `CRON_SECRET` and the relevant Shopify credentials/IDs; this performs catalog writes |

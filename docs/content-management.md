@@ -251,9 +251,9 @@ and [notification guidance](https://help.shopify.com/en/manual/online-store/them
 
 Gift-card-only purchases skip local delivery scheduling; orders that also contain physical boards
 still require a delivery window. When the last physical item is removed, the cart discards its
-unused delivery-capacity line and delivery metadata. Checkout also repairs older saved digital-only
+delivery metadata and any legacy reservation lines. Checkout also repairs older saved digital-only
 carts this way, creating a clean cart rather than changing an already-open checkout. Recipient
-properties and other customer items are preserved. This prevents leftover delivery reservations
+properties and other customer items are preserved. This prevents legacy delivery reservations
 from showing a shipping address or free shipping rate for a gift-card-only purchase. Shopify may
 still request a billing address for payment.
 Shopify owns checkout, payment, gift-card issuance, and redemption. Verify purchase, notification,

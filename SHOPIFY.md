@@ -49,8 +49,9 @@ Staff subsequently edit the schedule metaobject in Shopify Admin. Create the tou
 shared blackout entry as described in the [content guide](docs/content-management.md).
 
 Availability and checkout validate ZIP, schedule, lead time, horizon, and Shopify's shared blackouts
-directly. The chosen delivery date/window/timezone is stored as cart metadata and physical board
-line properties. Delivery does not consume inventory or need generated products or a cron job.
+directly. Choosing a window in the cart dropdown saves it immediately without a reservation
+button. The chosen delivery date/window/timezone is stored as cart metadata and visible physical
+board line properties in Shopify checkout and orders. Delivery does not consume inventory or need generated products or a cron job.
 The legacy `daily_capacity` metaobject field is ignored and no longer provisioned on new stores.
 
 Deploy the reservation-free code to Production **before** retiring old reservation products:
@@ -125,7 +126,7 @@ after live sales without a fresh reconciliation.
   do not configure this custom form. Verify that New gift card and Gift card receipt notification
   templates support recipients, then verify paid issuance and scheduled delivery with an approved
   end-to-end test. Gift-card-only carts skip delivery scheduling; cart edits and checkout remove
-  unused delivery-capacity lines and metadata when no physical products remain. An already-open
+  delivery metadata and any legacy reservation lines when no physical products remain. An already-open
   checkout is preserved and the site saves the replacement cart ID. See the
   [content guide](docs/content-management.md#gift-cards) for maintenance and fallback behavior.
 - Export outstanding Squarespace gift-certificate liabilities, verify each balance, issue an
