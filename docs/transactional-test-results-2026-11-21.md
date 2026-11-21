@@ -209,6 +209,9 @@ those liabilities separately.
 | Same Virginia tour/board, DC billing | $0 tax; $1,184 total | **Failed — open integration blocker.** Non-shipping on-tour food is sourced from billing, although fulfilled in Virginia. |
 
 No additional payment was made for these tax estimates. Full tax acceptance is not passed.
+The owner subsequently confirmed the required behavior: on-tour boards always use Virginia
+food-tax sourcing regardless of billing. Virginia, Maryland and DC billing are the required
+unpaid regression matrix; no Maryland-specific checkout pass is claimed by the earlier DC test.
 The owner explicitly confirmed there is no public pickup location. Native pickup is therefore
 incompatible with this workflow, and the private warehouse must not be enabled or exposed as a
 shortcut. A supported alternative remains under investigation; a valid non-Virginia billing

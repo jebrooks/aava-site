@@ -175,6 +175,11 @@ customer coverage only when actually exercised. Discounts are relevant only if o
 existing business rules rather than introducing a new broad discount. The external waiver
 follow-up process is an operational responsibility separate from recorded acknowledgments.
 
+For the on-tour food sourcing fix, repeat the same unpaid checkout with Virginia, Maryland and
+DC billing addresses. Under the current 11% prepared-food configuration, a $59 board must have
+$6.49 Virginia food tax in all three cases; the tour-service fee remains exempt. Preserve each
+buyer's genuine billing address and introduce no home delivery or public-pickup requirement.
+
 Tax correctness still requires the business facts and actual checkout estimates: intended
 Virginia-only delivery/tour service, Arlington preparation, registered Virginia collection,
 non-taxable tour service versus separately sold prepared food. The active DC delivery zone

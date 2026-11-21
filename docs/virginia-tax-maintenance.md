@@ -24,6 +24,15 @@ food add-on sale is not made exempt merely because it accompanies a tour. Delive
 treatment must also be checked against the actual charge and applicable rule rather than
 assuming the prior zero-tax test proves it correct.
 
+The owner explicitly confirmed that separately sold on-tour boards must always use Virginia
+food-tax sourcing because guests receive them in Virginia, irrespective of the payer's genuine
+billing address. The required regression matrix includes Virginia, Maryland and DC billing:
+a $59 on-tour board must contribute $6.49 tax under the current 11% configuration in every case,
+while the tour-service fee stays exempt. This is required behavior, not a claim that the current
+checkout passes. Virginia's [in-state sourcing rule](https://law.lis.virginia.gov/admincode/title23/agency10/chapter210/section2070/)
+generally uses the seller's business location for in-state internet orders; a billing address
+outside Virginia does not turn food received in Virginia into an interstate delivery.
+
 ## Configuration status — November 21, 2026
 
 - Virginia collection was enabled in Shopify after the owner confirmed existing registration.
