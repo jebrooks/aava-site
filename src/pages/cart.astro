@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
 ---
 
 <BaseLayout
@@ -28,8 +29,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <form class="delivery-form" data-delivery-form hidden>
             <label>
               <span>Delivery ZIP code</span>
-              <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" required />
+              <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" aria-describedby="delivery-zip-help" required />
             </label>
+            <p class="form-help" id="delivery-zip-help">
+              ZIP code not accepted? Call {site.name} at <a href={site.phoneHref}>{site.phoneDisplay}</a> to ask about delivery.
+            </p>
             <div class="tour-calendar delivery-calendar" data-delivery-calendar hidden>
               <div class="tour-calendar__nav">
                 <button type="button" class="tour-calendar__arrow" data-delivery-previous aria-label="Previous delivery month">←</button>

@@ -92,8 +92,10 @@ preview validation; verify service targets before any submission or reconciliati
 
 ### Physical on-tour board rollout
 
-The isolated native prototype passed the tax/fulfillment matrix. These steps govern rollout
-of the 44 existing live counterparts; their migration has not been claimed complete.
+Use this standing sequence for fulfillment changes to existing counterparts. It preserves
+compatibility between Production checkout/sync code and Shopify data. The November 21
+prototype and subsequent live rollout are recorded separately in the
+[results](transactional-test-results-2026-11-21.md).
 
 1. Create the dedicated bus/On tour board fulfillment location with the legitimate preparation
    address. Keep public pickup and local delivery disabled there. Configure the separate
@@ -111,7 +113,7 @@ of the 44 existing live counterparts; their migration has not been claimed compl
    `SHOPIFY_DELIVERY_LOCATION_ID`. A setup failure must stop before shipping-flag or inventory
    location changes; sharing a legitimate preparation street does not mean reusing its ID.
 3. Deploy the compatible Production checkout, cron and webhook synchronizer code **before**
-   applying changes to the 44 existing active On tour variants' shipping/location flags. The
+   applying changes to existing active On tour variants' shipping/location flags. The
    old Production synchronizer could revert a premature physical-board migration. Preserve all product/source
    IDs, prices, inventory and booking history; use the read-only sync plan before applying.
 4. Migrate/reconcile the existing counterparts only after that deployment, then verify their
@@ -126,14 +128,17 @@ of the 44 existing live counterparts; their migration has not been claimed compl
    unsupported destination must fail usefully. Record the live counterpart/method checks after
    migration; the passed prototype is not evidence that all live products have been migrated.
 
-The audited rate filter matched 44 live variants plus one active QA variant among 645 total,
-with zero ordinary/service/gift matches. Retire the QA fixture after proof. Routine sync is
+The pre-cleanup rate audit matched 44 live variants plus one QA variant among 645 total, with
+zero ordinary/service/gift matches. The QA fixture was then archived/unpublished; the rule now
+covers 22 ACTIVE products/44 live targets and zero QA targets. Routine sync is
 broader than the initial active migration: its observed plan included 69 targets across 35
 members, with 25 inactive targets; review the actual dry run before routine maintenance.
 
 Do not introduce a home-delivery calendar into booking or enable native public warehouse
-pickup. The existing ordinary-board delivery zones remain separate; the audited DC mismatch
-requires the owner's decision. See [tax maintenance](virginia-tax-maintenance.md) and
+pickup. Ordinary-board delivery zones remain separate; the owner authorized removing the ten
+DC ZIPs from both native delivery and the authoritative schedule while retaining Virginia 20598;
+the recorded save/readback and native checkout checks passed. Maintain both settings together
+for any future service-area change. See [tax maintenance](virginia-tax-maintenance.md) and
 [pickup ownership](content-management.md#tour-pickup-addresses-and-phone-coordination).
 
 

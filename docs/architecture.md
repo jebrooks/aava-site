@@ -39,9 +39,9 @@ Separately sold on-tour boards are physical at a selected/tentative Virginia boa
 destination and use one dedicated $0 fulfillment method. Tour-only/included-sandwich service
 remains non-shipping and has no default/delivery address. All pickup choices are tentative and
 coordinated by phone; genuine billing stays separate. The isolated native prototype passed the
-Virginia/DC/Maryland tax matrix. Deploy compatible Production checkout/sync code before
-migrating the 44 existing live counterparts; see [rollout ordering](deployments.md#physical-on-tour-board-rollout)
-and [tax evidence](virginia-tax-maintenance.md).
+Virginia/DC/Maryland tax matrix. Deploy compatible Production code before changing existing
+counterparts; see [rollout ordering](deployments.md#physical-on-tour-board-rollout)
+and the separately recorded [prototype/live evidence](virginia-tax-maintenance.md).
 
 Sources: [Storefront client](../src/lib/shopify/storefront.ts),
 [API authentication](../src/lib/shopify/client.ts), [cart API](../src/pages/api/cart.ts),

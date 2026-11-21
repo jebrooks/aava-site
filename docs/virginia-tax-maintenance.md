@@ -8,8 +8,11 @@ rules in Shopify rather than hardcoding a rate in the cart.
 
 The owner confirmed on November 21, 2026 that the business is registered in Virginia, prepares
 ready-to-eat charcuterie platters as catering in Arlington, and intends Virginia-only delivery
-and tour service. A later audit found an active DC delivery zone and matching schedule ZIPs,
-so Virginia-only delivery is not currently established. These facts support the working tax
+and tour service. An initial audit found an active DC delivery zone and matching schedule ZIPs.
+The owner
+subsequently authorized removal of those ten codes. Native Shopify and authoritative schedule
+save/readback verification passed, leaving the same 102 Virginia ZIPs; details follow below.
+These facts support the working tax
 treatment below; record actual checkout estimates before calling the integration verified.
 
 | Sale | Intended treatment | Source/maintenance |
@@ -39,30 +42,48 @@ outside Virginia does not turn food received in Virginia into an interstate deli
   The UI accepted an empty optional Sales tax ID field and now shows Missing ID. No registration
   number was invented or entered; the owner must maintain the real account information securely
   in Shopify as an account follow-up.
-- All 338 generated tour seat/bus service variants were changed to non-taxable and audited.
-  Prices and inventory were unchanged; food remains taxable. PR #50 maintains the setting for
-  new and existing dates. That code still requires merge and Production deployment; the older
-  Production synchronizer can create new date variants with Shopify's default taxable flag.
+- The 338 active generated tour seat/bus service variants were changed to non-taxable and audited.
+  Prices and inventory were unchanged; food remains taxable. PR #50's service-exemption
+  synchronization code is included in Production `a7dd7da` and maintains the flag for new and
+  existing dates. The earlier pre-merge warning about the older synchronizer is historical.
 - The manual, unpublished **Arlington Prepared Food (Tax Only)** collection contains 22 board
   products (ID `496413835418`). Its Virginia override was saved at 11% as one replacement tax
   line. Keep gift cards and tour service products out of this collection.
 - A Virginia shipping override was saved at 0%.
 - The historical non-shipping on-tour flow sourced food tax from billing and failed with DC
   billing. The physical-board correction passed the isolated native Virginia/DC/Maryland
-  matrix below; deploying compatible code and migrating the 44 existing live counterparts
-  remain rollout work, not an unresolved prototype tax calculation.
+  matrix below. At prototype time the 44 live counterparts had not yet migrated; subsequent
+  live rollout evidence is recorded separately below.
 
-## Open delivery-area mismatch
+## Verified delivery-area correction
 
-Shopify currently has an active **Local Delivery – D.C. (Zone 5)**, with a $20 fee and ten codes:
+The initial audit found active **Local Delivery – D.C. (Zone 5)**, with a $20 fee and ten codes:
 `20001`, `20003`, `20005`, `20006`, `20007`, `20008`, `20009`, `20024`, `20036`, `20037`. They exactly
-match the DC entries in the 112-code authoritative `delivery_schedule/default.eligible_zips`
-list. This conflicts with the owner's stated Virginia-only scope and is a second open
-configuration/integration issue. The owner requested an audit only; no zone or schedule setting
-has been changed pending their resolution. Do not remove `20598` with this DC set.
+matched the DC entries in the then-112-code authoritative
+`delivery_schedule/default.eligible_zips` list. That audit identified a second configuration
+mismatch with the owner's stated Virginia-only scope; it was corrected as recorded below. The owner then authorized removing exactly these ten codes
+from native delivery and `delivery_schedule/default.eligible_zips`, while preserving Virginia
+ZIP `20598`. Native Shopify Zone 5 removal was saved and reloaded successfully; four Virginia
+zones remained unchanged: Arlington 16 ZIPs/$5, Alexandria 22/$15, Falls Church 6/$10 and Fairfax
+58/$20 (102 total). The authoritative schedule API also removed exactly those ten codes,
+112 → 102, preserving the order of all remaining ZIPs including 20598. Horizon 120 and every
+other delivery field and the full blackout object were unchanged. Native delivery and the
+schedule are aligned to the approved 102 Virginia ZIPs.
+
+Native ordinary-board checkout rejected an official DC 20001 destination with
+`address_undeliverable`, zero groups/rates and no order. Restoring the Virginia destination
+with genuine Maryland billing offered only LOCAL $5, food tax $6.49 and total $70.49, ready to
+complete. No payment was made; this is native checkout evidence, not a claim that every ZIP
+has been exercised in a browser.
+
+Unsupported ZIP help invites a call to **714-715-9836** to discuss delivery, with a
+`tel:+17147159836` link and accessible input help. Source/local UI and read-only validation
+passed; public copy deployment is documented separately in the follow-up PR handoff. The note
+does not mark an address eligible or bypass schedule/checkout validation.
 
 The unpaid estimates below all used Virginia shipping and do not verify DC delivery taxes.
-The current Virginia food override must not be described as covering the configured DC zone.
+The Virginia food override is not a DC-delivery tax rule; DC destinations are now outside the
+configured delivery area.
 
 ## Historical unpaid estimates before physical-board correction
 
@@ -74,12 +95,12 @@ The current Virginia food override must not be described as covering the configu
 | Same Virginia tour/board with DC billing | $0 tax; $1,184 total | Historical failure in the non-shipping model; corrected prototype proof follows. |
 
 These were unpaid estimates, with no additional test payment. The later isolated prototype
-proves the corrected boarding-destination approach; the live counterpart rollout and the
-separate configured DC delivery-area decision must still be completed.
+proved the corrected boarding-destination approach. Subsequent live rollout observations and
+the separately verified DC delivery-area correction are recorded here and in the results.
 The owner confirmed that no public order-pickup location exists. Native public pickup remains
 incompatible; do not enable the private warehouse or expose its address. The approved
-physical-board correction below has isolated native checkout proof and still requires the
-ordered migration of existing live counterparts.
+physical-board correction uses a genuine/tentative boarding destination instead. Its prototype
+and subsequent live rollout are documented separately below.
 Do not ask customers to falsify billing details. Keep the historical pre-change zero-tax orders
 in the results report; they do not establish correctness after configuration.
 
@@ -115,8 +136,8 @@ Using the same legitimate preparation street is compatible with a dedicated, dis
 The dedicated internal **On-tour board fulfillment** location was created in Shopify as
 `gid://shopify/Location/91098611866`, using the legitimate private Arlington preparation address.
 It is active and fulfills online orders; storefront visibility, public pickup and local delivery
-are off. The isolated native shipping/rate prototype passed as recorded below. The 44 existing
-On tour variants' shipping flags and inventory locations have **not** been migrated. Keep the
+are off. At the isolated prototype stage, the 44 existing On tour variants' shipping flags and
+inventory locations had not yet migrated. See the later live rollout record below. Keep the
 private preparation street out of Git; `.env.example` retains a placeholder ID.
 
 | Isolated native unpaid case | Observed result |
@@ -129,16 +150,17 @@ private preparation street out of Git; `.env.example` retains a placeholder ID.
 
 Native checkout kept billing separate from the preset boarding destination; its billing address
 was observed blank before the genuine payer address was entered. No payment was made. These
-results resolve the prototype sourcing failure; they do not assert that the 44 active
-counterparts have migrated or that every live product has been rechecked. Retain the earlier
-failure as history and follow deployment-before-migration ordering, then verify the active
-counterparts. Selected, no-preference/phone-default, private custom Virginia and service-only
+results resolved the prototype sourcing failure and, at that stage, did not establish live
+counterpart migration. Retain the earlier failure and prototype as history; record subsequent
+migration and active-product verification separately. Selected, no-preference/phone-default, private custom Virginia and service-only
 presentation remain covered by source/fixture checks and any separately recorded browser
 observations, rather than inferred from a single prototype checkout.
 
 The rate rule uses product status ACTIVE and variant title ENDS_WITH **On tour**; no
-product-type or tag is needed. Keep the reserved Fulfillment option last. The 645-variant audit
-matched 44 live variants plus the active QA target (45), with no ordinary/service/gift matches.
+product-type or tag is needed. Keep the reserved Fulfillment option last. The pre-cleanup
+645-variant audit matched 44 live variants plus the active QA target (45), with no ordinary/
+service/gift matches. QA archival/unpublication subsequently left 22 ACTIVE products/44 live
+targets and zero QA targets.
 The native checkout also rejected a changed DC fulfillment destination as
 `address_undeliverable`, with no eligible handoff and no completion; restoring Virginia restored
 the valid path. The $0 tax on that undeliverable state is not a valid completed sale.
@@ -154,6 +176,31 @@ Shopify's [Tax Partner Apps platform](https://shopify.dev/docs/apps/build/tax) i
 selected providers; [tax apps](https://help.shopify.com/en/manual/taxes/tax-apps) replace the
 store's native tax service and can fall back to native settings during outages. Require provider
 confirmation, sandbox proof, whole-store regression and correct outage behavior before adoption.
+
+## Live rollout verification — November 21, 2026
+
+PR [#50](https://github.com/jebrooks/aava-site/pull/50) was merged and Production commit
+`a7dd7da` reached Ready. GitHub deployment `7967596560` succeeded at the
+[verified Production deployment](https://aava-site-q8z4h7arp-jebrooks-projects.vercel.app).
+The code deployment preceded counterpart mutation.
+
+| Check | Verified observation |
+| --- | --- |
+| Live counterpart migration | Passed at 18:36:13 UTC: 44 On tour targets across 22 ACTIVE board products are physical, untracked, inventory policy CONTINUE, and active exclusively at dedicated location 91098611866. No variants were created or deleted. |
+| Source/ordinary product preservation | Full before/after audit covered 645 variants: all 601 protected variants were unchanged, including 366 tour-service variants (338 active non-taxable/non-shipping; 28 archived with their historical taxable flags unchanged) and 25 inactive On tour variants. Ordinary Delivery stock, IDs, prices, taxability, serving counts, product status and history were preserved. Private audit evidence is retained outside Git. |
+| Merged-source control-cart integration | Six of six service controls passed using Production-source modules and real Admin reads/Storefront carts: public blank/default, Ballston, Reston Town Center and Arrange by phone; private custom Virginia board; private included Caprese without a board. All five board carts had one physical board plus non-shipping service and the exact selected $0 method. The no-board case had zero physical lines/groups and no address/default properties. No billing override was supplied; December 3 public 10 and December 4 private 1 capacity were unchanged. This is service/cart integration, not HTTP/browser/payment acceptance. |
+| Private included-sandwich native checkout | Passed for the December 4 private whole-bus booking, two actual guests: one $1,250 bundle reserves ten seats, Snack is sandwich, and there is no Delivery group/section, NorthSide/default-address text or Tentative fulfillment address. Genuine Maryland billing retained no fulfillment requirement, total $1,250 and tax $0, ready to complete. No card, payment or order was submitted. |
+| Live-source unpaid native checkout | Passed on native checkout using a real migrated board: the same Virginia boarding destination with genuine Virginia, DC and Maryland billing each charged $6.49 tax on the $59 board, $0 on the $1,125 tour service and $0 fulfillment; total $1,190.49 in all three cases. This verifies the native checkout from a merged-source control cart, not a complete Astro form/public-API/payment flow. |
+| QA fixture cleanup and cart boundary | Passed: the QA product was archived and unpublished without deletion; the tax-only collection was restored to its exact original 22 products; the manual QA rate source was removed. The dynamic rule now covers 22 ACTIVE board products/44 live targets and zero QA targets. The ordinary charcuterie collection retained its exact 35 members. Control carts made no orders, payments or email sends; private cart URLs stay outside Git. |
+
+The source-service control-cart harness uses synthetic local registration validation and
+strips all legal-acceptance properties before the actual Shopify CartCreate. Record its results
+as source-service/cart integration, separately from browser or public-API registration and
+acknowledgment acceptance. It makes no payment or order and sends no email.
+
+These live observations are separate from the earlier isolated prototype. No new payment or
+notification delivery is inferred from an unpaid checkout. The DC delivery-area removal was separately verified in native checkout and the authoritative
+schedule. The owner's real Virginia tax ID remains an account follow-up.
 
 ## Routine maintenance and verification
 
