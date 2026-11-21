@@ -1859,7 +1859,20 @@ ol {
   cursor: pointer;
 }
 
+.cart-line__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.cart-line__heading h3 {
+  min-width: 0;
+}
+
 .cart-line__price {
+  flex-shrink: 0;
+  white-space: nowrap;
   margin: 0;
   font-weight: 700;
   justify-self: end;
@@ -2076,3 +2089,9 @@ ol {
 }
 
 [data-cart-app] [hidden] { display: none !important; }
+
+.delivery-calendar { margin: 0; }
+.delivery-calendar td button[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--burgundy-dark);
+  color: white;
+}

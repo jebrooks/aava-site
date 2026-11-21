@@ -18,7 +18,8 @@ operational settings, tour inventory, draft orders, and synchronization. API cre
 on the server.
 
 - **Boards and gifts:** the product page adds a Shopify variant to a cart. The cart collects a
-  delivery date/window for physical boards and hands customers to Shopify-hosted checkout.
+  delivery date/window for physical boards, uses a calendar for the date and a select box for time, saves on time selection without a
+  reservation button, and hands customers to Shopify-hosted checkout with date/window/timezone on board lines.
   Gift-card-only orders skip delivery scheduling. Optional gift recipient/date details travel
   as Shopify's native cart-line properties; Shopify sends the gift-card emails.
 - **Tours:** `/booking` collects the registration and board choices. Availability checks Shopify

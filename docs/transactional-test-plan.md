@@ -64,9 +64,9 @@ serving counts, selections, and relevant booking details. Check inbox and spam f
 | C2 | Multi-size board | Small and Large retain correct prices and serving counts on product page, cart, checkout, order, and email. Both sizes can be combined in one purchase. |
 | C3 | Build-your-own board | Cheese, meat, accompaniment, and board-preference selections survive checkout and appear in the order and confirmation email. Invalid or incomplete selections are rejected. |
 | C4 | Multiple boards and quantities | Quantities, totals, and per-board serving counts are clear. The selected delivery window appears on every physical board line without a reservation product. Multiple orders may choose the same window. |
-| C5 | Cart changes | Change size/quantity, remove an item, refresh, and return later. No stale price, ingredient selection, or delivery reservation remains. |
-| C6 | Delivery restrictions | Reject unsupported ZIP codes, insufficient notice, blackouts, out-of-horizon dates, and full dates. Check every configured window without paying for each. |
-| C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order and the intended tour capacity reduction (where applicable) result. |
+| C5 | Cart changes | Change size/quantity, remove an item, refresh, and return later. The delivery calendar loads available dates automatically without a Check dates button or ZIP lookup, selects a date and the time dropdown shows only that date’s windows. Choosing a time saves immediately with a valid delivery ZIP, without a reservation button. Choosing a time before entering a ZIP prompts for the ZIP and saves after entering it. Check month navigation, disabled blackout/notice/horizon dates, and changing a date before saving a time. Changing a window updates the saved selection; failed saves can be retried. No stale price, ingredient selection, or delivery time remains. |
+| C6 | Delivery restrictions | Reject unsupported ZIP codes, insufficient notice, blackouts, and out-of-horizon dates. Delivery windows have no daily or per-window order cap. Check every configured window without paying for each. |
+| C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order results, with the saved delivery date/window/timezone visible on physical board lines and no reservation product. |
 | C8 | Discount, if offered | Valid and invalid codes, eligible products, totals, and refund amounts behave correctly. |
 
 **Email acceptance for C3:** the real order-confirmation email shows `Serves`, `Board preference`,
@@ -102,7 +102,7 @@ See [migration verification](../MIGRATION.md#verification-needed-before-full-cut
 | G2 | Send immediately to another recipient | Buyer receives order confirmation; recipient receives gift card with correct name, message, and value. |
 | G3 | Schedule delivery | Buyer confirmation arrives immediately; recipient delivery waits until selected date. Test a near-future date and observe actual delivery. |
 | G4 | Gift card plus physical board | Delivery is required for board; gift-card recipient settings remain intact. |
-| G5 | Remove the physical board | Remaining gift-card-only cart drops delivery reservation and delivery requirements. |
+| G5 | Remove the physical board | Remaining gift-card-only cart drops delivery metadata and delivery requirements, including any legacy reservation line. |
 | G6 | Partial redemption | Purchase below card balance; verify remaining balance. |
 | G7 | Gift card plus credit card | Purchase above remaining balance; verify split payment and final card balance. |
 | G8 | Redeem against a tour | Gift card works for intended tour checkout as well as charcuterie. |

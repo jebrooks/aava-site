@@ -50,7 +50,8 @@ operation, not the routine way to edit a message. Verify rendering with `npm run
 
 ### Delivery schedule — `delivery_schedule/default`
 
-Edit eligible ZIP codes, lead time in hours, horizon in days, and weekly windows JSON.
+Edit eligible ZIP codes, lead time in hours, horizon in days (1–180), and weekly windows JSON.
+The horizon is a rolling number of calendar days from today, not a fixed ending month.
 Weekday keys use Sunday `0` through Saturday `6`; window times use 24-hour `HH:mm`.
 Delivery uses Eastern Time. There is no daily or per-window reservation limit, and no delivery
 reservation product is added to the cart. The legacy `daily_capacity` field is ignored.
@@ -60,7 +61,12 @@ Local delivery → the fulfillment location**, using delivery zones. Keep those 
 with this schedule. Conventional Standard/Express shipping is disabled in **Markets → United
 States → Shipping**; local delivery remains configured separately. Automatic delivery estimates
 are off because a generic fulfillment estimate does not represent the selected delivery window.
-At selection and checkout, the site validates the schedule and shared blackout dates, and copies
+Customers choose a delivery date in the cart calendar, styled like the tour calendar, then
+a time in the select box. Available dates load automatically, without a Check dates button or
+a ZIP code lookup. The ZIP code is still required and validated when saving and at checkout.
+Only dates with eligible windows can be selected; closures, insufficient
+notice, and dates outside the horizon are disabled. The time list contains only the selected
+date’s windows. Choosing a time saves the window automatically; there is no reservation button. At selection and checkout, the site validates the schedule and shared blackout dates, and copies
 the date, window, and timezone onto each physical board's line properties for Shopify's order
 summary. Existing open checkouts are preserved by creating replacement carts when details change.
 Older saved carts have reservation lines removed when selecting delivery or returning to checkout.
@@ -250,9 +256,9 @@ and [notification guidance](https://help.shopify.com/en/manual/online-store/them
 
 Gift-card-only purchases skip local delivery scheduling; orders that also contain physical boards
 still require a delivery window. When the last physical item is removed, the cart discards its
-unused delivery-capacity line and delivery metadata. Checkout also repairs older saved digital-only
+delivery metadata and any legacy reservation lines. Checkout also repairs older saved digital-only
 carts this way, creating a clean cart rather than changing an already-open checkout. Recipient
-properties and other customer items are preserved. This prevents leftover delivery reservations
+properties and other customer items are preserved. This prevents legacy delivery reservations
 from showing a shipping address or free shipping rate for a gift-card-only purchase. Shopify may
 still request a billing address for payment.
 Shopify owns checkout, payment, gift-card issuance, and redemption. Verify purchase, notification,

@@ -1,6 +1,6 @@
 # Squarespace migration notes
 
-Original source audit: 2026-08-08. Implementation notes reconciled: 2026-11-15.
+Original source audit: 2026-08-08. Implementation notes reconciled: 2026-11-21.
 
 Use [Content management](docs/content-management.md) for routine edits and
 [Deployments](docs/deployments.md) for PR previews and releases. This document tracks migration
@@ -18,7 +18,10 @@ history and cutover verification; code coverage alone does not establish live se
 - Began with a hosting-neutral static build, then adopted the Vercel adapter for trusted commerce
   endpoints and server-rendered Shopify routes.
 - Added a headless Shopify storefront, cart proxy, Vercel server runtime, delivery-slot inventory,
-  custom-board draft orders, webhook verification, and catalog migration tooling.
+  custom-board draft orders, webhook verification, and catalog migration tooling. Delivery-slot
+  inventory and its daily cron were retired on 2026-11-21; the old reservation products are archived.
+  Delivery now uses schedule/blackout validation with no order cap. The cart calendar selects the date and a separate time dropdown saves the
+  selected window directly; physical board line properties carry the date/time into Shopify checkout.
 
 ## Public-site inventory
 
