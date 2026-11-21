@@ -15,6 +15,8 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Products, descriptions, product images, variants, prices, inventory | Shopify → Products; charcuterie collection and Headless publication | No; verify storefront visibility |
 | Serving counts | Shopify product/variant `custom.serving_count`; see Serving sizes below | No |
 | Ingredients, allergens, dietary labels, preparation hours | Shopify product metafields under `custom` | No |
+| Order confirmation and staff new-order email templates | Shopify → Settings → Notifications | No; verify actual received emails |
+| Custom-board request recipient and staff email content | `src/data/site.ts` and `src/lib/custom-board-request.ts`; Resend sender in server environment | Yes for code; redeploy after environment edits |
 | Marketing copy, FAQs, inquiry prompts, page-specific SEO | Matching files in `src/pages/`; shared components in `src/components/` | Yes |
 | Company contact details, navigation, social links, featured boards | `src/data/site.ts` | Yes |
 | Build-your-own ingredient options and size limits | `src/data/board-customizations.json` | Yes |
@@ -71,6 +73,18 @@ the date, window, and timezone onto each physical board's line properties for Sh
 summary. Existing open checkouts are preserved by creating replacement carts when details change.
 Older saved carts have reservation lines removed when selecting delivery or returning to checkout.
 
+Shopify owns the transactional email templates separately from the storefront. In **Settings →
+Notifications**, maintain the customer **Order confirmation** and staff **New order** templates
+so charcuterie delivery orders show the physical board line properties **Delivery date**,
+**Delivery window**, and **Delivery timezone**. Use the saved order values, not today's schedule
+or an estimated shipping date. Omit empty delivery fields for gift-card-only and on-tour orders.
+Preserve serving counts, ingredient selections, gift-card details, and existing order information
+when editing templates. Back up the current template before an edit, then compare checkout,
+order, and both received emails using an approved test purchase; a sample preview alone does
+not verify that the actual order properties reached the emails.
+See [Shopify order notification maintenance](shopify-notifications.md) for tour guest counts,
+pickup/snack details, staff board preparation fields, payment labels, and the full verification workflow.
+
 Closures belong in the shared Blackout dates entry. Schedule and blackout edits apply directly;
 no delivery catalog reconciliation or scheduled delivery job is required. Removing a closure
 immediately restores otherwise eligible windows. `DELIVERY_SCHEDULE_JSON` is a setup/local
@@ -126,6 +140,12 @@ Schedule changes and closures do not cancel or refund existing reservations. Sta
 affected bookings separately in Shopify and contact customers through the established process.
 
 ## Product maintenance
+
+Maintain tax registration, normal product taxability and prepared-food collection overrides in
+Shopify. Tour synchronization owns generated seat/bus variants and keeps their service fees
+non-taxable; on-tour board synchronization preserves the source board's taxability. See
+[Virginia tax maintenance](virginia-tax-maintenance.md) for the owner's confirmed business
+facts, current configuration status and checkout checks.
 
 Edit normal catalog products in Shopify. Ensure intended products belong to the configured
 charcuterie collection and are published to the configured Headless storefront. Check product
@@ -194,6 +214,40 @@ place with `LEAVE_AS_IS`; it does not recreate variants. Re-running the same sna
 completed cleanup steps, but unrelated catalog edits stop it for review. Keep the snapshot outside
 source control for recovery. Verify catalog cards, product choices, cart, gift guide and tour
 board choices after cleanup. `npm run test:cart` and `npm run test:booking` cover this behavior.
+
+## Custom-board requests
+
+The public `/custom-board-request` form emails `allaboardva.tours.charcuterie@gmail.com` through
+Resend. Its recipient is server-owned business configuration in `src/data/site.ts`; the request
+email and invoice helper are maintained in `src/lib/custom-board-request.ts`. Reuse
+`RESEND_API_KEY` and the verified `CONTACT_EMAIL_FROM` sender in both Vercel environments where
+sending is intended. Keep the customer's address as reply-to, never as the sending identity.
+
+Submitting the form does not create a Shopify draft, invoice, order or inventory reservation.
+The staff email contains the reference and all requested name/contact, date/address/ZIP, guest
+count, budget, dietary, theme and notes fields. It includes a link to Shopify Admin's new
+draft-order editor, without customer data in its URL. That link opens a blank editor and makes
+no saved order or email by itself. Authorized staff must review availability, agree the price
+and delivery date/window with the customer, enter delivery fees and taxes, and send the invoice
+from Shopify. The resulting checkout and order are owned by Shopify.
+
+The email also contains an optional copyable Shopify Sidekick prompt. The plain Admin link does
+not prefill a draft: staff may instead paste the prompt into Sidekick to help prepare an unsaved
+draft. It includes the reference and submitted details in a JSON data block, explicitly treating
+customer text as data rather than instructions. The submitted budget is guidance, not an agreed
+price. Staff must confirm availability, final prices, delivery date/window, fees and taxes, review
+any generated draft, and intentionally save or send only after that review. Neither receiving
+the email nor clicking its link runs Sidekick or creates a saved draft. Staff can always enter the
+same details manually. See [Shopify's draft-order guidance](https://help.shopify.com/en/manual/fulfillment/managing-orders/create-orders/create-draft).
+
+BotID Basic, same-origin checks, validation, consent, a spam trap and rate limiting protect the
+request route. A provider outage or missing email configuration must show a retry/contact error,
+preserve entered details and avoid reporting success. The success message means the request
+was sent for review; it must not promise a confirmed booking, availability, price or invoice.
+The web form needs no Shopify credentials or draft-order write scope. Run `npm run test:forms`
+and verify a real controlled staff email, its reply-to and reference, and its invoice link before
+release. Native manual invoice/payment testing is optional operations work, outside the site's
+integration gate, and does not prove request email delivery.
 
 ## Repository content changes
 

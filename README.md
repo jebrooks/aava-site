@@ -13,8 +13,12 @@ payments, gift cards, draft-order invoices, and orders. The production runtime t
 - [Deployments and preview review](docs/deployments.md): PR previews, production releases,
   environment variables for **both Preview and Production**, troubleshooting, and rollback.
 - [SHOPIFY.md](SHOPIFY.md): provisioning, integrations, imports, and catalog parity configuration.
+- [Shopify order notifications](docs/shopify-notifications.md): saved delivery/tour details,
+  board preparation fields, payment labels, and actual-email verification.
 - [Transactional test plan](docs/transactional-test-plan.md): purchase, email, inventory, gift-card,
   cancellation, and refund acceptance scenarios.
+- [Virginia tax maintenance](docs/virginia-tax-maintenance.md): registered collection, tour/food
+  treatment, prepared-food override, and checkout verification boundaries.
 - [MIGRATION.md](MIGRATION.md): migration history and remaining cutover verification.
 - [AGENTS.md](AGENTS.md): project instructions for coding agents and maintenance conventions.
 
@@ -64,8 +68,9 @@ for **both Preview and Production**, then redeploy each affected environment aft
 See [Deployments](docs/deployments.md#environment-variables--preview-and-production) for scope and
 external-service considerations. GitHub Actions secrets are configured separately.
 
-- `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact-form email from the Vercel backend.
-  Both are server-only; the sender must belong to a domain verified in Resend.
+- `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` enable contact and custom-board request email from
+  the Vercel backend. Both are server-only; the sender must belong to a domain verified in Resend.
+  Custom-board requests do not require Shopify credentials or draft-order API scopes.
 - The server-side Shopify Storefront token powers catalog and cart operations.
 - The Shopify Admin token, webhook secret, cron secret, and location/publication IDs are server-only.
 - Custom-board requests use Vercel BotID Basic for invisible bot protection, with no additional
@@ -88,7 +93,8 @@ scripts/
 src/
   components/          Shared header, footer, buttons, and page hero
   data/site.ts         Contact details, navigation, social links, featured boards
-  lib/shopify/         Storefront/Admin clients, carts, scheduling, and draft orders
+  lib/shopify/         Storefront/Admin clients, carts, scheduling, and synchronization
+  lib/custom-board-request.ts  Custom-board request email and staff invoice link
   layouts/             SEO and document shell
   pages/               File-based content, commerce, and API routes
   styles/global.css    Brand tokens and responsive design system
@@ -106,7 +112,7 @@ The homepage and the five primary content routes are local:
 - `/contact`
 
 The codebase includes Shopify-backed catalog/product routes, a local cart, scheduled delivery,
-Shopify-backed tour booking, custom-board draft requests, and local inquiry, policy, waiver, FAQ,
+Shopify-backed tour booking, emailed custom-board requests, and local inquiry, policy, waiver, FAQ,
 and press pages. Gift Cards links open the native Shopify gift-card product through
 `/gift-certificates`, with an inquiry fallback. Product pages collect optional gift recipients and
 send dates using Shopify’s native delivery properties. Purchase, redemption, and legacy balances require
@@ -267,6 +273,27 @@ handling, and native form submission. No test emails are sent by this suite. A l
 is still required after configuring Resend. The retired `PUBLIC_CONTACT_FORM_ENDPOINT` variable
 is no longer used and can be removed from Vercel.
 
+
+## Custom-board request email
+
+`/custom-board-request` sends a request through `/api/custom-board-request` to
+`allaboardva.tours.charcuterie@gmail.com` using the same Resend sender configuration as contact
+email. Staff receive the request reference, every submitted detail, the customer's reply-to
+address, and a Shopify Admin link to begin an invoice. The website creates no Shopify draft,
+invoice, reservation, or paid order. See [the staff workflow](docs/content-management.md#custom-board-requests).
+
+The invoice helper opens Shopify's blank new draft-order editor for an authorized staff member.
+It contains no customer details in the URL and does not save or send anything. The staff email
+also includes an optional copyable Sidekick prompt with the reference and request data in JSON.
+Staff can paste it into Shopify Sidekick to help prepare an unsaved draft, then review the result.
+The prompt treats customer values as data, treats the budget as guidance, and requires staff to
+confirm availability, final price, delivery date/window, fees and taxes before saving or sending
+an invoice. The website never executes the prompt. The public form confirms that the request
+was sent for review only after the email provider accepts it; it does not promise availability
+or claim an invoice exists.
+
+Run `npm run test:forms` for custom-request validation, BotID/spam protection, email delivery and
+failure handling. Verify actual inbox receipt and the staff link on the PR preview before release.
 
 ## Relative site links and domain cutover
 
