@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { syncTourCatalog } from '../src/lib/shopify/tours.ts';
+import { eligibleTourDates, parseTourSchedule } from '../src/lib/tour-schedule.ts';
 const now = new Date('2026-11-11T20:00:00Z');
 function fixture() {
   const state = {
@@ -77,11 +78,34 @@ test('entering the three-day cutoff closes both products', async () => {
   assert.ok(result.archived.includes('tour-bus-2026-11-15'));
   assert.ok(!result.created.includes('tour-seat-2026-11-15'));
 });
-test('late-evening sync anticipates tomorrow cutoff without creating beyond six calendar months', async () => {
+test('late-evening sync prepares tomorrow cutoff and inclusive six-month horizon', async () => {
   const {state,run}=fixture(); state.fields.operating_days='["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]'; state.fields.months_ahead='6';
   const result=await run({now:new Date('2026-11-12T03:00:00Z'),dryRun:true});
-  assert.equal(result.dates[0],'2026-11-15'); assert.equal(result.dates.at(-1),'2027-05-11');
+  assert.equal(result.dates[0],'2026-11-15'); assert.equal(result.dates.at(-1),'2027-05-12');
   assert.equal(state.products.length,0);assert.equal(state.lock,null);
+});
+test('UTC daily sync includes the horizon advertised after Eastern midnight, across DST', async () => {
+  for (const [now, first, last] of [
+    ['2026-11-21T03:00:00Z','2026-11-24','2027-05-21'],
+    ['2027-03-15T03:00:00Z','2027-03-18','2027-09-15'],
+  ]) {
+    const {state,run}=fixture();
+    state.fields.operating_days='["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]';
+    state.fields.months_ahead='6';
+    const result=await run({now:new Date(now),dryRun:true});
+    if (!('create' in result)) throw new Error('Expected a dry-run catalog plan');
+    assert.equal(result.earliest,first);
+    assert.equal(result.dates[0],first);
+    assert.equal(result.dates.at(-1),last);
+    assert.ok(result.create.includes(`tour-seat-${last}`));
+    assert.ok(result.create.includes(`tour-bus-${last}`));
+    assert.ok(!eligibleTourDates(parseTourSchedule(state.fields),new Date(now)).includes(last),
+      'Prepared catalog dates must still fail the current booking horizon before midnight');
+    assert.ok(eligibleTourDates(parseTourSchedule(state.fields),new Date(new Date(now).getTime()+2*60*60*1000)).includes(last),
+      'The newly advertised date must already have a planned catalog pair after midnight');
+    assert.equal(state.products.length,0);
+    assert.equal(state.lock,null);
+  }
 });
 test('bundle failure leaves the pair unsellable; retry repairs it without adding seat inventory', async () => {
   const {state,run}=fixture();state.failBundle=true;

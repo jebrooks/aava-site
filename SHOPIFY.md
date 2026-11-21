@@ -56,7 +56,8 @@ board line properties in Shopify checkout and orders. Delivery does not consume 
 The legacy `daily_capacity` metaobject field is ignored and no longer provisioned on new stores.
 Maintain customer order-confirmation and staff new-order email templates in Shopify separately;
 both must show the saved delivery date, window, and timezone. See the
-[notification maintenance instructions](docs/content-management.md#delivery-schedule--delivery_scheduledefault).
+[notification maintenance guide](docs/shopify-notifications.md), which also covers tour guest
+counts and pickup/snack details, staff board preparation fields, and explicit payment labels.
 
 Deploy the reservation-free code to Production **before** retiring old reservation products:
 

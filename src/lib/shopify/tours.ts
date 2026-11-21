@@ -170,10 +170,12 @@ export async function syncTourCatalog(options: {
   );
   if (!result.metaobjectByHandle) throw new Error('Create the tour_schedule/default Shopify metaobject first.');
   const config = parseTourSchedule(Object.fromEntries(result.metaobjectByHandle.fields.map(f => [f.key, f.value || ''])), await loadSharedBlackoutDates(graphql));
-  // Close the coming day's cutoff before midnight. This accommodates UTC cron timing and DST.
-  const closingDay = localTourDate(new Date(now.getTime() + 2 * 60 * 60 * 1000));
+  // The UTC cron runs before Eastern midnight. Prepare the coming day's entire range:
+  // close its cutoff and create its inclusive horizon, while booking still checks the actual date.
+  const catalogNow = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+  const closingDay = localTourDate(catalogNow);
   const earliest = addDays(closingDay, config.minimumDays);
-  const dates = eligibleTourDates(config, now).filter(date => date >= earliest);
+  const dates = eligibleTourDates(config, catalogNow);
   const eligible = new Set(dates);
   const started = Date.now();
   const maxRunMs = options.maxRunMs || 240_000;

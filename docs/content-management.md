@@ -82,6 +82,8 @@ Preserve serving counts, ingredient selections, gift-card details, and existing 
 when editing templates. Back up the current template before an edit, then compare checkout,
 order, and both received emails using an approved test purchase; a sample preview alone does
 not verify that the actual order properties reached the emails.
+See [Shopify order notification maintenance](shopify-notifications.md) for tour guest counts,
+pickup/snack details, staff board preparation fields, payment labels, and the full verification workflow.
 
 Closures belong in the shared Blackout dates entry. Schedule and blackout edits apply directly;
 no delivery catalog reconciliation or scheduled delivery job is required. Removing a closure

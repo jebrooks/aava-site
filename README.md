@@ -13,6 +13,8 @@ payments, gift cards, draft-order invoices, and orders. The production runtime t
 - [Deployments and preview review](docs/deployments.md): PR previews, production releases,
   environment variables for **both Preview and Production**, troubleshooting, and rollback.
 - [SHOPIFY.md](SHOPIFY.md): provisioning, integrations, imports, and catalog parity configuration.
+- [Shopify order notifications](docs/shopify-notifications.md): saved delivery/tour details,
+  board preparation fields, payment labels, and actual-email verification.
 - [Transactional test plan](docs/transactional-test-plan.md): purchase, email, inventory, gift-card,
   cancellation, and refund acceptance scenarios.
 - [MIGRATION.md](MIGRATION.md): migration history and remaining cutover verification.
