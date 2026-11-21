@@ -180,6 +180,7 @@ The Experiences page now embeds the tour planner. Its “Find a tour” and “B
 scroll to the planner, which opens `/booking` on the same site. `/tour-booking-preview` remains
 available for isolated review; that page and `/booking` are noindex.
 
+The Experiences setup collects tour type, guests and snack; region preference is chosen on `/booking`.
 The booking flow offers a region preference map, Public/Private tours, actual guest count, a live month calendar, snacks,
 regular catalog boards (including BYO validation), registration, required acknowledgments,
 and a dedicated Shopify cart. Region selection is a preference, with “Any region — I’m flexible”

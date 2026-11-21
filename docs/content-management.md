@@ -118,7 +118,8 @@ illustration is `public/images/tour-region-map.webp`; its clickable geometry is 
 region is a preference only, including for public tours. There are no dates dedicated to a region,
 no regional seat pools, and no region-specific prices. Shared blackout and capacity checks still
 apply. “Any region — I’m flexible” is the default for new and older saved bookings. Preferences
-are carried through the planner, booking draft, summary, Shopify cart attributes and tour line
+are selected on `/booking` (the Experiences setup page only collects tour type, guest count and
+snack) and carried through the booking draft, summary, Shopify cart attributes and tour line
 properties as **Preferred region**. Staff confirm the final region and wineries by phone.
 Changing labels, choices or map assets requires a deployment; it does not require catalog sync.
 

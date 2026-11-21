@@ -1,5 +1,4 @@
 ---
-import TourRegionSelector from "./TourRegionSelector.astro";
 
 interface Props {
   source?: string;
@@ -24,12 +23,8 @@ const { source = "tour-preview" } = Astro.props;
     <form action="/booking" method="get" class="tour-planner" data-tour-planner>
       <input type="hidden" name="src" value={source} />
       <fieldset class="tour-step">
-        <legend><span class="tour-step__number">1</span> Choose your preferred region</legend>
-        <TourRegionSelector />
-      </fieldset>
-      <fieldset class="tour-step">
         <legend>
-          <span class="tour-step__number">2</span> Choose your tour
+          <span class="tour-step__number">1</span> Choose your tour
         </legend>
         <div class="tour-choice-grid">
           <label class="tour-choice">
@@ -70,7 +65,7 @@ const { source = "tour-preview" } = Astro.props;
       </fieldset>
       <fieldset class="tour-step">
         <legend>
-          <span class="tour-step__number">3</span> Choose something to savor
+          <span class="tour-step__number">2</span> Choose something to savor
         </legend>
         <div class="tour-choice-grid tour-choice-grid--three">
           <label class="tour-choice">
@@ -137,7 +132,7 @@ const { source = "tour-preview" } = Astro.props;
       sessionStorage.getItem("aava-tour-booking-draft") || "null",
     );
     if (saved && Date.now() - saved.savedAt < 2 * 60 * 60 * 1000) {
-      for (const key of ["tourType", "snack", "region"]) {
+      for (const key of ["tourType", "snack"]) {
         const input = form?.querySelector<HTMLInputElement>(
           `input[name="${key}"][value="${saved.values[key]}"]`,
         );
@@ -156,7 +151,6 @@ const { source = "tour-preview" } = Astro.props;
   } catch {
     /* A new booking still works when storage is unavailable. */
   }
-  form?.querySelector("[data-region-picker]")?.dispatchEvent(new Event("region:sync"));
   form?.addEventListener("change", updateNote);
   updateNote();
 </script>

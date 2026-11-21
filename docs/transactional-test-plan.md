@@ -75,8 +75,9 @@ notification preview is not evidence that real order properties reached the emai
 
 ## 2. Tours
 
-Verify map and radio choices stay synchronized, support keyboard selection and mobile layouts,
-and include “Any region — I’m flexible.” Carry the chosen preference through planner → booking,
+Verify the Experiences setup page shows tour type, guests and snack without a region selector.
+On the booking page, verify map and radio choices stay synchronized, support keyboard selection and mobile layouts,
+and include “Any region — I’m flexible.” Carry the chosen preference through booking,
 reload/back navigation, summary, and Shopify tour line. Changing region must leave the same
 calendar dates, prices, and shared seats available. Older drafts default to flexible; invalid
 region IDs are rejected. Confirm that public-tour wording promises a preference, with the final
