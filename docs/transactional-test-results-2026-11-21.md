@@ -44,7 +44,7 @@ remain. It is not full release acceptance.
 | Gift-card purchase refund/deactivation (G9) | Tested native path passed; simulated-card refund pending | The full $175 refund for #1005 was submitted. Shopify's gift-card list then showed both issued cards Deactivated, with restored balances $125 of $125 and $50 of $50. In this tested native refund flow Shopify deactivated the cards automatically; no manual deactivation was needed. No active test gift cards remain. This observed result must not replace checking card status in future refund cases. |
 | Mixed gift/board cart and last-board removal (G4/G5) | Tested cart path passed; mixed paid purchase not completed | A cart containing two recipient gift-card lines plus a physical board required a delivery ZIP/window. Removing the last board cleared delivery requirements and retained both gift-card recipient lines. This verifies the observed cart transition; a completed mixed physical/gift order and its emails were not tested. |
 | Remaining gift-card scenarios | Not completed | Scheduled recipient delivery (G3) remains untested. The mixed-cart behavior above was inspected before payment, not through a mixed-order purchase. |
-| Previous automatic custom-request draft flow | Historical failure; superseded by email intake | The tested Production form failed with Shopify access denied for `draftOrderCreate`; no draft was created, and the raw internal permission error reached the customer. On November 21 the owner directed that requests email the business instead, with no automatic draft. The replacement request-email and staff invoice-helper flow is pending deployment and live verification under CB1–CB6 in the updated plan. No app-permission expansion is required for that form. |
+| Previous automatic custom-request draft flow | Historical failure; superseded by tested Preview email intake | The tested Production form failed with Shopify access denied for `draftOrderCreate`; no draft was created, and the raw internal permission error reached the customer. On November 21 the owner directed that requests email the business instead, with no automatic draft. PR #50 Preview subsequently passed actual request submission and staff-email receipt (CB1), with no new Shopify draft; helper and remaining CB1–CB6 boundaries are recorded below. No app-permission expansion is required for that form. |
 | Other operations | Not completed | Delivery-completion notification, remaining recovery scenarios, and intended alternative payment methods still require end-to-end testing. |
 
 The delivery-template diff retained existing serving/ingredient and gift-card handling. The
@@ -61,6 +61,11 @@ local fixtures/mocked Shopify services, with no external Shopify writes. They co
 and registration validation, recipient/date mapping, cart preservation, blackout checks, and
 tour synchronization rules; they do not replace actual checkout/email/inventory evidence.
 
+For the replacement custom-request workflow, PR #50 code commit `1543b3b` separately passed all
+**16 form tests**, Astro/TypeScript checking and the production build. Its Vercel deployment and
+separate Catalog parity check passed. These checks supplement the Preview/email observations
+below; they do not establish manual-invoice or full transactional-plan acceptance.
+
 ## Historical custom-request failure details
 
 At the tested Production commit, the API called `createCustomBoardDraft` and returned success
@@ -72,9 +77,9 @@ part of the replacement email-only intake workflow below.
 
 ### November 21, 2026 — owner-directed replacement workflow
 
-Custom-board requests are being changed to email `allaboardva.tours.charcuterie@gmail.com`
-through Resend, with the customer as Reply-To and all request details plus a reference. The
-form will create no Shopify draft, invoice, order or reservation and needs no Shopify credentials.
+Custom-board requests now email `allaboardva.tours.charcuterie@gmail.com` through Resend,
+with the customer as Reply-To and all request details plus a reference. The form creates no
+Shopify draft, invoice, order or reservation and needs no Shopify credentials.
 The staff-only helper link opens Shopify's blank new draft-order editor, without customer data
 in the URL; staff must review availability and price, enter the agreed delivery details, and
 manually prepare/send any invoice. Clicking the link alone saves or sends nothing.
@@ -88,8 +93,30 @@ received prompt is part of CB2; executing Sidekick is not a required QA step.
 
 The updated plan separates actual request-email receipt (CB1), helper-link/prompt behavior (CB2),
 manual invoice/payment (CB3), provider failures (CB4), validation/spam controls (CB5) and retry/staff
-handling (CB6). This section records the changed requirement, not a passed live test. Deployment,
-received-email verification and the new manual invoice path remain pending.
+handling (CB6). The following Preview observations verify the replacement intake; the manual
+invoice/payment path remains a separate, uncompleted acceptance step.
+
+### November 21, 2026 — PR #50 Preview email verification
+
+Verified [PR #50](https://github.com/jebrooks/aava-site/pull/50), code commit `1543b3b`, on its
+[custom-board request Preview](https://aava-site-git-codex-custom-board-email-jebrooks-projects.vercel.app/custom-board-request).
+This used the actual browser form and configured Resend service, followed by inspection of the
+received Gmail message and Shopify draft list. No invoice or test payment was created.
+
+| Check | Observed result | Remaining boundary |
+| --- | --- | --- |
+| CB1: request submission and staff email | Passed for the submitted case. Browser success followed the actual UI submission. Gmail received all 11 submitted values and request reference `cef9ed0a-4710-4e34-aab5-374e55fadcff`. The server-controlled From was `website@allaboardva.com`, To was the business inbox, and Reply-To matched the controlled customer alias. | Other optional-field combinations and retry cases remain separate checks. No private customer values or alias are retained in this report. |
+| No automatic Shopify draft | Passed for the submitted case. Shopify's draft list contained the existing #D4 both before and after submission; no new draft appeared. | This request test did not create an invoice, reserve inventory, or execute a payment. |
+| CB2: email helper and prompt content | Passed for link opening and received-prompt inspection. The actual email contains the blank-editor Admin URL and the copyable Sidekick JSON prompt with data-only, budget-guidance and review-before-save/send safeguards. The link opened the intended Shopify store's Create order screen with empty products, customer and notes, and a $0.00 total. No invoice was created or sent. | Sidekick execution is optional and was not performed or counted as passed. The separate CB3 manual invoice/payment path remains pending. |
+| CB3: manual quote, invoice and payment | Not performed. | Staff-created invoice, payment, and the resulting customer/staff notification checks remain pending. |
+| CB4: missing email configuration | Passed locally for missing Resend configuration: a safe failure appeared and the entered values were retained. | Local development has no Resend API key/sender configured. Provider rejection, timeout and network-failure browser cases on Preview remain untested. |
+| CB5: validation and spam protection | The 16 form tests passed, and the protected Preview browser submission succeeded. | Separate live direct-POST rejection, rate-limit and spam cases have not been established by this successful submission. |
+| CB6: repeat/retry and staff handling | Not completed. | Duplicate/retry behavior and actual reply handling remain to be verified. |
+
+Resend configuration names were confirmed present for both Vercel Preview and Production;
+the actual email evidence above comes from Preview. The local development server uses this PR
+branch but lacks those local email settings, so its controlled missing-configuration result
+must not be mistaken for successful email delivery.
 
 ## Final cleanup observation
 
@@ -118,9 +145,11 @@ recorded separately from verified inventory and gift-card restoration.
   cases (C4), invalid booking/cart/browser boundary cases, scheduled gift delivery (G3), and
   a completed mixed physical/gift purchase. The selected mixed-cart/removal transition (G4/G5)
   has passed at the cart stage.
-- Verify the replacement emailed custom request and staff invoice helper (CB1–CB6), then the
-  manually created Shopify invoice/payment and actual emails. Do not add draft-order app access
-  to restore the retired automatic draft workflow.
+- Complete the remaining custom-request CB1–CB6 boundaries above, including failure/spam/retry
+  cases and the manually created Shopify invoice/payment with actual emails. Preview request
+  submission, actual staff-email receipt, no automatic draft creation, and the blank-editor
+  helper/prompt inspection passed for the recorded case. Do not add draft-order app access to
+  restore the retired workflow.
 - Complete the delivery-completion notification and intended alternative payment methods.
   Business tax correctness still requires approval.
 
