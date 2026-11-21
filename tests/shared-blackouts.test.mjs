@@ -31,6 +31,11 @@ test('delivery selection has no inventory dependency and rechecks shared blackou
  const server=await createServer({configFile:false,server:{middlewareMode:true,watch:null,ws:false},optimizeDeps:{noDiscovery:true,include:[]},define:{'import.meta.env.DELIVERY_SCHEDULE_JSON':JSON.stringify(JSON.stringify(config))},plugins:[{name:'delivery-fixtures',enforce:'pre',resolveId(id){if(id==='./client')return '\0delivery-client';},load(id){if(id==='\0delivery-client')return `export class ShopifyApiError extends Error { constructor(message,status=502){super(message);this.status=status;} } export function adminGraphql(...args){return globalThis.__sharedDeliveryTest.graphql(...args);}`;}}]});
  t.after(async()=>{await server.close();delete globalThis.__sharedDeliveryTest;});
  const service=await server.ssrLoadModule('/src/lib/shopify/schedule.ts');
+ const calendar=await service.getDeliveryCalendar(now);
+ assert.ok(calendar.slots.length);
+ assert.ok(!calendar.slots.some(s=>s.date==='2026-11-14'));
+ await assert.rejects(()=>service.assertDeliverySlotAvailable('','2026-11-15:09:00',now),/outside/);
+ assert.deepEqual((await service.getAvailableDeliverySlots('99999',now)).slots,[]);
  const availability=await service.getAvailableDeliverySlots('22205',now);
  assert.equal(availability.blackoutSource,'booking_blackouts/default');
  assert.ok(!availability.slots.some(s=>s.date==='2026-11-14'));
@@ -47,4 +52,5 @@ test('delivery selection has no inventory dependency and rechecks shared blackou
  assert.ok((await service.getAvailableDeliverySlots('22205',now)).slots.length,'Environment fallback works without capacity');
  state.missing=true;
  await assert.rejects(()=>service.getAvailableDeliverySlots('22205',now),/booking_blackouts\/default/);
+ await assert.rejects(()=>service.getDeliveryCalendar(now),/booking_blackouts\/default/);
 });

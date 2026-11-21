@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { apiError, json } from '../../../lib/http';
 import { allowRequest } from '../../../lib/rate-limit';
 import { ShopifyApiError } from '../../../lib/shopify/client';
-import { getAvailableDeliverySlots } from '../../../lib/shopify/schedule';
+import { getAvailableDeliverySlots, getDeliveryCalendar } from '../../../lib/shopify/schedule';
 
 export const prerender = false;
 
@@ -12,7 +12,9 @@ export const GET: APIRoute = async ({ url, request }) => {
     if (!allowRequest(`delivery:${ip}`, 60, 60 * 1000)) {
       throw new ShopifyApiError('Too many availability requests.', 429);
     }
-    const availability = await getAvailableDeliverySlots(url.searchParams.get('zip') || '');
+    const availability = url.searchParams.get('calendar') === '1'
+      ? await getDeliveryCalendar()
+      : await getAvailableDeliverySlots(url.searchParams.get('zip') || '');
     return json(availability);
   } catch (error) {
     return apiError(error);

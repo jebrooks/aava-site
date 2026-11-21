@@ -198,23 +198,26 @@ export function getEligibleDates(config: DeliveryScheduleConfig, now = new Date(
   return dates;
 }
 
+function deliverySlotsForSchedule(config: DeliveryScheduleConfig, now: Date): DeliverySlot[] {
+  return getEligibleDates(config, now).flatMap(({ date, windows }) =>
+    windows.map((window) => ({ key: `${date}:${window.start}`, date, ...window, available: true })),
+  );
+}
+
+// Calendar browsing does not approve a ZIP; selection and checkout still require eligibility.
+export async function getDeliveryCalendar(now = new Date()) {
+  const config = await getDeliveryScheduleConfig();
+  return { blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone, slots: deliverySlotsForSchedule(config, now) };
+}
+
 export async function getAvailableDeliverySlots(zip: string, now = new Date()) {
   const config = await getDeliveryScheduleConfig();
   const normalizedZip = normalizeZip(zip);
-  if (!normalizedZip || !config.eligibleZips.includes(normalizedZip)) {
-    return { eligible: false, blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone, slots: [] as DeliverySlot[] };
-  }
-
-  const slots = getEligibleDates(config, now).flatMap(({ date, windows }) =>
-    windows.map((window) => ({
-      key: `${date}:${window.start}`,
-      date,
-      ...window,
-      available: true,
-    })),
-  );
-
-  return { eligible: true, blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone, slots };
+  const eligible = !!normalizedZip && config.eligibleZips.includes(normalizedZip);
+  return {
+    eligible, blackoutSource: BLACKOUT_SOURCE, timezone: config.timezone,
+    slots: eligible ? deliverySlotsForSchedule(config, now) : [] as DeliverySlot[],
+  };
 }
 
 export async function assertDeliverySlotAvailable(zip: string, slotKey: string, now = new Date()) {

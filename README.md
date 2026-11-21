@@ -307,7 +307,8 @@ single blackout list. No schedule reference needs to be selected manually.
 
 Availability and checkout read the shared list directly with no application cache. Missing or
 invalid shared configuration fails closed, including when an environment delivery schedule
-fallback exists. Customers choose a delivery date in the cart calendar, then a time in the select box.
+fallback exists. The cart calendar displays available dates automatically, without a Check dates button.
+Customers choose a delivery date, then a time in the select box; a valid delivery ZIP is required.
 Choosing the time saves the window immediately without a reservation button. The date, window, and timezone appear on each physical
 board line in Shopify checkout and orders. Delivery windows have no capacity limit or generated
 reservation products.

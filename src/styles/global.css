@@ -2076,3 +2076,9 @@ ol {
 }
 
 [data-cart-app] [hidden] { display: none !important; }
+
+.delivery-calendar { margin: 0; }
+.delivery-calendar td button[aria-pressed="true"]:hover:not(:disabled) {
+  background: var(--burgundy-dark);
+  color: white;
+}

@@ -28,10 +28,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <form class="delivery-form" data-delivery-form>
             <label>
               <span>Delivery ZIP code</span>
-              <div class="field-row">
-                <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" required />
-                <button class="button button--secondary" type="button" data-load-slots>Check dates</button>
-              </div>
+              <input name="zip" inputmode="numeric" autocomplete="postal-code" maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" required />
             </label>
             <div class="tour-calendar delivery-calendar" data-delivery-calendar hidden>
               <div class="tour-calendar__nav">
@@ -81,7 +78,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const cartStatus = document.querySelector<HTMLElement>('[data-cart-status]');
   const deliveryForm = document.querySelector<HTMLFormElement>('[data-delivery-form]');
   const zipInput = deliveryForm?.elements.namedItem('zip') as HTMLInputElement | null;
-  const loadSlots = document.querySelector<HTMLButtonElement>('[data-load-slots]');
   const slotField = document.querySelector<HTMLElement>('[data-slot-field]');
   const slotSelect = document.querySelector<HTMLSelectElement>('[data-slot-select]');
   const deliveryStatus = document.querySelector<HTMLElement>('[data-delivery-status]');
@@ -163,10 +159,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   }
 
   zipInput?.addEventListener('input', () => {
-    if (deliveryCalendar) deliveryCalendar.hidden = true;
-    if (slotField) slotField.hidden = true;
-    deliverySlots = [];
-    selectedDate = '';
+    if (zipInput.validity.valid && slotSelect?.value) void saveDeliveryWindow();
   });
 
   const money = (value: { amount: string; currencyCode: string }) =>
@@ -380,25 +373,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (!deliveryForm) return;
     deliveryForm.hidden = !deliveryForm.hidden;
     changeDelivery.textContent = deliveryForm.hidden ? 'Change delivery window' : 'Keep saved window';
-    if (!deliveryForm.hidden) loadSlots?.click();
+    if (!deliveryForm.hidden) void loadDeliveryCalendar();
   });
 
-  loadSlots?.addEventListener('click', async () => {
-    const zip = zipInput?.value.trim() || '';
-    if (deliveryStatus) deliveryStatus.textContent = 'Checking available windows…';
-    loadSlots.disabled = true;
+  async function loadDeliveryCalendar() {
+    if (deliveryStatus) deliveryStatus.textContent = 'Loading available delivery dates…';
     if (slotField) slotField.hidden = true;
     if (deliveryCalendar) deliveryCalendar.hidden = true;
-    if (zipInput) zipInput.disabled = true;
     deliverySlots = [];
     selectedDate = '';
     try {
-      const response = await fetch(`/api/delivery/availability?zip=${encodeURIComponent(zip)}`);
-      const result = await response.json() as { eligible?: boolean; slots?: DeliverySlot[]; error?: string };
+      const response = await fetch('/api/delivery/availability?calendar=1');
+      const result = await response.json() as { slots?: DeliverySlot[]; error?: string };
       if (!response.ok) throw new Error(result.error || 'Availability could not be loaded.');
-      if (!result.eligible) throw new Error('That ZIP code is outside our local-delivery area.');
-      const open = (result.slots || []).filter((slot) => slot.available);
-      if (!open.length) throw new Error('No delivery windows are currently available for that ZIP code.');
+      const open = (result.slots || []).filter(slot => slot.available);
+      if (!open.length) throw new Error('No delivery dates are currently available.');
       deliverySlots = open;
       const savedDate = currentCart?.attributes.find(attribute => attribute.key === 'Delivery date')?.value;
       calendarMonth = (open.find(slot => slot.date === savedDate)?.date || open[0].date).slice(0, 7);
@@ -406,26 +395,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (deliveryCalendar) deliveryCalendar.hidden = false;
       if (deliveryStatus) deliveryStatus.textContent = 'Choose a delivery date, then a time.';
     } catch (error) {
-      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Availability failed.';
-      if (slotField) slotField.hidden = true;
-    } finally {
-      loadSlots.disabled = false;
-      if (zipInput) zipInput.disabled = false;
+      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Availability failed. Reload the page to retry.';
     }
-  });
+  }
 
   deliveryForm?.addEventListener('submit', (event) => {
     event.preventDefault();
-    loadSlots?.click();
+    void saveDeliveryWindow();
   });
 
-  slotSelect?.addEventListener('change', async () => {
-    if (!currentCart?.id || !slotSelect?.value) return;
+  slotSelect?.addEventListener('change', () => { void saveDeliveryWindow(); });
+
+  async function saveDeliveryWindow() {
+    if (savingDelivery || !currentCart?.id || !slotSelect?.value) return;
+    if (!zipInput?.validity.valid) {
+      if (deliveryStatus) deliveryStatus.textContent = 'Enter your delivery ZIP code to save this window.';
+      return;
+    }
     const checkoutWasDisabled = checkout?.disabled ?? true;
     savingDelivery = true;
     renderDeliveryCalendar();
     slotSelect.disabled = true;
-    if (loadSlots) loadSlots.disabled = true;
     if (zipInput) zipInput.disabled = true;
     if (changeDelivery) changeDelivery.disabled = true;
     if (checkout) checkout.disabled = true;
@@ -446,11 +436,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       savingDelivery = false;
       renderDeliveryCalendar();
       slotSelect.disabled = false;
-      if (loadSlots) loadSlots.disabled = false;
       if (zipInput) zipInput.disabled = false;
       if (changeDelivery) changeDelivery.disabled = false;
     }
-  });
+  }
 
   checkout?.addEventListener('click', () => {
     if (!currentCart?.id) return;
@@ -474,7 +463,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   });
 
   window.addEventListener('pageshow', event => {
-    if (event.persisted) void loadCart();
+    if (event.persisted) void initializeCart();
   });
-  void loadCart();
+  async function initializeCart() {
+    await loadCart();
+    if (deliveryForm && !deliveryForm.hidden) await loadDeliveryCalendar();
+  }
+  void initializeCart();
 </script>
