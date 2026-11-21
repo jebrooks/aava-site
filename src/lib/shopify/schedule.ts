@@ -2,6 +2,7 @@ import { loadSharedBlackoutDates } from './blackouts';
 import { BLACKOUT_SOURCE } from '../blackout-dates';
 import { adminGraphql, ShopifyApiError } from './client';
 import type { DeliveryScheduleConfig, DeliverySlot, DeliveryWindow } from './types';
+import { site } from '../../data/site';
 
 const SCHEDULE_TIMEZONE = 'America/New_York' as const;
 function parseStringList(value: string | undefined) {
@@ -227,7 +228,7 @@ export async function assertDeliverySlotAvailable(zip: string, slotKey: string, 
       candidate.key === slotKey && candidate.available,
   );
   if (!availability.eligible) {
-    throw new ShopifyApiError('That ZIP code is outside the local-delivery area.', 400);
+    throw new ShopifyApiError(`That ZIP code is outside our online delivery area. Call ${site.name} at ${site.phoneDisplay} to ask about delivery.`, 400);
   }
   if (!slot) {
     throw new ShopifyApiError('That delivery window is no longer available.', 409);

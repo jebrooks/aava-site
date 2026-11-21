@@ -90,8 +90,9 @@ code **before** changing existing counterparts' shipping/location flags; older s
 undo the migration. See [deployment steps](docs/deployments.md#physical-on-tour-board-rollout),
 [verified pickup base addresses](docs/content-management.md#tour-pickup-addresses-and-phone-coordination)
 and [tax verification](docs/virginia-tax-maintenance.md). The isolated native prototype passed
-Virginia/DC/Maryland billing; deploy compatible Production code before migrating the 44 live
-counterparts. Do not confuse that migration prerequisite with a remaining prototype tax failure.
+Virginia/DC/Maryland billing. For any existing-counterpart migration, deploy compatible
+Production code first, then apply and verify the data changes. Historical prototype and live
+rollout observations are recorded separately in the [results](docs/transactional-test-results-2026-11-21.md).
 
 ## 3. Normalize and import the Squarespace catalog
 

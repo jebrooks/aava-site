@@ -60,7 +60,14 @@ reservation product is added to the cart. The legacy `daily_capacity` field is i
 
 ZIP-based delivery fees are maintained separately in **Settings → Shipping and delivery →
 Local delivery → the fulfillment location**, using delivery zones. Keep those ZIP codes aligned
-with this schedule. Conventional Standard/Express shipping is disabled in **Markets → United
+with this schedule. The confirmed service area is 102 Virginia ZIPs in both native delivery
+and `delivery_schedule/default.eligible_zips`. The ten DC codes were removed from both while
+preserving Virginia 20598; the 120-day horizon and shared blackouts were unchanged. Maintain
+both ZIP lists together for future service-area edits. Keep unsupported-ZIP guidance inviting
+customers to call **714-715-9836** to ask about delivery; a phone discussion does not mark a ZIP
+eligible or bypass saving/checkout validation.
+
+Conventional Standard/Express shipping is disabled in **Markets → United
 States → Shipping**; local delivery remains configured separately. Automatic delivery estimates
 are off because a generic fulfillment estimate does not represent the selected delivery window.
 Customers choose a delivery date in the cart calendar, styled like the tour calendar, then
@@ -165,8 +172,9 @@ warehouse pickup. The dedicated rate's eligibility uses **product status ACTIVE*
 On tour**. It has no product-type or tag requirement. The reserved **Fulfillment** option must
 remain the final product option so generated variant titles end in **On tour**; merchant option
 reordering can remove eligibility and must block handoff rather than offer a different rate.
-The whole 645-variant audit matched 44 live targets plus one QA target, with no ordinary,
-tour-service or gift variant matches; remove the QA fixture after validation.
+The pre-cleanup 645-variant audit matched 44 live targets plus one QA target, with no ordinary,
+tour-service or gift matches. After QA archival/unpublication, the rule covers 22 ACTIVE board
+products/44 live targets and no QA target; the ordinary 35-member collection was preserved.
 
 Routine CLI/cron synchronization still enumerates the full collection: the observed plan had
 69 targets across 35 members, including 25 inactive targets. The initial migration of 44 active

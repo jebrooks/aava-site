@@ -74,7 +74,7 @@ serving counts, selections, and relevant booking details. Check inbox and spam f
 | C3 | Build-your-own board | Cheese, meat, accompaniment, board-preference and serving-count selections survive checkout and appear in the Shopify order, real customer confirmation and real staff new-order email. Compare both plain-text and HTML bodies; omit empty fields. Invalid or incomplete selections are rejected. |
 | C4 | Multiple boards and quantities | Quantities, totals, and per-board serving counts are clear. The selected delivery window appears on every physical board line without a reservation product. Multiple orders may choose the same window. |
 | C5 | Cart changes | Change size/quantity, remove an item, refresh, and return later. The delivery calendar loads available dates automatically without a Check dates button or ZIP lookup, selects a date and the time dropdown shows only that date’s windows. Choosing a time saves immediately with a valid delivery ZIP, without a reservation button. Choosing a time before entering a ZIP prompts for the ZIP and saves after entering it. Check month navigation, disabled blackout/notice/horizon dates, and changing a date before saving a time. Changing a window updates the saved selection; failed saves can be retried. No stale price, ingredient selection, or delivery time remains. |
-| C6 | Delivery restrictions | Reject unsupported ZIP codes and non-Virginia delivery addresses, insufficient notice, blackouts, and out-of-horizon dates. Delivery windows have no daily or per-window order cap. Check every configured window without paying for each. |
+| C6 | Delivery restrictions | Reject unsupported ZIP codes and non-Virginia delivery addresses, insufficient notice, blackouts, and out-of-horizon dates. Unsupported ZIP help invites a call to 714-715-9836 to discuss delivery without marking the ZIP eligible or bypassing checkout validation. Delivery windows have no daily or per-window order cap. Check every configured window without paying for each. |
 | C7 | Checkout interruption and completed-cart recovery | Abandon checkout, return, and complete once. Exactly one paid order results, with the saved delivery date/window/timezone visible on physical board lines and no reservation product. After purchase, return to the same browser's cart and refresh: show an empty cart, Cart 0 and no delivery calendar or stale-cart error. A new add-to-cart operation starts a usable cart with the correct badge and no prior ingredients or delivery selection. |
 | C8 | Discount, if offered | Valid and invalid codes, eligible products, totals, and refund amounts behave correctly. |
 
@@ -184,7 +184,7 @@ buyer's genuine billing address and introduce no home delivery or public-pickup 
 
 The isolated native prototype passed Virginia/DC/Maryland billing, tour-only delivery-group
 omission and ordinary-delivery isolation; see the results. After compatible Production
-deployment and migration of the 44 active counterparts, verify their live contract without
+deployment and migration of existing active counterparts, verify their live contract without
 another payment:
 
 - Tour-only and included-sandwich bookings retain optional pickup preference/phone coordination,
@@ -213,11 +213,13 @@ checkout/sync code before changing existing On tour shipping/location flags.
 Tax correctness still requires the business facts and actual checkout estimates: intended
 Virginia-only delivery/tour service, Arlington preparation, registered Virginia collection,
 non-taxable tour service versus separately sold prepared food. The active DC delivery zone
-and matching schedule ZIPs conflict with the intended service area and remain unresolved.
+and matching schedule ZIPs were removed after owner authorization; native/schedule readback
+and native DC rejection/retained Virginia delivery passed as recorded in the results.
 A displayed zero is not approval.
 See [Virginia tax maintenance](virginia-tax-maintenance.md) for saved configuration, actual
-historical failed estimates and the passed physical-board prototype. Live migration and its
-verification remain ordered rollout work. Scheduled-send date handoff is required;
+historical failed estimates and separately recorded prototype/live verification. For active
+counterpart changes, verify the live contract after the ordered rollout. Scheduled-send date
+handoff is required;
 waiting for Shopify's future delivery is outside this integration gate.
 
 ## Cleanup and release gate

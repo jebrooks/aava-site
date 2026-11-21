@@ -204,9 +204,10 @@ dedicated bus fulfillment location and zero-cost method **Provided on your tour 
 arranged by phone**. Tour seats/bus service remain non-shipping and non-taxable. The buyer's
 real billing address stays separate. No home-board delivery calendar or public warehouse pickup
 is introduced. The isolated native prototype passed Virginia/DC/Maryland billing with the
-same Virginia food tax and $0 fulfillment. The 44 existing live counterparts still require the
-ordered rollout below; prototype proof is not a claim of live migration. Historical tax
-observations remain in the [results](docs/transactional-test-results-2026-11-21.md).
+same Virginia food tax and $0 fulfillment. Historical prototype observations and subsequent
+Production rollout verification are recorded separately in the
+[results](docs/transactional-test-results-2026-11-21.md). Follow the standing procedure below:
+deploy compatible code before migrating existing counterpart data.
 
 All pickup preferences are tentative and arranged by phone. Only bookings with a separately
 sold charcuterie board need a boarding fulfillment destination. For those bookings, no preference
