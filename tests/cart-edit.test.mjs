@@ -66,23 +66,27 @@ const deliveryCart = () => ({
   ]},
 });
 
-test('checkout displays the validated delivery window without changing the original checkout or gift details', () => {
-  const cart=deliveryCart();const original=structuredClone(cart);
-  cart.lines.nodes[1].attributes=[{key:'Delivery window',value:'Stale window'},{key:'Note',value:'Keep'}];
+test('delivery details go on physical boards, remove legacy reservations and preserve gifts and open checkouts', () => {
+  const cart=deliveryCart();
+  cart.lines.nodes.push({id:'board',quantity:2,merchandise:{id:'board-variant',requiresShipping:true,product:{handle:'board'}},attributes:[{key:'Cheeses',value:'Brie'},{key:'Delivery window',value:'Old'}]});
   const snapshot=structuredClone(cart);
-  const input=cartCopyWithDeliveryWindow(cart,'slot',{date:'2026-12-02',label:'1:00–3:00 PM'});
+  const slot={date:'2026-12-02',label:'1:00–3:00 PM'};
+  const input=cartCopyWithDeliveryWindow(cart,slot);
+  assert.equal(input.lines.length,2);
   assert.deepEqual(input.lines[1].attributes,[
-    {key:'Note',value:'Keep'},
-    {key:'Delivery date',value:'2026-12-02'},
-    {key:'Delivery window',value:'1:00–3:00 PM'},
+    {key:'Cheeses',value:'Brie'},
+    {key:'Delivery date',value:slot.date},
+    {key:'Delivery window',value:slot.label},
     {key:'Delivery timezone',value:'America/New_York'},
   ]);
-  assert.deepEqual(input.lines[0].attributes,original.lines.nodes[0].attributes);
+  assert.deepEqual(input.lines[0].attributes,cart.lines.nodes[0].attributes);
   assert.ok(!input.attributes.some(a=>a.key==='Checkout locked'));
   assert.deepEqual(cart,snapshot);
+  cart.lines.nodes.splice(1,1);
   cart.lines.nodes[1].attributes=input.lines[1].attributes;
-  assert.equal(cartCopyWithDeliveryWindow(cart,'slot',{date:'2026-12-02',label:'1:00–3:00 PM'}),null);
-  assert.throws(()=>cartCopyWithDeliveryWindow(cart,'gift',{date:'2026-12-02',label:'1:00–3:00 PM'}),/reservation not found/);
+  assert.equal(cartCopyWithDeliveryWindow(cart,slot),null);
+  const updated=cartCopyWithDeliveryWindow(cart,slot,[{key:'Delivery ZIP',value:'22201'}]);
+  assert.deepEqual(updated.attributes,[{key:'Note',value:'Keep this note'},{key:'Delivery ZIP',value:'22201'}]);
 });
 
 test('digital-only cleanup drops the shipping slot and delivery metadata, preserving gifts and the original checkout', () => {

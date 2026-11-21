@@ -3,26 +3,28 @@ import type { ShopifyCart } from './shopify/types';
 import { servingAttributes } from './serving-size.ts';
 
 // Line properties are visible in Shopify checkout; cart attributes alone are not.
-export function cartCopyWithDeliveryWindow(cart: ShopifyCart, lineId: string, slot: { date: string; label: string }) {
-  const line = cart.lines.nodes.find(candidate => candidate.id === lineId);
-  if (!line?.merchandise.product.handle.startsWith('delivery-slot-')) throw new Error('Delivery reservation not found.');
+export function cartCopyWithDeliveryWindow(cart: ShopifyCart, slot: { date: string; label: string }, delivery?: LineAttribute[]) {
   const details = [
     { key: 'Delivery date', value: slot.date },
     { key: 'Delivery window', value: slot.label },
     { key: 'Delivery timezone', value: 'America/New_York' },
   ];
   const keys = new Set(details.map(detail => detail.key));
-  if (JSON.stringify(line.attributes.filter(attribute => keys.has(attribute.key))) === JSON.stringify(details)) return null;
-  return {
-    attributes: cart.attributes.filter(attribute => attribute.key !== 'Checkout locked'),
-    lines: cart.lines.nodes.map(candidate => ({
-      merchandiseId: candidate.merchandise.id,
-      quantity: candidate.quantity,
-      attributes: candidate.id === lineId
-        ? [...candidate.attributes.filter(attribute => !keys.has(attribute.key)), ...details]
-        : candidate.attributes,
-    })),
+  const lines = cart.lines.nodes.filter(line => !line.merchandise.product.handle.startsWith('delivery-slot-'));
+  let changed = !!delivery || lines.length !== cart.lines.nodes.length;
+  const input = {
+    attributes: delivery
+      ? [...cart.attributes.filter(attribute => attribute.key !== 'Checkout locked' && !deliveryAttributes.has(attribute.key)), ...delivery]
+      : cart.attributes.filter(attribute => attribute.key !== 'Checkout locked'),
+    lines: lines.map(line => {
+      const attributes = line.merchandise.requiresShipping
+        ? [...line.attributes.filter(attribute => !keys.has(attribute.key)), ...details]
+        : line.attributes;
+      if (JSON.stringify(attributes) !== JSON.stringify(line.attributes)) changed = true;
+      return { merchandiseId: line.merchandise.id, quantity: line.quantity, attributes };
+    }),
   };
+  return changed ? input : null;
 }
 
 // Copy older carts to add Shopify-sourced serving details without changing an open checkout.

@@ -15,7 +15,6 @@ import {
   removeUnusedDelivery,
   copyCartWithLineChange,
   copyCartWithAddedLine,
-  replaceDeliverySlot,
   updateCartAttributes,
   updateCartLine,
   ensureCartServingCounts,
@@ -125,26 +124,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (action === 'setDelivery') {
       const cartId = id(body.cartId, 'Cart ID');
-      const variantId = id(body.variantId, 'Delivery slot ID');
       const slotKey = String(body.slotKey || '');
       const zip = String(body.zip || '');
-      const slot = await assertDeliverySlotAvailable(zip, variantId, slotKey);
-      let current = await getCart(cartId);
+      const slot = await assertDeliverySlotAvailable(zip, slotKey);
+      const current = await getCart(cartId);
       if (!current) throw new ShopifyApiError('Cart not found.', 404);
       if (!current.lines.nodes.some((line) =>
         !line.merchandise.product.handle.startsWith('delivery-slot-') && line.merchandise.requiresShipping
       )) {
         throw new ShopifyApiError('Add a physical charcuterie item before choosing delivery.', 400);
       }
-      const currentSlot = current.lines.nodes.find(line => line.merchandise.product.handle.startsWith('delivery-slot-'));
-      if (isCheckoutLocked(current)) {
-        if (!currentSlot) throw new ShopifyApiError('This checkout has no saved delivery window.', 409);
-        current = await copyCartWithLineChange(current, currentSlot.id, 0);
-      }
-      const existingSlotLines = current.lines.nodes
-        .filter((line) => line.merchandise.product.handle.startsWith('delivery-slot-'))
-        .map((line) => line.id);
-      const cart = await replaceDeliverySlot(current.id, existingSlotLines, variantId, [
+      const cart = await ensureCartDeliveryWindow(current, slot, [
         { key: 'Delivery ZIP', value: zip },
         { key: 'Delivery date', value: slot.date },
         { key: 'Delivery window', value: slot.label },
@@ -175,22 +165,15 @@ export const POST: APIRoute = async ({ request }) => {
         }
       }
       const needsDelivery = catalogLines.some((line) => line.merchandise.requiresShipping);
-      const slotLines = cart.lines.nodes.filter((line) =>
-        line.merchandise.product.handle.startsWith('delivery-slot-')
-      );
       if (needsDelivery) {
-        if (slotLines.length !== 1 || slotLines[0].quantity !== 1) {
-          throw new ShopifyApiError('Choose one delivery window before checkout.', 400);
-        }
         const attributes = Object.fromEntries(
           cart.attributes.map((attribute) => [attribute.key, attribute.value]),
         );
         const slot = await assertDeliverySlotAvailable(
           attributes['Delivery ZIP'] || '',
-          slotLines[0].merchandise.id,
           attributes['Delivery slot key'] || '',
         );
-        cart = await ensureCartDeliveryWindow(cart, slotLines[0].id, slot);
+        cart = await ensureCartDeliveryWindow(cart, slot);
       }
       cart = await removeUnusedDelivery(cart);
       cart = await ensureCartServingCounts(cart);

@@ -82,14 +82,14 @@
 <g transform="translate(81,967)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="13"/><path d="M16 7v10l7 4"/></g>
 <text x="134" y="990" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Delivery + shared closures</text>
 <text x="76" y="1036" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">delivery_schedule/default + booking_blackouts/default</text>
-<text x="76" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">Generated delivery-date product inventory</text>
+<text x="76" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">No reservation inventory or capacity limits</text>
 <rect x="778" y="940" width="610" height="146" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
 <rect x="778" y="940" width="6" height="146" rx="3" fill="#5B45A0" stroke="#5B45A0"/>
 <rect x="800" y="960" width="46" height="46" rx="12" fill="#F1EDFA" stroke="#F1EDFA"/>
 <g transform="translate(807,967)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="26" height="22" rx="3"/><path d="M3 12h26M8 8h1m4 0h1m4 0h1"/></g>
 <text x="860" y="990" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Cart delivery scheduling</text>
 <text x="802" y="1036" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">/cart → /api/delivery/availability</text>
-<text x="802" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">ZIP eligibility, dates, windows and capacity</text>
+<text x="802" y="1065" font-family="Arial, Helvetica, sans-serif" font-size="19" font-weight="400" fill="#292B36" text-anchor="start">ZIP eligibility, dates, windows and blackouts</text>
 <path d="M662,1013 L778,1013" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <rect x="691.0" y="977" width="58.0" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
 <text x="720" y="997" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="600" fill="#596375" text-anchor="middle">data</text>

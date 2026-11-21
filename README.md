@@ -52,7 +52,6 @@ webhook verification, and custom-order requests require trusted server-side code
 - Build command: `npm run build`
 - Framework preset: Astro
 - Required runtime: Vercel Functions
-- Scheduled task: `/api/cron/materialize-delivery` daily at 05:15 UTC
 - Scheduled task: `/api/cron/materialize-tours` daily at 03:00 UTC
 
 Marketing pages can still be prerendered later, but the catalog, product pages, cart API, dynamic
@@ -303,15 +302,16 @@ this crawl while its temporary server is active. `npm run test:links` covers lin
 Edit **Shopify Admin → Content → Metaobjects → Blackout dates → Business blackout dates**
 (`booking_blackouts/default`). The **Dates** field contains one `YYYY-MM-DD` date per line.
 An empty field intentionally means no business-wide closures. Delivery and tour schedules
-retain their own operating days, lead times, horizons, capacity, and prices, but both use this
+retain their own operating days, lead times, and horizons; tours retain seat capacity and prices. Both use this
 single blackout list. No schedule reference needs to be selected manually.
 
 Availability and checkout read the shared list directly with no application cache. Missing or
 invalid shared configuration fails closed, including when an environment delivery schedule
-fallback exists. The daily jobs archive blocked delivery products and tour seat/bus products.
-Removing a blackout lets eligible archived products reopen without replacing their IDs or
-resetting sold inventory. Delivery reopen also republishes the product; publication failures
-put it back into Archived for a safe retry. Existing orders are not canceled by schedule edits.
+fallback exists. Delivery windows have no capacity limit or generated reservation products.
+The tour job archives blocked seat/bus products and reopens eligible dates without resetting
+sold inventory. Removing a delivery blackout immediately restores otherwise eligible windows.
+Existing orders are not canceled by schedule edits. See the [delivery maintenance guide](docs/content-management.md#delivery-schedule--delivery_scheduledefault)
+for retiring old reservation products after deployment.
 
 Migration and rollout:
 
@@ -332,11 +332,11 @@ host has changed. Migration records are backed up under `/tmp` before writes.
 
 The initial migration also archives already-generated products on the closures immediately;
 new closures are enforced immediately by availability/checkout and reconciled in the catalog
-by the scheduled jobs. Removing a closure restores eligible dates after the next catalog sync. Run the existing authenticated jobs for immediate catalog reconciliation.
+by the tour job. Removing a closure restores eligible tour dates after the next catalog sync. Delivery does not need reconciliation.
 New-store setup should create both schedules, then run the shared-blackout setup before enabling
 bookings. The `DELIVERY_SCHEDULE_JSON.blackoutDates` fallback is no longer authoritative.
 
 `npm run test:blackouts` covers parsing, arbitrary-length lists, delivery availability and
-checkout rejection, pagination, archiving/reopening without restocking, publication failure,
+checkout rejection, unlimited repeated window selections without inventory queries,
 and refusing missing configuration even with a fallback. Tour booking and sync tests cover
 the same shared source for public seats and private buses.

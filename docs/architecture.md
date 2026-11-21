@@ -14,7 +14,7 @@ webhook subscriptions, DNS cutover, and payment/email readiness require separate
 
 The browser requests pages and calls same-site `/api/*` routes. Astro's server-side code calls
 Shopify's **Storefront API** for published catalog data and carts, and its **Admin API** for
-operational settings, delivery inventory, draft orders, and synchronization. API credentials stay
+operational settings, tour inventory, draft orders, and synchronization. API credentials stay
 on the server.
 
 - **Boards and gifts:** the product page adds a Shopify variant to a cart. The cart collects a
@@ -27,7 +27,7 @@ on the server.
   appears on the tour line, while board lines show **Fulfillment: Provided on the bus** and the
   tour date. Shopify handles payment and orders.
 - **Custom boards:** `/custom-board-request` uses BotID verification and creates an Admin API draft
-  order tagged for staff quoting. Staff sets the final price, reserves delivery capacity, and
+  order tagged for staff quoting. Staff sets the final price, records the delivery window, and
   sends the invoice from Shopify; the form does not automatically complete a purchase.
 - **Inquiries:** `/contact` posts to `/api/contact`, which uses Resend to send to the business inbox.
   This is separate from Shopify's order and gift-card notifications.
@@ -49,7 +49,7 @@ Sources: [Storefront client](../src/lib/shopify/storefront.ts),
 | Gift-card amount selector | That gift-card product's variant prices | Storefront API; sorted numerically, no amount list maintained in the page |
 | Gift-card price examples | Available charcuterie delivery variants plus `tour_schedule/default` prices | Storefront + Admin APIs; charcuterie grouped by serving count and rounded to the nearest $25; tour rows use configured prices |
 | Planner on `/experiences`, then `/booking` | `tour_schedule/default`, `booking_blackouts/default`, dated tour products and their inventory | The planner opens booking; `/api/tours/availability` supplies live booking data, and `/api/tours/checkout` validates it again |
-| Delivery selection on `/cart` | `delivery_schedule/default`, `booking_blackouts/default`, generated delivery-date inventory | `/api/delivery/availability` checks ZIP, schedule and remaining capacity; checkout revalidates the selection |
+| Delivery selection on `/cart` | `delivery_schedule/default`, `booking_blackouts/default` | `/api/delivery/availability` checks ZIP, schedule and blackouts; no reservation inventory; checkout revalidates the selection |
 | Cart items, prices, quantities and checkout URL | Shopify cart | Browser calls `/api/cart`; server uses Shopify APIs and validates board/gift/delivery details |
 | Homepage marketing copy and featured boards; About, FAQ, guides, policies and ingredient choices | Repository pages, data, styles and images | Deployed application files; these are not automatically rewritten by Shopify product changes |
 
@@ -69,20 +69,18 @@ Sources: [content ownership guide](content-management.md), [header](../src/compo
 
 [![Shopify automation: production cron jobs reconcile delivery and tour products, and signed webhooks synchronize on-tour boards](architecture/shopify-automation.svg)](architecture/shopify-automation.svg)
 
-Both cron schedules are defined in [vercel.json](../vercel.json) and run on **Production**.
-They call server endpoints protected by `Authorization: Bearer <CRON_SECRET>`. Times are UTC;
+The tour cron schedule is defined in [vercel.json](../vercel.json) and run on **Production**.
+It calls a server endpoint protected by `Authorization: Bearer <CRON_SECRET>`. Times are UTC;
 Eastern wall-clock times change with daylight saving time.
 
 | Trigger | Endpoint or process | Reads from Shopify | Writes back to Shopify |
 | --- | --- | --- | --- |
-| Daily **05:15 UTC** | `/api/cron/materialize-delivery` | Delivery schedule, shared blackouts, existing date products and inventory | Creates entering dates, reconciles capacity by delta, archives ineligible dates and reopens eligible dates; publishes to Headless |
 | Daily **03:00 UTC** | `/api/cron/materialize-tours` | Tour schedule, shared blackouts, existing seats/bundles, charcuterie catalog | Reconciles dated seat products and whole-bus bundles; after a completed tour sync, reconciles on-tour board variants |
 | Signed product-create/product-update webhook | `/api/shopify/webhooks` → `syncTourBoardProduct` | Affected charcuterie product, source variants, collection membership and fulfillment data | Creates/updates its on-tour counterparts and source relationships |
 | Signed charcuterie-collection update webhook | `/api/shopify/webhooks` → `syncTourBoards` | Current charcuterie collection and variants | Reconciles on-tour counterparts across the collection |
 | Authorized manual maintenance | Existing sync scripts or authenticated cron endpoints | Same authoritative settings and catalog | Reconciliation on demand; these operations can affect the configured live store |
 
-A delivery date is represented by a hidden, $0, inventory-tracked Shopify variant; its stock
-limits orders across that date's windows. A public tour date has ten seat units. Its private-bus
+Delivery windows have no capacity limit or Shopify reservation products. A public tour date has ten seat units. Its private-bus
 product is a bundle that needs all ten units, so public and private bookings share capacity.
 On-tour board variants mirror their delivery counterpart's options, price, and tax settings but
 do not require shipping.
@@ -97,10 +95,9 @@ identity, run sync in the background, and stop writing once the product is alrea
 Other accepted webhook topics are logged; this handler does not implement order fulfillment or
 refund processing for them.
 
-Sources: [delivery cron](../src/pages/api/cron/materialize-delivery.ts),
-[tour cron](../src/pages/api/cron/materialize-tours.ts),
+Sources: [tour cron](../src/pages/api/cron/materialize-tours.ts),
 [webhook handler](../src/pages/api/shopify/webhooks.ts),
-[delivery reconciliation](../src/lib/shopify/schedule.ts),
+[delivery schedule](../src/lib/shopify/schedule.ts),
 [tour reconciliation](../src/lib/shopify/tours.ts),
 [on-tour board sync](../src/lib/shopify/tour-board-sync.ts).
 

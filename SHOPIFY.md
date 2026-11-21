@@ -35,38 +35,36 @@ or descriptions. For the staged snapshot → populate fields → deploy → clea
 field-aware site is deployed, and do not rerun the catalog importer for this maintenance.
 
 Create a real `DELIVERY_SCHEDULE_JSON` using approved ZIP codes, selectable windows, lead time,
-shared daily capacity, and horizon. Manage closures in `booking_blackouts/default`, not this
-environment fallback. Weekday keys use JavaScript numbering: Sunday `0`
-through Saturday `6`. Each time must use 24-hour `HH:mm` format. Capacity is the maximum number of
-orders across the entire delivery date; the windows do not have separate limits.
-
-With the server-only variables loaded in the shell, run:
+and horizon. Manage closures in `booking_blackouts/default`, not this environment fallback.
+Weekday keys use Sunday `0` through Saturday `6`; times use 24-hour `HH:mm`.
+Delivery windows have no daily or per-window capacity limit.
 
 ```sh
 npm run shopify:setup
 ```
 
-This creates or updates `delivery_schedule/default` in Shopify Admin and creates product metafield
-definitions. It overwrites an existing schedule with the environment values; do not rerun it with
-stale defaults after staff have edited the entry. Staff subsequently edit the schedule metaobject
-in Shopify Admin. Create the tour schedule and shared blackout entry as described in the
-[content guide](docs/content-management.md) and [blackout setup notes](README.md#shared-blackout-dates-for-deliveries-and-tours)
-before enabling bookings. Existing slot
-inventory is never reset automatically because it may already represent paid orders; exceptional
-changes to generated dates must be made through Shopify inventory.
+This initial setup creates or updates `delivery_schedule/default` and product metafield definitions.
+It overwrites an existing schedule with environment values; do not rerun it with stale defaults.
+Staff subsequently edit the schedule metaobject in Shopify Admin. Create the tour schedule and
+shared blackout entry as described in the [content guide](docs/content-management.md).
 
-Seed hidden slot products locally or after deployment:
+Availability and checkout validate ZIP, schedule, lead time, horizon, and Shopify's shared blackouts
+directly. The chosen delivery date/window/timezone is stored as cart metadata and physical board
+line properties. Delivery does not consume inventory or need generated products or a cron job.
+The legacy `daily_capacity` metaobject field is ignored and no longer provisioned on new stores.
+
+Deploy the reservation-free code to Production **before** retiring old reservation products:
 
 ```sh
-curl -H "Authorization: Bearer $CRON_SECRET" \
-  http://localhost:4330/api/cron/materialize-delivery
+npm run shopify:retire-delivery                 # Read-only plan, shows configured store/count
+npm run shopify:retire-delivery -- --apply      # Verify Production, archive old reservation products
 ```
 
-Vercel repeats this daily for newly entering dates in the rolling horizon. Every date is a hidden,
-zero-price, inventory-tracked variant published only to the custom storefront. The selected window
-is stored as cart metadata, while the date variant enforces shared daily capacity. Shopify therefore
-rejects a checkout when the final order for that date has already sold. Changing daily capacity in
-the schedule metaobject adjusts future inventory by the capacity delta without erasing booked orders.
+Use `--site=https://your-production-host` if the primary host changes. The guard requires eligible
+windows with no variant IDs and the shared-blackout marker. If all windows are closed, wait until
+an eligible window exists rather than bypassing the guard. Archiving preserves orders, variant
+IDs, and inventory history. Saved carts are migrated when choosing a window or checking out;
+already-open Shopify checkouts are left untouched. Do not delete old products or reset inventory.
 
 ## 3. Normalize and import the Squarespace catalog
 
@@ -83,8 +81,7 @@ present and correct option names, handles, prices, SKUs, image URLs, inventory, 
 allergens, serving counts, and legacy URLs. The normalizer cannot infer ambiguous business data.
 By default it excludes hidden products, titles marked `(former)`, obvious test products, and
 Squarespace gift certificates. Use `--include-former` or `--include-tests` only for an intentional
-archive import. Products whose Squarespace stock is `Unlimited` remain inventory-untracked because
-the hidden delivery-date product enforces the shared daily order limit. Recreate gift certificates
+archive import. Products whose Squarespace stock is `Unlimited` remain inventory-untracked. Recreate gift certificates
 as native Shopify gift cards instead of ordinary shippable catalog products.
 
 Run the importer without `--apply` first:
@@ -117,7 +114,7 @@ after live sales without a fresh reconciliation.
   orders, cancellations, and refunds—against `https://DOMAIN/api/shopify/webhooks`. Use the custom
   app client secret as `SHOPIFY_WEBHOOK_SECRET` and verify test deliveries in Vercel logs.
 - Configure a Shopify Flow or staff order view for the `custom-board-request` and `needs-quote`
-  draft-order tags. Staff must price the draft, choose/reserve delivery inventory, and send the
+  draft-order tags. Staff must price the draft, record the agreed delivery date and window, and send the
   invoice from Shopify Admin.
 - Enable a native Shopify gift-card product, include it in the charcuterie collection, and publish
   it to the Headless storefront. `/gift-certificates` redirects to the first native gift card in

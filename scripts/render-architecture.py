@@ -115,8 +115,8 @@ def pages():
   'Gift Cards',['/gift-certificates → native product page','Amount selector + automatic price examples']),
  ('Tours + shared closures',['tour_schedule/default + booking_blackouts/default','Dated seat/bus products: prices + live inventory'],'calendar',
   'Planner + tour booking',['/experiences planner → /booking','Live calendar, seat availability and checkout']),
- ('Delivery + shared closures',['delivery_schedule/default + booking_blackouts/default','Generated delivery-date product inventory'],'clock',
-  'Cart delivery scheduling',['/cart → /api/delivery/availability','ZIP eligibility, dates, windows and capacity']),
+ ('Delivery + shared closures',['delivery_schedule/default + booking_blackouts/default','No reservation inventory or capacity limits'],'clock',
+  'Cart delivery scheduling',['/cart → /api/delivery/availability','ZIP eligibility, dates, windows and blackouts']),
  ('Files in this repository',['src/pages, src/data and public/images','Policies, copy, featured boards, ingredient choices'],'code',
   'Marketing + local content',['Homepage, About, guides, FAQ and form wording','Homepage featured-board copy is curated in code']),
  ]
@@ -137,11 +137,11 @@ def automation():
  d.card(778,192,610,166,'Tour settings + board catalog',['tour_schedule/default + shared closures','Published charcuterie products and source variants'],'green','bag')
  d.path([(357,358),(357,431)],'read via Admin API',357,403)
  d.path([(1083,358),(1083,431)],'read via Admin API',1083,403)
- d.card(52,431,610,242,'Daily delivery reconciliation',['05:15 UTC · /api/cron/materialize-delivery','Create dates entering the booking horizon','Adjust capacity by delta; archive ineligible dates','Preserve already-booked inventory'],'purple','clock',20)
+ d.card(52,431,610,242,'Delivery availability + checkout',['On request · /api/delivery/availability','Read schedule and shared blackout dates','Validate ZIP, notice, horizon and windows','Keep customer window selection available'],'purple','clock',20)
  d.card(778,431,610,242,'Daily tour reconciliation',['03:00 UTC · /api/cron/materialize-tours','Create / update seats and whole-bus bundles','Archive dates outside the active schedule','After completed tour sync: sync on-tour boards'],'purple','clock',20)
- d.path([(357,673),(357,754)],'write via Admin API',357,717)
+ d.path([(357,673),(357,754)],'write via Storefront API',357,717)
  d.path([(1083,673),(1083,754)],'write via Admin API',1083,717)
- d.card(52,754,610,177,'Shopify delivery-date products',['Hidden, $0 variants enforce daily order capacity','Published to Headless; window saved on the cart','Shopify checkout consumes available inventory'],'green','bag',20)
+ d.card(52,754,610,177,'Shopify board order lines',['Date and window saved on physical board lines','Cart metadata plus visible line properties','No reservation products added at checkout'],'green','bag',20)
  d.card(778,754,610,177,'Shopify tour products + variants',['Dated seats; bus bundle uses all 10 seats','On-tour board variants mirror delivery prices','On-tour boards do not require shipping'],'green','bag',20)
  d.rect(52,994,1336,247,PALE['green'],r=22)
  d.text(77,1034,'EVENT-DRIVEN SYNC · /api/shopify/webhooks',20,C['green'],700)

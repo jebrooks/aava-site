@@ -3,10 +3,6 @@ import { adminGraphql, assertUserErrors } from './lib.mjs';
 const rawSchedule = process.env.DELIVERY_SCHEDULE_JSON;
 if (!rawSchedule) throw new Error('DELIVERY_SCHEDULE_JSON is required for initial setup.');
 const schedule = JSON.parse(rawSchedule);
-if (!Number.isInteger(schedule.dailyCapacity) || schedule.dailyCapacity < 1) {
-  throw new Error('DELIVERY_SCHEDULE_JSON.dailyCapacity must be a positive integer.');
-}
-
 const definitionQuery = await adminGraphql(`query {
   metaobjectDefinitionByType(type: "delivery_schedule") {
     id
@@ -28,7 +24,6 @@ if (!definitionQuery.metaobjectDefinitionByType) {
         type: 'delivery_schedule',
         fieldDefinitions: [
           { name: 'Eligible ZIP codes', key: 'eligible_zips', type: 'multi_line_text_field', required: true },
-          { name: 'Daily order capacity', key: 'daily_capacity', type: 'number_integer', required: true },
           { name: 'Lead time in hours', key: 'lead_time_hours', type: 'number_integer', required: true },
           { name: 'Horizon in days', key: 'horizon_days', type: 'number_integer', required: true },
           { name: 'Weekly windows JSON', key: 'weekly_windows', type: 'json', required: true },
@@ -37,33 +32,6 @@ if (!definitionQuery.metaobjectDefinitionByType) {
     },
   );
   assertUserErrors(created.metaobjectDefinitionCreate, 'Creating delivery schedule definition');
-} else if (!definitionQuery.metaobjectDefinitionByType.fieldDefinitions.some(
-  (field) => field.key === 'daily_capacity',
-)) {
-  const updated = await adminGraphql(
-    `mutation AddDailyCapacity(
-      $id: ID!
-      $definition: MetaobjectDefinitionUpdateInput!
-    ) {
-      metaobjectDefinitionUpdate(id: $id, definition: $definition) {
-        metaobjectDefinition { id }
-        userErrors { field message }
-      }
-    }`,
-    {
-      id: definitionQuery.metaobjectDefinitionByType.id,
-      definition: {
-        fieldDefinitions: [{
-          create: {
-            name: 'Daily order capacity',
-            key: 'daily_capacity',
-            type: 'number_integer',
-          },
-        }],
-      },
-    },
-  );
-  assertUserErrors(updated.metaobjectDefinitionUpdate, 'Adding daily capacity field');
 }
 
 const existing = await adminGraphql(`query {
@@ -71,7 +39,6 @@ const existing = await adminGraphql(`query {
 }`);
 const fields = [
   { key: 'eligible_zips', value: schedule.eligibleZips.join('\n') },
-  { key: 'daily_capacity', value: String(schedule.dailyCapacity) },
   { key: 'lead_time_hours', value: String(schedule.leadTimeHours) },
   { key: 'horizon_days', value: String(schedule.horizonDays) },
   { key: 'weekly_windows', value: JSON.stringify(schedule.weeklyWindows) },

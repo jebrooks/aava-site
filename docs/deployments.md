@@ -139,10 +139,9 @@ Vercel runs configured cron jobs on Production, not automatically on PR previews
 
 | Endpoint | Daily UTC schedule | Purpose |
 | --- | --- | --- |
-| `/api/cron/materialize-delivery` | 05:15 | Reconcile delivery date inventory |
 | `/api/cron/materialize-tours` | 03:00 | Reconcile tour dates and then on-tour board variants |
 
-Both endpoints require `Authorization: Bearer <CRON_SECRET>`. Calling an authenticated endpoint
+The endpoint requires `Authorization: Bearer <CRON_SECRET>`. Calling an authenticated endpoint
 manually can write to the configured store, including when called on Preview. Inspect results
 and Vercel logs for failures, incomplete backfills, or lock contention. See the
 [content guide](content-management.md) and [Shopify runbook](../SHOPIFY.md) before reconciliation.
@@ -155,7 +154,7 @@ and Vercel logs for failures, incomplete backfills, or lock contention. See the
 - **Catalog parity fails:** inspect the Actions log and its separately configured Shopify credentials;
   confirm product publication/collection membership and the reported broken links.
 - **Availability differs from schedule:** check the authoritative metaobjects, shared blackouts,
-  generated inventory, and latest production sync result before attempting a reconciliation.
+  and latest production tour sync result before attempting a reconciliation.
 - **Regression after release:** restore a known-good production deployment using Vercel's rollback
   controls, or revert the change through a PR. Verify the active deployment and affected flows.
   Rolling back code does not undo Shopify edits, orders, inventory changes, or sent email; reconcile

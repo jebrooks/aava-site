@@ -28,7 +28,7 @@ refund; see [Shopify test-order guidance](https://help.shopify.com/en/manual/che
 - [ ] Confirm the deployed commit and Shopify store being tested.
 - [ ] Confirm payment mode and enabled payment methods.
 - [ ] Use two controlled inboxes: buyer and gift recipient. Use real, monitored addresses for email tests.
-- [ ] Choose eligible delivery dates and two unused tour dates; record starting capacity.
+- [ ] Choose eligible delivery dates and two unused tour dates; record starting tour capacity.
 - [ ] Confirm tests will not trigger unintended food preparation, fulfillment, or customer communications.
 - [ ] Label orders in Shopify with a consistent test tag, such as `transactional-test`.
 - [ ] Test primary flows on desktop and mobile; include guest checkout and returning-customer checkout if enabled.
@@ -63,10 +63,10 @@ serving counts, selections, and relevant booking details. Check inbox and spam f
 | C1 | Single-size board | Exact price, separate serving count, eligible delivery date/window, correct address and delivery fee. |
 | C2 | Multi-size board | Small and Large retain correct prices and serving counts on product page, cart, checkout, order, and email. Both sizes can be combined in one purchase. |
 | C3 | Build-your-own board | Cheese, meat, accompaniment, and board-preference selections survive checkout and appear in the order and confirmation email. Invalid or incomplete selections are rejected. |
-| C4 | Multiple boards and quantities | Quantities, totals, and per-board serving counts are clear. The order consumes the intended number of delivery reservations. |
+| C4 | Multiple boards and quantities | Quantities, totals, and per-board serving counts are clear. The selected delivery window appears on every physical board line without a reservation product. Multiple orders may choose the same window. |
 | C5 | Cart changes | Change size/quantity, remove an item, refresh, and return later. No stale price, ingredient selection, or delivery reservation remains. |
 | C6 | Delivery restrictions | Reject unsupported ZIP codes, insufficient notice, blackouts, out-of-horizon dates, and full dates. Check every configured window without paying for each. |
-| C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order and the intended capacity reduction result. |
+| C7 | Checkout interruption | Abandon checkout, return, and complete once. Exactly one paid order and the intended tour capacity reduction (where applicable) result. |
 | C8 | Discount, if offered | Valid and invalid codes, eligible products, totals, and refund amounts behave correctly. |
 
 **Email acceptance for C3:** the real order-confirmation email shows `Serves`, `Board preference`,
@@ -114,7 +114,7 @@ they use the same issuance path. Keep gift-card codes and recipient details in p
 ## 4. Custom requests and operations
 
 - [ ] Complete one custom-board request through request → Shopify draft → staff pricing and
-  delivery reservation → invoice email → payment → confirmation.
+  agreed delivery window → invoice email → payment → confirmation.
 - [ ] Complete a full cancellation/refund with intentional restocking.
 - [ ] Partially refund a board or add-on while keeping the tour intact.
 - [ ] Verify the actual local-delivery completion notification used by staff.
@@ -151,7 +151,7 @@ Do not change production prices or introduce broad discounts just to reduce test
 ## Cleanup and release gate
 
 - [ ] Record all test order numbers, charges, refunds, and remaining gift-card balances.
-- [ ] Cancel/refund designated orders and intentionally restore the correct delivery and tour capacity.
+- [ ] Cancel/refund designated orders and intentionally restore the correct tour capacity.
 - [ ] Confirm inventory returns to the expected baseline, accounting for legitimate concurrent bookings.
 - [ ] Resolve remaining test gift-card liabilities through the appropriate Shopify workflow.
 - [ ] Close test drafts and abandoned operational tasks without removing required audit records.

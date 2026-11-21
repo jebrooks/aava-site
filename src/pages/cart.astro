@@ -227,10 +227,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (subtotal) subtotal.textContent = money(cart.cost.subtotalAmount);
     if (total) total.textContent = money(cart.cost.totalAmount);
 
-    const slotLine = cart.lines.nodes.find(isDeliveryLine);
     const attrs = Object.fromEntries(cart.attributes.map((attribute) => [attribute.key, attribute.value]));
     const locked = attrs['Checkout locked'] === 'true';
-    const hasSavedWindow = Boolean(slotLine && slotLine.quantity === 1);
+    const hasSavedWindow = Boolean(attrs['Delivery ZIP'] && attrs['Delivery slot key'] && attrs['Delivery date'] && attrs['Delivery window']);
     if (deliveryForm) deliveryForm.hidden = !needsDelivery || hasSavedWindow;
     if (changeDelivery) {
       changeDelivery.hidden = !needsDelivery || !hasSavedWindow;
@@ -239,13 +238,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (slotField) slotField.hidden = true;
     if (saveSlot) saveSlot.hidden = true;
     if (deliveryStatus) deliveryStatus.textContent = '';
-    if (slotLine && selectedDelivery && needsDelivery) {
+    if (hasSavedWindow && selectedDelivery && needsDelivery) {
       selectedDelivery.hidden = false;
       selectedDelivery.replaceChildren();
       const label = element('strong');
-      label.textContent = 'Reserved delivery window';
+      label.textContent = 'Selected delivery window';
       const detail = element('p');
-      detail.textContent = `${attrs['Delivery date'] || ''} · ${attrs['Delivery window'] || slotLine.merchandise.title} · ZIP ${attrs['Delivery ZIP'] || ''}`;
+      detail.textContent = `${attrs['Delivery date'] || ''} · ${attrs['Delivery window'] || ''} · ZIP ${attrs['Delivery ZIP'] || ''}`;
       selectedDelivery.append(label, detail);
       if (zipInput && attrs['Delivery ZIP']) zipInput.value = attrs['Delivery ZIP'];
     } else if (selectedDelivery) {
@@ -254,9 +253,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (checkout) {
       checkout.textContent = locked ? 'Resume checkout' : 'Continue to secure checkout';
       checkout.disabled = !customerLines.length ||
-        (needsDelivery && (!hasSavedWindow || (!locked && !slotLine?.merchandise.availableForSale)));
+        (needsDelivery && !hasSavedWindow);
     }
-    if (cartStatus) cartStatus.textContent = customerLines.length && needsDelivery && !slotLine
+    if (cartStatus) cartStatus.textContent = customerLines.length && needsDelivery && !hasSavedWindow
       ? 'Choose a delivery window before checkout.'
       : locked && customerLines.length
         ? 'Your checkout is ready to resume. Your saved delivery window will be checked again before continuing.'
@@ -311,7 +310,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         const option = document.createElement('option');
         option.value = slot.key;
         option.textContent = `${slot.date} — ${slot.label}`;
-        option.dataset.variantId = slot.variantId;
         option.dataset.date = slot.date;
         option.dataset.label = slot.label;
         slotSelect?.append(option);
@@ -331,21 +329,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   deliveryForm?.addEventListener('submit', async (event) => {
     event.preventDefault();
     if (!currentCart?.id || !slotSelect?.value) return;
-    const selectedOption = slotSelect.selectedOptions[0];
-    if (!selectedOption?.dataset.variantId) return;
     if (saveSlot) saveSlot.disabled = true;
-    if (deliveryStatus) deliveryStatus.textContent = 'Reserving your delivery window…';
+    if (deliveryStatus) deliveryStatus.textContent = 'Saving your delivery window…';
     try {
       renderCart(await cartRequest({
         action: 'setDelivery',
         cartId: currentCart.id,
         zip: zipInput?.value,
-        variantId: selectedOption.dataset.variantId,
         slotKey: slotSelect.value,
       }));
       if (deliveryStatus) deliveryStatus.textContent = 'Delivery window added to your order.';
     } catch (error) {
-      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Reservation failed.';
+      if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Delivery selection failed.';
     } finally {
       if (saveSlot) saveSlot.disabled = false;
     }

@@ -9,7 +9,7 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Content | Authoritative source | Deployment needed? |
 | --- | --- | --- |
 | Announcement messages and display dates | Shopify → Content → Metaobjects → Announcement banner | No; allow about a minute on new page loads |
-| Delivery service area, capacity, notice, horizon, windows | Shopify → Content → Metaobjects → Delivery schedule, handle `default` | No; reconcile generated date products after edits |
+| Delivery service area, notice, horizon, windows | Shopify → Content → Metaobjects → Delivery schedule, handle `default` | No; read on availability and checkout |
 | Tour operating days, notice, horizon, enabled state, prices | Shopify → Content → Metaobjects → Tour schedule, handle `default` | No; reconcile generated date products after edits |
 | Business closures for both tours and delivery | Shopify → Content → Metaobjects → Blackout dates → Business blackout dates | No; availability checks use the list directly; catalog reconciliation follows |
 | Products, descriptions, product images, variants, prices, inventory | Shopify → Products; charcuterie collection and Headless publication | No; verify storefront visibility |
@@ -50,30 +50,32 @@ operation, not the routine way to edit a message. Verify rendering with `npm run
 
 ### Delivery schedule — `delivery_schedule/default`
 
-Edit eligible ZIP codes, daily order capacity, lead time in hours, horizon in days, and weekly
-windows JSON. Weekday keys use Sunday `0` through Saturday `6`; window times use 24-hour `HH:mm`.
-Capacity is shared across all windows on the same date. Delivery uses Eastern Time.
+Edit eligible ZIP codes, lead time in hours, horizon in days, and weekly windows JSON.
+Weekday keys use Sunday `0` through Saturday `6`; window times use 24-hour `HH:mm`.
+Delivery uses Eastern Time. There is no daily or per-window reservation limit, and no delivery
+reservation product is added to the cart. The legacy `daily_capacity` field is ignored.
 
 ZIP-based delivery fees are maintained separately in **Settings → Shipping and delivery →
 Local delivery → the fulfillment location**, using delivery zones. Keep those ZIP codes aligned
 with this schedule. Conventional Standard/Express shipping is disabled in **Markets → United
 States → Shipping**; local delivery remains configured separately. Automatic delivery estimates
-are off because a generic fulfillment estimate does not represent a reserved delivery window.
-At checkout handoff, the site copies the validated date, window, and timezone onto the delivery
-reservation's line properties so they appear in Shopify's order summary. Existing open checkouts
-are preserved; return through the site checkout button to create an updated checkout when needed.
-The scheduled process names the shared daily product **Delivery Time Reservation — YYYY-MM-DD**
-with a single **Reservation** variant, and reconciles older product names using title-only updates. Time windows belong to individual order
-lines, not the shared product title, because multiple windows use the same daily capacity.
+are off because a generic fulfillment estimate does not represent the selected delivery window.
+At selection and checkout, the site validates the schedule and shared blackout dates, and copies
+the date, window, and timezone onto each physical board's line properties for Shopify's order
+summary. Existing open checkouts are preserved by creating replacement carts when details change.
+Older saved carts have reservation lines removed when selecting delivery or returning to checkout.
 
-Closures belong in the shared Blackout dates entry. `DELIVERY_SCHEDULE_JSON` is a setup/local
+Closures belong in the shared Blackout dates entry. Schedule and blackout edits apply directly;
+no delivery catalog reconciliation or scheduled delivery job is required. Removing a closure
+immediately restores otherwise eligible windows. `DELIVERY_SCHEDULE_JSON` is a setup/local
 fallback, not the routine content source. `npm run shopify:setup` writes its values into the
 schedule, including an existing entry; do not rerun it with stale environment defaults.
 
-The daily job `/api/cron/materialize-delivery` runs at **05:15 UTC**, creates hidden date inventory,
-and reconciles capacity changes by a delta so booked orders remain accounted for. A date must
-have generated inventory to be bookable. After changing the schedule, reconcile through the
-authenticated endpoint if the change must appear before the next job. See [SHOPIFY.md](../SHOPIFY.md).
+After deploying reservation-free delivery to Production, archive the old generated products with
+`npm run shopify:retire-delivery` (read-only plan), then `npm run shopify:retire-delivery -- --apply`.
+The apply command verifies Production no longer uses reservation variants. Archiving preserves
+past orders and inventory history; do not delete products or reset their inventory. See
+[SHOPIFY.md](../SHOPIFY.md).
 
 ### Tour schedule — `tour_schedule/default`
 
@@ -110,8 +112,9 @@ An empty field intentionally means no closures. Both schedules read this one lis
 legacy per-schedule blackout fields or an environment fallback for closures.
 
 Availability and checkout read the shared list directly without an application cache. Missing or
-invalid shared configuration blocks availability. Jobs archive blocked generated products;
-removing a closure lets eligible dates reopen after reconciliation without resetting sold inventory.
+invalid shared configuration blocks availability. The tour job archives blocked generated tour products;
+removing a closure lets tour dates reopen after reconciliation without resetting sold inventory.
+Delivery windows reopen immediately when otherwise eligible.
 
 Schedule changes and closures do not cancel or refund existing reservations. Staff must handle
 affected bookings separately in Shopify and contact customers through the established process.
@@ -120,7 +123,7 @@ affected bookings separately in Shopify and contact customers through the establ
 
 Edit normal catalog products in Shopify. Ensure intended products belong to the configured
 charcuterie collection and are published to the configured Headless storefront. Check product
-details and the menu after edits. Automated delivery dates, tour seats, bus bundles, and on-tour
+details and the menu after edits. Automated tour seats, bus bundles, and on-tour
 board variants are maintained by synchronization code; do not use them as ordinary editable content.
 
 Catalog cards show an exact price when all currently available choices cost the same. Multi-size
