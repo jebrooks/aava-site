@@ -8,7 +8,7 @@ import {
 export type TourGraphql = <T>(query: string, variables?: Record<string, unknown>) => Promise<T>;
 interface Errors { userErrors: Array<{ message: string; code?: string }> }
 interface Variant {
-  id: string; price: string; inventoryQuantity: number; inventoryPolicy: string; requiresComponents: boolean;
+  id: string; price: string; taxable: boolean; inventoryQuantity: number; inventoryPolicy: string; requiresComponents: boolean;
   inventoryItem: { id: string; tracked: boolean; requiresShipping: boolean };
   productVariantComponents: { nodes: Array<{ quantity: number; productVariant: { id: string } }> };
 }
@@ -21,7 +21,7 @@ interface Product {
 const productFields = `id handle status tags
   date: metafield(namespace:"tour",key:"date"){value}
   publishedOnPublication(publicationId:$publicationId)
-  variants(first:2){nodes{id price inventoryQuantity inventoryPolicy requiresComponents
+  variants(first:2){nodes{id price taxable inventoryQuantity inventoryPolicy requiresComponents
     inventoryItem{id tracked requiresShipping}
     productVariantComponents(first:2){nodes{quantity productVariant{id}}}
   }}`;
@@ -94,7 +94,7 @@ async function ensureProduct(
     productOptions: [{ name: 'Booking', values: [{ name: kind === 'seat' ? 'Seat' : 'Whole bus' }] }],
     variants: [{
       optionValues: [{ optionName: 'Booking', name: kind === 'seat' ? 'Seat' : 'Whole bus' }],
-      price, inventoryPolicy: 'DENY', requiresComponents: kind === 'bus',
+      price, taxable: false, inventoryPolicy: 'DENY', requiresComponents: kind === 'bus',
       inventoryItem: { tracked: kind === 'seat', requiresShipping: false },
       ...(kind === 'seat' ? { inventoryQuantities: [{ locationId, name: 'available', quantity: TOUR_CAPACITY }] } : {}),
     }],
@@ -137,6 +137,18 @@ async function updatePrice(graphql: TourGraphql, product: Product, price: string
     productVariantsBulkUpdate(productId:$id,variants:$variants){userErrors{message}}
   }`, { id: product.id, variants: [{ id: product.variants.nodes[0].id, price }] });
   checked(result.productVariantsBulkUpdate, `Pricing ${product.handle}`);
+}
+
+async function ensureTourServiceTax(graphql: TourGraphql, product: Product) {
+  const variant = product.variants.nodes[0];
+  if (variant.taxable === false) return false;
+  // Only generated tour services are exempt. Food add-ons retain their own source tax settings.
+  const result = await graphql<{ productVariantsBulkUpdate: Errors }>(`mutation TourTax($id:ID!,$variants:[ProductVariantsBulkInput!]!){
+    productVariantsBulkUpdate(productId:$id,variants:$variants){userErrors{message}}
+  }`, { id: product.id, variants: [{ id: variant.id, taxable: false }] });
+  checked(result.productVariantsBulkUpdate, `Setting service tax treatment for ${product.handle}`);
+  variant.taxable = false;
+  return true;
 }
 
 interface Lock { shop: { id: string; metafield: { value: string; compareDigest: string } | null } }
@@ -199,10 +211,13 @@ export async function syncTourCatalog(options: {
     const created: string[] = [];
     const archived: string[] = [];
     const reopened: string[] = [];
+    const taxUpdated: string[] = [];
     if (options.dryRun) return {
       dryRun: true, earliest, dates,
       create: dates.flatMap(date => (['seat', 'bus'] as const).map(kind => tourHandle(kind, date))).filter(handle => !map.has(handle)),
       archive: closing.map(p => p.handle),
+      taxUpdates: products.filter(product => eligible.has(managedTourDate(product.handle)!) && product.variants.nodes[0].taxable !== false)
+        .map(product => ({ handle: product.handle, variantId: product.variants.nodes[0].id, from: product.variants.nodes[0].taxable, to: false })),
     };
     // Closing runs before creation, so reaching the execution budget cannot defer expired dates.
     for (const product of closing) {
@@ -233,6 +248,9 @@ export async function syncTourCatalog(options: {
       await updatePrice(graphql, seat, config.seatPrice);
       await updatePrice(graphql, bus, config.busPrice);
       for (const product of [seat, bus]) {
+        if (await ensureTourServiceTax(graphql, product)) taxUpdated.push(product.handle);
+      }
+      for (const product of [seat, bus]) {
         if (product.status === 'ARCHIVED') reopened.push(product.handle);
         await setStatus(graphql, product, 'ACTIVE');
         await ensurePublished(graphql, product, publicationId);
@@ -246,7 +264,7 @@ export async function syncTourCatalog(options: {
       const failure = results.find(result => result.status === 'rejected');
       if (failure?.status === 'rejected') throw failure.reason;
     }
-    const summary = { busy: false, created, archived, reopened, pending: dates.length - processed, dates: dates.length, earliest };
+    const summary = { busy: false, created, archived, reopened, taxUpdated, pending: dates.length - processed, dates: dates.length, earliest };
     console.info(JSON.stringify({ event: 'tour_catalog_sync', ...summary }));
     return summary;
   } finally {
