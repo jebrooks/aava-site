@@ -37,9 +37,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <span>Available delivery window</span>
               <select name="slot" data-slot-select required></select>
             </label>
-            <button class="button button--secondary" type="submit" data-save-slot hidden>
-              Reserve this window
-            </button>
             <p class="form-status" data-delivery-status role="status"></p>
           </form>
 
@@ -74,7 +71,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const loadSlots = document.querySelector<HTMLButtonElement>('[data-load-slots]');
   const slotField = document.querySelector<HTMLElement>('[data-slot-field]');
   const slotSelect = document.querySelector<HTMLSelectElement>('[data-slot-select]');
-  const saveSlot = document.querySelector<HTMLButtonElement>('[data-save-slot]');
   const deliveryStatus = document.querySelector<HTMLElement>('[data-delivery-status]');
   const selectedDelivery = document.querySelector<HTMLElement>('[data-selected-delivery]');
   const changeDelivery = document.querySelector<HTMLButtonElement>('[data-change-delivery]');
@@ -236,7 +232,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       changeDelivery.textContent = 'Change delivery window';
     }
     if (slotField) slotField.hidden = true;
-    if (saveSlot) saveSlot.hidden = true;
     if (deliveryStatus) deliveryStatus.textContent = '';
     if (hasSavedWindow && selectedDelivery && needsDelivery) {
       selectedDelivery.hidden = false;
@@ -298,6 +293,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const zip = zipInput?.value.trim() || '';
     if (deliveryStatus) deliveryStatus.textContent = 'Checking available windows…';
     loadSlots.disabled = true;
+    if (slotField) slotField.hidden = true;
     try {
       const response = await fetch(`/api/delivery/availability?zip=${encodeURIComponent(zip)}`);
       const result = await response.json() as { eligible?: boolean; slots?: DeliverySlot[]; error?: string };
@@ -305,7 +301,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (!result.eligible) throw new Error('That ZIP code is outside our local-delivery area.');
       const open = (result.slots || []).filter((slot) => slot.available);
       if (!open.length) throw new Error('No delivery windows are currently available for that ZIP code.');
-      slotSelect?.replaceChildren();
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Choose a delivery window';
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      slotSelect?.replaceChildren(placeholder);
       open.forEach((slot) => {
         const option = document.createElement('option');
         option.value = slot.key;
@@ -315,21 +316,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         slotSelect?.append(option);
       });
       if (slotField) slotField.hidden = false;
-      if (saveSlot) saveSlot.hidden = false;
       if (deliveryStatus) deliveryStatus.textContent = 'Choose the window that works best.';
     } catch (error) {
       if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Availability failed.';
       if (slotField) slotField.hidden = true;
-      if (saveSlot) saveSlot.hidden = true;
     } finally {
       loadSlots.disabled = false;
     }
   });
 
-  deliveryForm?.addEventListener('submit', async (event) => {
+  deliveryForm?.addEventListener('submit', (event) => {
     event.preventDefault();
+    loadSlots?.click();
+  });
+
+  slotSelect?.addEventListener('change', async () => {
     if (!currentCart?.id || !slotSelect?.value) return;
-    if (saveSlot) saveSlot.disabled = true;
+    const checkoutWasDisabled = checkout?.disabled ?? true;
+    slotSelect.disabled = true;
+    if (loadSlots) loadSlots.disabled = true;
+    if (zipInput) zipInput.disabled = true;
+    if (changeDelivery) changeDelivery.disabled = true;
+    if (checkout) checkout.disabled = true;
     if (deliveryStatus) deliveryStatus.textContent = 'Saving your delivery window…';
     try {
       renderCart(await cartRequest({
@@ -341,8 +349,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (deliveryStatus) deliveryStatus.textContent = 'Delivery window added to your order.';
     } catch (error) {
       if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Delivery selection failed.';
+      slotSelect.value = '';
+      if (checkout) checkout.disabled = checkoutWasDisabled;
     } finally {
-      if (saveSlot) saveSlot.disabled = false;
+      slotSelect.disabled = false;
+      if (loadSlots) loadSlots.disabled = false;
+      if (zipInput) zipInput.disabled = false;
+      if (changeDelivery) changeDelivery.disabled = false;
     }
   });
 

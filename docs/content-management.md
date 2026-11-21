@@ -60,7 +60,8 @@ Local delivery → the fulfillment location**, using delivery zones. Keep those 
 with this schedule. Conventional Standard/Express shipping is disabled in **Markets → United
 States → Shipping**; local delivery remains configured separately. Automatic delivery estimates
 are off because a generic fulfillment estimate does not represent the selected delivery window.
-At selection and checkout, the site validates the schedule and shared blackout dates, and copies
+Customers save a window by selecting it from the cart dropdown; there is no separate reservation
+button. At selection and checkout, the site validates the schedule and shared blackout dates, and copies
 the date, window, and timezone onto each physical board's line properties for Shopify's order
 summary. Existing open checkouts are preserved by creating replacement carts when details change.
 Older saved carts have reservation lines removed when selecting delivery or returning to checkout.
