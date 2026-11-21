@@ -65,7 +65,7 @@
 <text x="860" y="804" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Shopify tour products + variants</text>
 <text x="802" y="850" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Dated seats; bus bundle uses all 10 seats</text>
 <text x="802" y="879" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">On-tour board variants mirror delivery prices</text>
-<text x="802" y="908" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">On-tour boards do not require shipping</text>
+<text x="802" y="908" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Physical boards: $0 VA boarding handoff</text>
 <rect x="52" y="994" width="1336" height="247" rx="22" fill="#EAF5EE" stroke="#EAF5EE"/>
 <text x="77" y="1034" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" fill="#216747" text-anchor="start">EVENT-DRIVEN SYNC · /api/shopify/webhooks</text>
 <rect x="77" y="1065" width="373" height="160" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>

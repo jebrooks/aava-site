@@ -31,7 +31,7 @@
 <g transform="translate(514,482)" stroke="#5B45A0" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="24" height="11" rx="3"/><rect x="4" y="18" width="24" height="11" rx="3"/><path d="M9 8h1m4 0h9M9 23h1m4 0h9"/></g>
 <text x="567" y="505" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#5B45A0" text-anchor="start">Server-side endpoints</text>
 <text x="509" y="551" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Cart, delivery and tour booking</text>
-<text x="509" y="580" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Draft requests, cron and webhooks</text>
+<text x="509" y="580" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Request email, cron and webhooks</text>
 <rect x="1047" y="190" width="341" height="445" rx="22" fill="#EAF5EE" stroke="#EAF5EE"/>
 <rect x="1070" y="210" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
 <g transform="translate(1077,217)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10h18l3 19H4zM11 11V8a5 5 0 0 1 10 0v3"/><path d="M13 17c5-3 9 3 4 5s-7 2-5 5"/></g>
@@ -48,7 +48,7 @@
 <rect x="1092" y="475" width="46" height="46" rx="12" fill="#EAF5EE" stroke="#EAF5EE"/>
 <g transform="translate(1099,482)" stroke="#216747" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="24" height="11" rx="3"/><rect x="4" y="18" width="24" height="11" rx="3"/><path d="M9 8h1m4 0h9M9 23h1m4 0h9"/></g>
 <text x="1152" y="505" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#216747" text-anchor="start">Admin API</text>
-<text x="1094" y="551" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Metaobjects + drafts</text>
+<text x="1094" y="551" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Settings + inventory</text>
 <text x="1094" y="580" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Catalog / inventory sync</text>
 <path d="M362,310 L462,310" fill="none" stroke="#697488" stroke-width="2.5" stroke-linejoin="round" marker-end="url(#arrow)"/>
 <rect x="378.25" y="273" width="67.5" height="28" rx="6" fill="#F6F7FA" stroke="#F6F7FA"/>
@@ -72,8 +72,8 @@
 <rect x="537" y="805" width="46" height="46" rx="12" fill="#FBF2E2" stroke="#FBF2E2"/>
 <g transform="translate(544,812)" stroke="#946016" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="26" height="21" rx="3"/><path d="m4 8 12 10L28 8"/></g>
 <text x="597" y="835" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#946016" text-anchor="start">Resend</text>
-<text x="539" y="881" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Contact inquiries → business inbox</text>
-<text x="539" y="910" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Sent by /api/contact</text>
+<text x="539" y="881" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Contact + custom-board requests</text>
+<text x="539" y="910" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Sent to business inboxes</text>
 <text x="539" y="939" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="400" fill="#292B36" text-anchor="start">Separate from Shopify gift emails</text>
 <rect x="978" y="785" width="410" height="210" rx="18" fill="#FFFFFF" stroke="#D9DFE7"/>
 <rect x="978" y="785" width="6" height="210" rx="3" fill="#8A1538" stroke="#8A1538"/>

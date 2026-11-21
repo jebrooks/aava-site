@@ -4,6 +4,7 @@ import {
   PICKUP_LOCATIONS,
   SANDWICHES,
   TOUR_PREFERENCES,
+  DEFAULT_TOUR_PICKUP,
 } from "../data/tour-options";
 export const prerender = false;
 ---
@@ -241,13 +242,14 @@ export const prerender = false;
                 </p>
               </div>
               <div class="form-field">
-                <label for="booking-pickup">Pickup preference</label>
-                <select id="booking-pickup" name="pickup" required>
-                  <option value="">Choose a preference</option>
+                <label for="booking-pickup">Pickup preference <span class="tour-optional">(optional)</span></label>
+                <select id="booking-pickup" name="pickup">
+                  <option value="">No preference — arrange by phone</option>
                   {PICKUP_LOCATIONS.map((p) => (
                     <option>{p}</option>
                   ))}
                 </select>
+                <p class="form-help">All pickup preferences are tentative. We’ll contact you by phone to confirm the arrangements.</p>
               </div>
             </div>
             <div class="form-field" data-custom-pickup-field hidden>
@@ -259,6 +261,38 @@ export const prerender = false;
                 rows="2"
               ></textarea>
             </div>
+            <div data-custom-pickup-address hidden>
+              <div class="form-field">
+                <label for="booking-pickup-street">Tentative pickup street address</label>
+                <input id="booking-pickup-street" name="customPickupStreet" maxlength="200" autocomplete="shipping address-line1" disabled />
+              </div>
+              <div class="form-field">
+                <label for="booking-pickup-address2">Apartment, suite or pickup details <span class="tour-optional">(optional)</span></label>
+                <input id="booking-pickup-address2" name="customPickupAddress2" maxlength="100" autocomplete="shipping address-line2" disabled />
+              </div>
+              <div class="tour-fields-grid">
+                <div class="form-field">
+                  <label for="booking-pickup-city">City</label>
+                  <input id="booking-pickup-city" name="customPickupCity" maxlength="100" autocomplete="shipping address-level2" disabled />
+                </div>
+                <div class="form-field">
+                  <label for="booking-pickup-state">State</label>
+                  <select id="booking-pickup-state" name="customPickupState" autocomplete="shipping address-level1" disabled><option value="VA">Virginia</option></select>
+                </div>
+                <div class="form-field">
+                  <label for="booking-pickup-zip">ZIP code</label>
+                  <input id="booking-pickup-zip" name="customPickupZip" maxlength="10" inputmode="numeric" pattern="[0-9]{5}(-[0-9]{4})?" autocomplete="shipping postal-code" disabled />
+                </div>
+              </div>
+              <input type="hidden" name="customPickupCountry" value="US" disabled />
+              <p class="form-help">Tour food is provided in Virginia. We’ll confirm your requested pickup by phone.</p>
+            </div>
+            <p class="form-help" data-tour-fulfillment-note hidden>
+              Your board will be provided on the bus. At secure checkout, you’ll see a tentative tour handoff address;
+              if you have no pickup preference, we use {DEFAULT_TOUR_PICKUP}. You don’t need to
+              travel there—we’ll confirm pickup by phone. Enter your real billing address at checkout,
+              which may be different from this tentative address.
+            </p>
             <div class="form-field">
               <label for="booking-allergies">
                 Dietary needs or allergies{" "}

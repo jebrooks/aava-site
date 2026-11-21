@@ -53,6 +53,9 @@ jobs:
       - name: Test contact form delivery
         run: npm run test:contact
 
+      - name: Test custom-board request email
+        run: npm run test:forms
+
       - name: Test relative links
         run: npm run test:links
 

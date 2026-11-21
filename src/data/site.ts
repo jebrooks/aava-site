@@ -4,6 +4,8 @@ export const site = {
   description:
     'Curated Virginia wine tours and handcrafted charcuterie boards for everyday gatherings and extraordinary celebrations.',
   email: 'info.allaboardva@gmail.com',
+  customBoardEmail: 'allaboardva.tours.charcuterie@gmail.com',
+  shopifyDraftOrderUrl: 'https://admin.shopify.com/store/allaboardva/draft_orders/new',
   phoneDisplay: '714-715-9836',
   phoneHref: 'tel:+17147159836',
   address: '5877 Washington Boulevard #50001, Arlington, VA 22205',

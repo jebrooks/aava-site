@@ -18,7 +18,7 @@
     "test:links": "node --experimental-strip-types --test tests/site-links.test.mjs",
     "check:links": "node scripts/check-site-links.mjs",
     "test:contact": "node --experimental-strip-types --test tests/contact-form.test.mjs",
-    "test:cart": "node --experimental-strip-types --test tests/cart-edit.test.mjs tests/delivery-cart.test.mjs tests/delivery-calendar.test.mjs tests/gift-card.test.mjs tests/gift-card-guide.test.mjs tests/serving-size.test.mjs tests/serving-size-migration.test.mjs",
+    "test:cart": "node --experimental-strip-types --test tests/cart-edit.test.mjs tests/cart-session.test.mjs tests/delivery-cart.test.mjs tests/delivery-calendar.test.mjs tests/gift-card.test.mjs tests/gift-card-guide.test.mjs tests/serving-size.test.mjs tests/serving-size-migration.test.mjs",
     "test:boards": "node --experimental-strip-types --test tests/board-customization.test.mjs",
     "test:announcement": "node --experimental-strip-types --test tests/announcement.test.mjs tests/rich-text.test.mjs",
     "shopify:setup-announcement": "node --env-file=.env scripts/shopify/setup-announcement.mjs",
@@ -28,7 +28,7 @@
     "test:booking": "node --experimental-strip-types --test tests/tour-booking.test.mjs tests/tour-board-sync.test.mjs",
     "shopify:sync-tour-boards": "node --env-file=.env --experimental-strip-types scripts/shopify/sync-tour-boards.mjs",
     "shopify:register-tour-webhooks": "node --env-file=.env scripts/shopify/register-tour-board-webhooks.mjs",
-    "test:forms": "node --test tests/custom-board-request.test.mjs"
+    "test:forms": "node --test tests/custom-board-request.test.mjs tests/custom-board-email.test.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "11.0.5",

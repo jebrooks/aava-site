@@ -14,7 +14,7 @@ webhook subscriptions, DNS cutover, and payment/email readiness require separate
 
 The browser requests pages and calls same-site `/api/*` routes. Astro's server-side code calls
 Shopify's **Storefront API** for published catalog data and carts, and its **Admin API** for
-operational settings, tour inventory, draft orders, and synchronization. API credentials stay
+operational settings, tour inventory, and synchronization. API credentials stay
 on the server.
 
 - **Boards and gifts:** the product page adds a Shopify variant to a cart. The cart collects a
@@ -27,16 +27,26 @@ on the server.
   containing the dated tour variant and any on-tour boards. The destination coordination note
   appears on the tour line, while board lines show **Fulfillment: Provided on the bus** and the
   tour date. Shopify handles payment and orders.
-- **Custom boards:** `/custom-board-request` uses BotID verification and creates an Admin API draft
-  order tagged for staff quoting. Staff sets the final price, records the delivery window, and
-  sends the invoice from Shopify; the form does not automatically complete a purchase.
+- **Custom boards:** `/custom-board-request` uses BotID verification and Resend to email the
+  business. The form creates no Shopify draft or order. A link in the staff email opens the new
+  Shopify draft-order editor. An optional copyable Sidekick prompt carries the request details
+  as JSON data to help staff prepare an unsaved draft. Staff confirm availability, price and
+  delivery details, review the draft, then manually save and send the invoice from Shopify.
 - **Inquiries:** `/contact` posts to `/api/contact`, which uses Resend to send to the business inbox.
   This is separate from Shopify's order and gift-card notifications.
+
+Separately sold on-tour boards are physical at a selected/tentative Virginia boarding
+destination and use one dedicated $0 fulfillment method. Tour-only/included-sandwich service
+remains non-shipping and has no default/delivery address. All pickup choices are tentative and
+coordinated by phone; genuine billing stays separate. The isolated native prototype passed the
+Virginia/DC/Maryland tax matrix. Deploy compatible Production checkout/sync code before
+migrating the 44 existing live counterparts; see [rollout ordering](deployments.md#physical-on-tour-board-rollout)
+and [tax evidence](virginia-tax-maintenance.md).
 
 Sources: [Storefront client](../src/lib/shopify/storefront.ts),
 [API authentication](../src/lib/shopify/client.ts), [cart API](../src/pages/api/cart.ts),
 [tour booking service](../src/lib/shopify/tour-booking.ts),
-[custom drafts](../src/lib/shopify/draft-orders.ts), [contact API](../src/pages/api/contact.ts).
+[custom request email](../src/lib/custom-board-request.ts), [contact API](../src/pages/api/contact.ts).
 
 ## 2. Which Shopify components populate which pages?
 
@@ -83,8 +93,10 @@ Eastern wall-clock times change with daylight saving time.
 
 Delivery windows have no capacity limit or Shopify reservation products. A public tour date has ten seat units. Its private-bus
 product is a bundle that needs all ten units, so public and private bookings share capacity.
-On-tour board variants mirror their delivery counterpart's options, price, and tax settings but
-do not require shipping.
+On-tour board variants mirror their delivery counterpart's options, price and tax settings.
+They require physical fulfillment at the dedicated bus location and a selected/tentative
+Virginia boarding destination. The booking API validates the single exact $0 delivery option;
+tour seats and bus bundles remain non-shipping/non-taxable.
 
 These are reconciliation jobs, not nightly reimports: they preserve sold inventory and existing
 variant relationships. Schedule edits do not cancel booked orders. Shared blackout checks read

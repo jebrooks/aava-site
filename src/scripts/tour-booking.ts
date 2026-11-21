@@ -113,13 +113,19 @@ function initialize(root: HTMLElement) {
     "phone",
     "pickup",
     "customPickup",
+    "customPickupStreet",
+    "customPickupAddress2",
+    "customPickupCity",
+    "customPickupState",
+    "customPickupZip",
     "sandwich",
     "allergies",
     "requests",
     "boardQuantity",
   ]) {
     if (typeof saved[key] === "string" || typeof saved[key] === "number")
-      field(key).value = String(saved[key]);
+      field(key).value = key === 'pickup' && saved[key] === 'Reston Metro'
+        ? 'Reston Town Center Metro' : String(saved[key]);
   }
   if (["public", "private"].includes(String(saved.tourType)))
     field("tourType").value = String(saved.tourType);
@@ -142,6 +148,7 @@ function initialize(root: HTMLElement) {
     return board?.variants.find((v) => v.id === field("boardVariantId").value);
   }
   function summary() {
+    pickupVisibility();
     const type = field("tourType").value,
       guests = Number(field("guests").value),
       snack = field("snack").value;
@@ -441,9 +448,16 @@ function initialize(root: HTMLElement) {
       field("pickup").value = "";
     const custom =
       field("pickup").value === "Custom pickup (private tours)" && !publicTour;
-    find("[data-custom-pickup-field]").hidden = !custom;
-    field("customPickup").required = custom;
-    field("customPickup").disabled = !custom;
+    const hasBoard = field('snack').value === 'charcuterie' && !!field('boardVariantId').value && Number(field('boardQuantity').value) >= 1;
+    find("[data-custom-pickup-field]").hidden = !custom || hasBoard;
+    field("customPickup").required = custom && !hasBoard;
+    field("customPickup").disabled = !custom || hasBoard;
+    find('[data-custom-pickup-address]').hidden = !custom || !hasBoard;
+    for (const name of ['customPickupStreet', 'customPickupAddress2', 'customPickupCity', 'customPickupState', 'customPickupZip', 'customPickupCountry']) {
+      field(name).disabled = !custom || !hasBoard;
+      field(name).required = custom && hasBoard && name !== 'customPickupAddress2';
+    }
+    find('[data-tour-fulfillment-note]').hidden = !hasBoard;
   }
   async function refresh() {
     // Retain ingredients while refreshing capacity or changing party size.
