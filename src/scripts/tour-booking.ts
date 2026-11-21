@@ -1,3 +1,4 @@
+import { TOUR_REGIONS } from "../data/tour-options";
 import { boardAttributes } from "../lib/board-customization";
 import { variantServingLabel } from '../lib/serving-size';
 import type { tourBookingService } from "../lib/shopify/tour-booking";
@@ -83,7 +84,7 @@ function initialize(root: HTMLElement) {
     }
     // Keep only non-personal selections in the URL, so a reload doesn't restore old query choices.
     const url = new URL('/booking', location.origin);
-    for (const name of ['tourType', 'guests', 'snack']) url.searchParams.set(name, field(name).value);
+    for (const name of ['tourType', 'guests', 'snack', 'region']) url.searchParams.set(name, field(name).value);
     if (selectedDate) url.searchParams.set('date', selectedDate);
     history.replaceState(null, '', url);
   }
@@ -106,6 +107,7 @@ function initialize(root: HTMLElement) {
   if (typeParam) saved.tourType = typeParam.toLowerCase();
   if (guestParam) saved.guests = guestParam;
   if (snackParam) saved.snack = snackParam.toLowerCase();
+  if (params.has("region")) saved.region = params.get("region");
   if (params.has("date")) saved.date = params.get("date");
   for (const key of [
     "name",
@@ -138,10 +140,16 @@ function initialize(root: HTMLElement) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(String(saved.date)))
     selectedDate = String(saved.date);
   if (/^\d{4}-\d{2}$/.test(String(saved.month))) month = String(saved.month);
+  const regionInput = [...form.querySelectorAll<HTMLInputElement>('[name="region"]')].find(input => input.value === saved.region);
+  if (regionInput) regionInput.checked = true;
+  find('[data-region-picker]').dispatchEvent(new Event('region:sync'));
   function currentVariant() {
     return board?.variants.find((v) => v.id === field("boardVariantId").value);
   }
   function summary() {
+    const region = TOUR_REGIONS.find(region => region.id === field('region').value) || TOUR_REGIONS[0];
+    find('[data-summary-region]').textContent = region.label;
+    find('[data-region-details-label]').textContent = region.label;
     const type = field("tourType").value,
       guests = Number(field("guests").value),
       snack = field("snack").value;

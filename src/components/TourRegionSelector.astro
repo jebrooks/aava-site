@@ -1,0 +1,61 @@
+---
+import { TOUR_REGIONS } from '../data/tour-options';
+import paths from '../data/tour-region-map.json';
+---
+<div class="tour-region-picker" data-region-picker>
+  <p class="tour-region-picker__intro">Where would you love to explore?</p>
+  <p class="form-help">Choose a preferred region or stay flexible. For public tours, we’ll consider everyone’s preferences and confirm the final region and wineries by phone. Your preference does not limit available dates.</p>
+  <div class="tour-region-picker__layout">
+    <div class="tour-region-picker__map">
+      <svg viewBox="0 0 480 493" role="group" aria-label="Choose a preferred Virginia wine region">
+        <image href="/images/tour-region-map.webp" width="480" height="493" />
+        {TOUR_REGIONS.filter(region => region.mapId).map(region => (
+          <g role="button" tabindex="0" data-map-region={region.id} aria-label={`Prefer ${region.label}`} aria-pressed="false">
+            <title>{region.label}</title>
+            <path d={paths[region.mapId as keyof typeof paths]} />
+          </g>
+        ))}
+      </svg>
+      <a href="/images/tour-region-map.webp" target="_blank" rel="noopener">View the full-size map (opens in a new tab)</a>
+    </div>
+    <fieldset class="tour-region-picker__choices">
+      <legend>Preferred region</legend>
+      {TOUR_REGIONS.map(region => (
+        <label class="tour-choice tour-region-choice">
+          <input type="radio" name="region" value={region.id} checked={region.id === 'flexible'} />
+          <span><strong>{region.label}</strong></span>
+        </label>
+      ))}
+      <p class="form-help" data-region-selection aria-live="polite">Any region — I’m flexible</p>
+    </fieldset>
+  </div>
+</div>
+<script>
+  for (const picker of document.querySelectorAll<HTMLElement>('[data-region-picker]')) {
+    const radios = [...picker.querySelectorAll<HTMLInputElement>('input[name="region"]')];
+    const hotspots = [...picker.querySelectorAll<SVGGElement>('[data-map-region]')];
+    function update() {
+      const selected = radios.find(input => input.checked);
+      hotspots.forEach(hotspot => hotspot.setAttribute('aria-pressed', String(hotspot.dataset.mapRegion === selected?.value)));
+      const status = picker.querySelector<HTMLElement>('[data-region-selection]');
+      if (status) status.textContent = selected?.closest('label')?.textContent?.trim() || '';
+    }
+    hotspots.forEach(hotspot => {
+      function select() {
+        const radio = radios.find(input => input.value === hotspot.dataset.mapRegion);
+        radio?.click();
+        update();
+      }
+      hotspot.addEventListener('click', select);
+      hotspot.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          select();
+        }
+      });
+    });
+    picker.addEventListener('change', update);
+    picker.addEventListener('region:sync', update);
+    update();
+  }
+</script>

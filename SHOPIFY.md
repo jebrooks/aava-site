@@ -164,3 +164,11 @@ check before merging. Vercel production deployments should continue to track onl
    validate the dynamic sitemap.
 7. Complete a low-value live payment before DNS cutover. Keep Squarespace reachable on a legacy
    hostname for the agreed 30-day rollback and reconciliation window.
+
+## Tour region preferences
+
+The region map records a **Preferred region** on the tour cart/order line and cart attributes.
+It does not dedicate dates, divide inventory, filter availability, or change tour prices. Public
+tour guests may request different regions on the same departure; staff coordinate the final
+region and itinerary by phone. See [Content management](docs/content-management.md) for the
+region choices and locally hosted map source. No Shopify schema or catalog changes are needed.

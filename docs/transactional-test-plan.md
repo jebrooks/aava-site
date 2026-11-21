@@ -75,6 +75,14 @@ notification preview is not evidence that real order properties reached the emai
 
 ## 2. Tours
 
+Verify map and radio choices stay synchronized, support keyboard selection and mobile layouts,
+and include “Any region — I’m flexible.” Carry the chosen preference through planner → booking,
+reload/back navigation, summary, and Shopify tour line. Changing region must leave the same
+calendar dates, prices, and shared seats available. Older drafts default to flexible; invalid
+region IDs are rejected. Confirm that public-tour wording promises a preference, with the final
+region and wineries arranged by phone.
+
+
 | ID | Scenario | Acceptance criteria |
 | --- | --- | --- |
 | T1 | Public tour for multiple guests | Correct per-person total; seat inventory decreases by guest count; date, passenger count, pickup, contact information, and acknowledgments are retained. |

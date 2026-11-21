@@ -18,7 +18,7 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Marketing copy, FAQs, inquiry prompts, page-specific SEO | Matching files in `src/pages/`; shared components in `src/components/` | Yes |
 | Company contact details, navigation, social links, featured boards | `src/data/site.ts` | Yes |
 | Build-your-own ingredient options and size limits | `src/data/board-customizations.json` | Yes |
-| Tour pickup locations, sandwiches, preferences, terms version | `src/data/tour-options.ts` | Yes |
+| Tour region choices, pickup locations, sandwiches, preferences, terms version | `src/data/tour-options.ts` | Yes |
 | Policy and waiver wording | `src/data/policies.json`, rendered by policy pages | Yes |
 | Press coverage | `src/data/press.ts` and `src/pages/press.astro` | Yes |
 | Brand colors, typography, responsive layout | `src/styles/global.css`, layouts and components | Yes |
@@ -110,6 +110,17 @@ These commands use the store configured in local `.env`. The second command writ
 Repeat a backfill when `pending > 0` (CLI exit code 2). Use the authenticated job for the combined
 tour and board reconciliation, or the board sync described in the [README](../README.md#tour-booking).
 Verify `/experiences`, `/booking`, affected dates, and prices after reconciliation.
+
+Tour region labels and stable IDs live in `src/data/tour-options.ts`. The locally hosted original
+illustration is `public/images/tour-region-map.webp`; its clickable geometry is in
+`src/data/tour-region-map.json`. The artwork and hotspot geometry were restored from the original
+[Experiences page](https://www.allaboardva.com/experiences). Keep map keys aligned with the region definitions. Choosing a
+region is a preference only, including for public tours. There are no dates dedicated to a region,
+no regional seat pools, and no region-specific prices. Shared blackout and capacity checks still
+apply. “Any region — I’m flexible” is the default for new and older saved bookings. Preferences
+are carried through the planner, booking draft, summary, Shopify cart attributes and tour line
+properties as **Preferred region**. Staff confirm the final region and wineries by phone.
+Changing labels, choices or map assets requires a deployment; it does not require catalog sync.
 
 ### Blackout dates — `booking_blackouts/default`
 

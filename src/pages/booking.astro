@@ -1,4 +1,5 @@
 ---
+import TourRegionSelector from "../components/TourRegionSelector.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   PICKUP_LOCATIONS,
@@ -39,6 +40,10 @@ export const prerender = false;
               <span class="tour-step__number">1</span>
               <h2 id="date-heading">Choose your date</h2>
             </div>
+            <details class="tour-region-details" data-region-details>
+              <summary>Preferred region: <span data-region-details-label>Any region — I’m flexible</span></summary>
+              <TourRegionSelector />
+            </details>
             <div class="tour-fields-grid">
               <div class="form-field">
                 <label for="booking-type">Tour type</label>
@@ -361,8 +366,12 @@ export const prerender = false;
               <dd data-summary-guests>1 guest</dd>
             </div>
             <div>
+              <dt>Preferred region</dt>
+              <dd data-summary-region>Any region — I’m flexible</dd>
+            </div>
+            <div>
               <dt>Destinations</dt>
-              <dd>To arrange by phone</dd>
+              <dd>Final itinerary confirmed by phone</dd>
             </div>
             <div>
               <dt>Snack</dt>

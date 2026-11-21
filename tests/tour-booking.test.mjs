@@ -376,7 +376,7 @@ test("only the tour line includes destination; board fulfillment is clear for pu
     });
     const tourAttributes = state.cartInput.lines[0].attributes;
     const boardAttributes = state.cartInput.lines[1].attributes;
-    const destination = { key: "Destination", value: "To coordinate by phone" };
+    const destination = { key: "Destination", value: "Final region and wineries to coordinate by phone" };
     assert.ok(tourAttributes.some(a => a.key === destination.key && a.value === destination.value));
     assert.ok(state.cartInput.attributes.some(a => a.key === destination.key && a.value === destination.value));
     assert.ok(!boardAttributes.some(a => a.key === "Destination"));
@@ -444,4 +444,21 @@ test('missing or invalid shared dates refuse availability and checkout',async()=
  await assert.rejects(()=>service.availability('public',2),/Invalid blackout/);
  await assert.rejects(()=>service.checkout(base),/Invalid blackout/);
  assert.equal(state.cartInput,null);
+});
+
+test('region preferences default to flexible, reject unknown values, and travel with the tour line', async () => {
+  assert.equal(validateTourRegistration(base).region, 'flexible');
+  assert.throws(() => validateTourRegistration({...base, region:'guaranteed-private-route'}), /preferred region/);
+  const {state,service}=fixture();
+  await service.checkout({...base,region:'loudoun'});
+  const loudoun=structuredClone(state.cartInput);
+  assert.equal(loudoun.lines[0].attributes.find(a=>a.key==='Preferred region').value,'Loudoun Wine Trail');
+  assert.equal(loudoun.attributes.find(a=>a.key==='Preferred region').value,'Loudoun Wine Trail');
+  assert.match(loudoun.lines[0].attributes.find(a=>a.key==='Destination').value,/coordinate by phone/);
+  await service.checkout({...base,region:'charlottesville'});
+  assert.equal(state.cartInput.lines[0].merchandiseId,loudoun.lines[0].merchandiseId,'All public preferences use the same dated inventory');
+  assert.equal(state.cartInput.lines[0].quantity,loudoun.lines[0].quantity);
+  assert.equal(state.cartInput.lines[0].attributes.find(a=>a.key==='Preferred region').value,'Charlottesville Wine Region');
+  state.blackouts=base.date;
+  await assert.rejects(()=>service.checkout({...base,region:'loudoun'}),/date is no longer available/);
 });

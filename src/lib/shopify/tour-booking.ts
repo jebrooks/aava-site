@@ -276,6 +276,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
         "Tour type",
         "Guest count",
         "Destination",
+        "Preferred region",
         "Snack",
       ].includes(a.key),
     );
@@ -342,7 +343,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
           lines,
           attributes,
           buyerIdentity: { email: booking.email, phone, countryCode: "US" },
-          note: `Tour booking: ${booking.date} — ${booking.tourType}. Destination and pickup details to coordinate by phone.`,
+          note: `Tour booking: ${booking.date} — ${booking.tourType}. Preferred region: ${attributes.find(attribute => attribute.key === "Preferred region")?.value}. Final region, destinations and pickup details to coordinate by phone.`,
         },
       },
     );

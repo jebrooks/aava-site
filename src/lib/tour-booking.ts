@@ -1,5 +1,6 @@
 import {
   TOUR_TYPES,
+  TOUR_REGIONS,
   TOUR_SNACKS,
   PICKUP_LOCATIONS,
   SANDWICHES,
@@ -46,6 +47,8 @@ function text(
 export function validateTourSelection(
   input: Record<string, unknown>,
 ): TourSelection {
+  const region = input.region ?? 'flexible';
+  if (!TOUR_REGIONS.some(option => option.id === region)) throw new Error('Choose a valid preferred region.');
   const tourType = input.tourType;
   if (!TOUR_TYPES.includes(tourType as never))
     throw new Error("Choose Public or Private tour.");
@@ -72,6 +75,7 @@ export function validateTourSelection(
   }
   return {
     tourType: tourType as TourSelection["tourType"],
+    region: region as TourSelection["region"],
     guests,
     snack: snack as TourSelection["snack"],
     boardVariantId,
@@ -167,7 +171,8 @@ export function tourBookingAttributes(
     "Lead guest": booking.name,
     Email: booking.email,
     "Mobile phone": booking.phone,
-    Destination: "To coordinate by phone",
+    "Preferred region": TOUR_REGIONS.find(region => region.id === booking.region)?.label || TOUR_REGIONS[0].label,
+    Destination: "Final region and wineries to coordinate by phone",
     "Pickup preference": booking.pickup,
     "Custom pickup address": booking.customPickup,
     Snack: booking.snack,

@@ -2095,3 +2095,28 @@ ol {
   background: var(--burgundy-dark);
   color: white;
 }
+
+/* Region choices are preferences, independent of date availability and seat inventory. */
+.tour-region-picker__intro { margin: 0 0 .4rem; font-size: 1.1rem; font-weight: 650; }
+.tour-region-picker__layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 2rem; align-items: center; margin-top: 1.25rem; }
+.tour-region-picker__map { min-width: 0; text-align: center; }
+.tour-region-picker__map svg { width: 100%; height: auto; }
+.tour-region-picker__map a { font-size: .8rem; }
+.tour-region-picker__map [data-map-region] { cursor: pointer; outline: none; }
+.tour-region-picker__map path { fill: transparent; stroke: transparent; stroke-width: 2; transition: fill .15s; }
+.tour-region-picker__map [data-map-region]:hover path { fill: rgb(138 21 56 / 12%); stroke: var(--burgundy); }
+.tour-region-picker__map [aria-pressed="true"] path { fill: rgb(138 21 56 / 23%); stroke: var(--burgundy); }
+.tour-region-picker__map [data-map-region]:focus-visible path { stroke: var(--burgundy); stroke-width: 4; stroke-dasharray: 5 3; }
+.tour-region-picker__choices { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: .65rem; }
+.tour-region-picker__choices legend { font-size: .8rem; font-weight: 700; margin-bottom: .65rem; }
+.tour-region-choice { min-height: auto; padding: .85rem 1rem; }
+.tour-region-choice strong { font-size: .95rem; }
+.tour-region-details { margin: 0 0 1.5rem; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; }
+.tour-region-details summary { cursor: pointer; color: var(--burgundy); font-weight: 600; }
+.tour-region-details[open] summary { margin-bottom: 1rem; }
+.tour-region-details .tour-region-picker__layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.tour-region-details .tour-region-picker__map { max-width: 400px; margin-inline: auto; }
+@media (max-width: 680px) {
+  .tour-region-picker__layout { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .tour-region-picker__map { max-width: 480px; margin-inline: auto; }
+}

@@ -180,9 +180,12 @@ The Experiences page now embeds the tour planner. Its “Find a tour” and “B
 scroll to the planner, which opens `/booking` on the same site. `/tour-booking-preview` remains
 available for isolated review; that page and `/booking` are noindex.
 
-The booking flow offers Public/Private tours, actual guest count, a live month calendar, snacks,
+The booking flow offers a region preference map, Public/Private tours, actual guest count, a live month calendar, snacks,
 regular catalog boards (including BYO validation), registration, required acknowledgments,
-and a dedicated Shopify cart. Destinations are arranged by phone. Availability and checkout
+and a dedicated Shopify cart. Region selection is a preference, with “Any region — I’m flexible”
+as the default. It does not filter dates, change prices, or split shared bus inventory. The preference
+appears in the booking summary and Shopify tour line; final regions and destinations are arranged
+by phone. Availability and checkout
 both read `tour_schedule/default` and `booking_blackouts/default` directly, enforcing the shared
 closures and current 3-day / 6-month settings independently of the nightly catalog job. A public order buys its guest quantity;
 a private order buys one whole-bus bundle and records the actual number of passengers.
@@ -285,7 +288,7 @@ Tour planning, custom estimates, booking help, and gift-certificate inquiries us
 and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking
 changes. Gift links use `/gift-certificates` to find a native Shopify gift card in the catalog
 collection and open its product page, with an inquiry fallback. The old gift-product path
-redirects there only while no matching Shopify product exists. FAQs describe the current region-free booking flow, and Press reuses
+redirects there only while no matching Shopify product exists. FAQs describe the current region-preference booking flow, and Press reuses
 the existing coverage with local images.
 
 Shopify product descriptions and announcement rich text normalize links to `allaboardva.com`
