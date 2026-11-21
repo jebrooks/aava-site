@@ -353,10 +353,24 @@ slots) and Virginia 20598/22205 (eligible, 542 slots each at that observation). 
 selection helper using the live schedule/blackout loader rejected DC 20001 with status 400 and
 the call number, after two Admin queries and zero cart mutations. Eligibility was not bypassed.
 
-The follow-up source/local checks passed; they are not a claim that its new copy has deployed
-publicly. Record public deployment evidence in the follow-up PR handoff after its Vercel and
-Catalog parity gates. The native Shopify/schedule removal above was separately applied and
-verified already.
+The source/local checks passed. The subsequent PR Preview browser evidence below is separate
+from those observations; neither is a claim of Production copy deployment. Record Production
+deployment evidence in the PR handoff after merge and its checks. The native Shopify/schedule
+removal above was separately applied and verified already.
+
+### PR #51 Preview browser verification — passed
+
+Verified [PR #51](https://github.com/jebrooks/aava-site/pull/51), commit
+`6826c83074a77072c70edf2341c0581c37187965`, through the Vercel bot's Preview link to the correct
+branch's [cart Preview](https://aava-site-git-codex-delivery-area-and-08bf49-jebrooks-projects.vercel.app/cart).
+Both Vercel and Catalog parity checks passed for that head.
+
+A QA Quick Pick Small ($59) was added through the site. The cart displayed the static call
+help and actual telephone link. ZIP 20001 plus November 24, 1:00–3:00 PM returned status 400:
+“That ZIP code is outside our online delivery area. Call All ABoard VA at 714-715-9836 to ask
+about delivery.” No delivery window was saved and Checkout stayed disabled. At a 390px mobile
+viewport, document width was 390px with no horizontal overflow. The owned QA item was removed
+and the actual empty cart was confirmed. No payment or order was created.
 
 The paid QA cleanup above remains verified: #1009's full refund was submitted; #1010–#1012
 were canceled/refunded with restocking, all test cards were deactivated, the queued gift send
