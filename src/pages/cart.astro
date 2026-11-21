@@ -204,7 +204,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     link.href = `/charcuterie-menu/p/${line.merchandise.product.handle}`;
     link.textContent = line.merchandise.product.title;
     title.append(link);
-    content.append(title);
+    const heading = element('div', 'cart-line__heading');
+    const price = element('p', 'cart-line__price');
+    price.textContent = money(line.cost.totalAmount);
+    heading.append(title, price);
+    content.append(heading);
     const count = servingCount(line.merchandise.product, line.merchandise);
     if (count) {
       const servings = element('p', 'cart-line__selection');
@@ -279,9 +283,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     });
     controls.append(label, remove);
     content.append(controls, lineStatus);
-    const price = element('p', 'cart-line__price');
-    price.textContent = money(line.cost.totalAmount);
-    row.append(content, price);
+    row.append(content);
     return row;
   }
 
