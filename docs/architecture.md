@@ -35,6 +35,14 @@ on the server.
 - **Inquiries:** `/contact` posts to `/api/contact`, which uses Resend to send to the business inbox.
   This is separate from Shopify's order and gift-card notifications.
 
+Separately sold on-tour boards are physical at a selected/tentative Virginia boarding
+destination and use one dedicated $0 fulfillment method. Tour-only/included-sandwich service
+remains non-shipping and has no default/delivery address. All pickup choices are tentative and
+coordinated by phone; genuine billing stays separate. The isolated native prototype passed the
+Virginia/DC/Maryland tax matrix. Deploy compatible Production checkout/sync code before
+migrating the 44 existing live counterparts; see [rollout ordering](deployments.md#physical-on-tour-board-rollout)
+and [tax evidence](virginia-tax-maintenance.md).
+
 Sources: [Storefront client](../src/lib/shopify/storefront.ts),
 [API authentication](../src/lib/shopify/client.ts), [cart API](../src/pages/api/cart.ts),
 [tour booking service](../src/lib/shopify/tour-booking.ts),
@@ -85,8 +93,10 @@ Eastern wall-clock times change with daylight saving time.
 
 Delivery windows have no capacity limit or Shopify reservation products. A public tour date has ten seat units. Its private-bus
 product is a bundle that needs all ten units, so public and private bookings share capacity.
-On-tour board variants mirror their delivery counterpart's options, price, and tax settings but
-do not require shipping.
+On-tour board variants mirror their delivery counterpart's options, price and tax settings.
+They require physical fulfillment at the dedicated bus location and a selected/tentative
+Virginia boarding destination. The booking API validates the single exact $0 delivery option;
+tour seats and bus bundles remain non-shipping/non-taxable.
 
 These are reconciliation jobs, not nightly reimports: they preserve sold inventory and existing
 variant relationships. Schedule edits do not cancel booked orders. Shared blackout checks read

@@ -77,6 +77,7 @@ with the example or commit credentials. These are the functional groups:
 | Published catalog, product pages, gift amounts, carts | `PUBLIC_SHOPIFY_STORE_DOMAIN`, `SHOPIFY_STOREFRONT_ACCESS_TOKEN`; use the intended API version and collection handle |
 | Announcements, gift-guide tour prices, delivery settings, tour settings and tour inventory | Same store plus `SHOPIFY_CLIENT_ID` and `SHOPIFY_CLIENT_SECRET` (or the optional `SHOPIFY_ADMIN_ACCESS_TOKEN` fallback) |
 | Catalog, delivery and tour maintenance | Correct `SHOPIFY_DELIVERY_LOCATION_ID`, `SHOPIFY_STOREFRONT_PUBLICATION_ID`, and relevant collection IDs/handle |
+| Physical on-tour board fulfillment | Server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` for the dedicated bus location; required in both Vercel Preview and Production and in local/script configuration when testing or synchronizing this feature |
 | Contact, inquiry and custom-board request email | `RESEND_API_KEY` and `CONTACT_EMAIL_FROM` using an approved, verified sender |
 | Manual cron testing | `CRON_SECRET` and the relevant Shopify credentials/IDs; this performs catalog writes |
 | Webhook verification | `SHOPIFY_WEBHOOK_SECRET` or the configured app client secret; Shopify cannot deliver to a loopback-only URL |
@@ -88,6 +89,53 @@ Vercel endpoints. BotID uses development behavior locally, so test its deployed 
 Vercel. Local checkout still hands off to Shopify-hosted checkout, and shared Shopify/email
 credentials can affect the same services as Production. Use read-only checks for ordinary local
 preview validation; verify service targets before any submission or reconciliation.
+
+### Physical on-tour board rollout
+
+The isolated native prototype passed the tax/fulfillment matrix. These steps govern rollout
+of the 44 existing live counterparts; their migration has not been claimed complete.
+
+1. Create the dedicated bus/On tour board fulfillment location with the legitimate preparation
+   address. Keep public pickup and local delivery disabled there. Configure the separate
+   zero-cost Virginia-only board fulfillment method with the exact title **Provided on your
+   tour — pickup arranged by phone**; it must not offer customer home delivery. Its eligibility
+   is product status ACTIVE plus variant title ENDS_WITH **On tour**, with no product-type/tag
+   requirement. Preserve **Fulfillment** as the final option so titles match; fail closed if
+   merchant reordering makes the intended rate unavailable.
+2. Set server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` to that location's real GraphQL ID in
+   **both Preview and Production**, plus the ignored local `.env`/maintenance script environment
+   when used. Never invent a location ID or publish the private preparation address as a
+   customer pickup point. Redeploy each affected Vercel environment after setting the variable.
+   Synchronization performs a read-only location preflight before any writes: the configured
+   location must exist, be active, fulfill online orders, and differ from the ordinary
+   `SHOPIFY_DELIVERY_LOCATION_ID`. A setup failure must stop before shipping-flag or inventory
+   location changes; sharing a legitimate preparation street does not mean reusing its ID.
+3. Deploy the compatible Production checkout, cron and webhook synchronizer code **before**
+   applying changes to the 44 existing active On tour variants' shipping/location flags. The
+   old Production synchronizer could revert a premature physical-board migration. Preserve all product/source
+   IDs, prices, inventory and booking history; use the read-only sync plan before applying.
+4. Migrate/reconcile the existing counterparts only after that deployment, then verify their
+   physical fulfillment and dedicated location/rate. Tour seat/bus service stays non-shipping
+   and non-taxable; food stays taxable. Billing must remain the customer's genuine address.
+5. Verify the same unpaid tour-plus-board checkout with Virginia, Maryland and DC billing.
+   Require $6.49 food tax on a $59 board under the current 11% rule, $0 tour-service tax and $0
+   tour-board fulfillment. Check selected, Arrange by phone/default and private custom Virginia
+   pickup paths, all explicitly tentative and phone-coordinated on both booking and native
+   checkout. Also check tour-only/included-sandwich bookings: no default NorthSide address or
+   delivery address may be introduced. Missing location, wrong rate, changed address or an
+   unsupported destination must fail usefully. Record the live counterpart/method checks after
+   migration; the passed prototype is not evidence that all live products have been migrated.
+
+The audited rate filter matched 44 live variants plus one active QA variant among 645 total,
+with zero ordinary/service/gift matches. Retire the QA fixture after proof. Routine sync is
+broader than the initial active migration: its observed plan included 69 targets across 35
+members, with 25 inactive targets; review the actual dry run before routine maintenance.
+
+Do not introduce a home-delivery calendar into booking or enable native public warehouse
+pickup. The existing ordinary-board delivery zones remain separate; the audited DC mismatch
+requires the owner's decision. See [tax maintenance](virginia-tax-maintenance.md) and
+[pickup ownership](content-management.md#tour-pickup-addresses-and-phone-coordination).
+
 
 ## What runs where
 

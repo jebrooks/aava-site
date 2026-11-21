@@ -20,7 +20,7 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Marketing copy, FAQs, inquiry prompts, page-specific SEO | Matching files in `src/pages/`; shared components in `src/components/` | Yes |
 | Company contact details, navigation, social links, featured boards | `src/data/site.ts` | Yes |
 | Build-your-own ingredient options and size limits | `src/data/board-customizations.json` | Yes |
-| Tour pickup locations, sandwiches, preferences, terms version | `src/data/tour-options.ts` | Yes |
+| Tour pickup venue/station names and full base addresses, sandwiches, preferences, terms version | `src/data/tour-options.ts` | Yes |
 | Policy and waiver wording | `src/data/policies.json`, rendered by policy pages | Yes |
 | Press coverage | `src/data/press.ts` and `src/pages/press.astro` | Yes |
 | Brand colors, typography, responsive layout | `src/styles/global.css`, layouts and components | Yes |
@@ -124,6 +124,57 @@ These commands use the store configured in local `.env`. The second command writ
 Repeat a backfill when `pending > 0` (CLI exit code 2). Use the authenticated job for the combined
 tour and board reconciliation, or the board sync described in the [README](../README.md#tour-booking).
 Verify `/experiences`, `/booking`, affected dates, and prices after reconciliation.
+
+### Tour pickup addresses and phone coordination
+
+`src/data/tour-options.ts` owns the verified full venue/station base addresses, pickup labels
+and tentative default. Repository edits require deployment; do not replace these with a tax
+location, private warehouse or invented bus curb. The owner confirmed **Reston Town Center**
+for the previously ambiguous Reston choice.
+
+| Choice | Verified base address | Primary source |
+| --- | --- | --- |
+| NorthSide Social, Clarendon | 3211 Wilson Blvd, Arlington, VA 22201 | [Venue](https://www.northsidesocialva.com/location/arlington/) |
+| Ballston Metro | 4230 Fairfax Drive, Arlington, VA 22201 | [WMATA](https://www.wmata.com/ridertools/station/ballston-mu/info) |
+| Mosaic District, Merrifield | 2905 District Ave, Fairfax, VA 22031 | [Venue](https://mosaicdistrict.com/directions/) |
+| Tysons Metro | 1944 Chain Bridge Road, McLean, VA 22102 | [WMATA](https://www.wmata.com/ridertools/station/tysons/info) |
+| Reston Town Center Metro | 12023-A Sunset Hills Rd, Reston, VA 20190 | [WMATA](https://www.wmata.com/ridertools/station/reston-town-center/info) |
+| Fairfax Corner | 4100 Monument Corner Dr, Fairfax, VA 22030 | [Venue](https://www.fairfaxcorner.com/directions/) |
+
+**Every pickup preference is tentative and final arrangements are made by phone.** These are
+base addresses, not a confirmed boarding curb. Keep that meaning clear on booking and native
+Shopify checkout rather than presenting a selected address as a settled travel instruction.
+
+The approved physical-board rollout uses a selected/tentative Virginia boarding destination
+only when the booking contains a separately sold charcuterie board. For no preference or
+Arrange by phone, use the first option, NorthSide Social, as that board booking's tentative
+default and reassure the customer that no final pickup choice is needed to book. Private
+custom board pickup needs a genuine Virginia destination. Keep billing genuine and separate.
+Tour-only bookings, including an included sandwich incidental to the service fee, have optional
+pickup preference/phone coordination and **no default NorthSide or delivery address**.
+
+The source records a blank preference as **No preference**, explicit phone choice as **Arrange
+by phone**, and normalizes older **Reston Metro** drafts to **Reston Town Center Metro**. Saved
+`Pickup arrangements` explains tentative phone coordination for every booking;
+`Tentative fulfillment address` is present only for board bookings. These values are rendered
+through explicit escaped notification fields, not interpreted as a confirmed itinerary.
+
+The board's dedicated $0 fulfillment method is **Provided on your tour — pickup arranged by
+phone**. Do not introduce home delivery, the ordinary board-delivery calendar or native public
+warehouse pickup. The dedicated rate's eligibility uses **product status ACTIVE** and **variant title ENDS_WITH
+On tour**. It has no product-type or tag requirement. The reserved **Fulfillment** option must
+remain the final product option so generated variant titles end in **On tour**; merchant option
+reordering can remove eligibility and must block handoff rather than offer a different rate.
+The whole 645-variant audit matched 44 live targets plus one QA target, with no ordinary,
+tour-service or gift variant matches; remove the QA fixture after validation.
+
+Routine CLI/cron synchronization still enumerates the full collection: the observed plan had
+69 targets across 35 members, including 25 inactive targets. The initial migration of 44 active
+variants is not evidence that normal synchronization is limited to active products.
+
+The isolated native checkout prototype passed the billing/tax matrix. Migrate existing live
+counterparts only in the documented order; see [deployment ordering](deployments.md#physical-on-tour-board-rollout)
+and [tax maintenance](virginia-tax-maintenance.md).
 
 ### Blackout dates — `booking_blackouts/default`
 

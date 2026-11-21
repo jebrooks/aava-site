@@ -9,6 +9,7 @@ import {
   deliveryVariantTitle,
 } from "../src/lib/tour-fulfillment.ts";
 import { tourBookingService } from "../src/lib/shopify/tour-booking.ts";
+import { DEFAULT_TOUR_PICKUP, TOUR_PICKUP_ADDRESSES, TOUR_DELIVERY_METHOD_TITLE } from '../src/data/tour-options.ts';
 const base = {
   tourType: "public",
   guests: 2,
@@ -50,7 +51,12 @@ function fixture() {
     cartWarning: false,
     dropBoard: false,
     wrongPrice: false,
-    shippingBoard: false,
+    nonShippingBoard: false,
+    shippingService: false,
+    wrongQuantity: false,
+    wrongCurrency: false,
+    deliveryMode: '',
+    selectedOptions: [],
   };
   const makeVariant = (id, amount, requiresShipping = false) => ({
     id,
@@ -87,7 +93,8 @@ function fixture() {
       taxable: true,
       taxCode: null,
       selectedOptions: [{ name: "Fulfillment", value: "On tour" }],
-      inventoryItem: { tracked: false, requiresShipping: false, sku: null },
+      inventoryItem: { tracked: false, requiresShipping: true, sku: null,
+        inventoryLevels: { nodes: [{ id: 'tour-level', location: { id: 'gid://shopify/Location/99' } }], pageInfo: { hasNextPage: false } } },
       source: { value: sourceId },
     },
   ];
@@ -128,6 +135,8 @@ function fixture() {
     },
   });
   const admin = async (query) => {
+    if (query.includes('query TourBoardFulfillmentLocation'))
+      return { location: { id: 'gid://shopify/Location/99', isActive: true, fulfillsOnlineOrders: true } };
     if (query.includes("query SharedBlackoutDates")) return {metaobjectByHandle:state.missingBlackouts?null:{fields:[{key:"dates",value:state.blackouts}]}};
     if (query.includes("query BookingSchedule"))
       return {
@@ -142,6 +151,30 @@ function fixture() {
       return { product: syncProduct };
     throw new Error("Unexpected admin operation");
   };
+  function cart(selected = false) {
+    const input = state.cartInput;
+    const option = { handle: 'tour-delivery', title: TOUR_DELIVERY_METHOD_TITLE, deliveryMethodType: 'SHIPPING', estimatedCost: { amount: '0.00', currencyCode: 'USD' } };
+    if (state.deliveryMode === 'paid') option.estimatedCost.amount = '5.00';
+    if (state.deliveryMode === 'wrongTitle') option.title = 'Ordinary delivery';
+    if (state.deliveryMode === 'localDelivery') option.deliveryMethodType = 'LOCAL';
+    if (state.deliveryMode === 'wrongDeliveryCurrency') option.estimatedCost.currencyCode = 'CAD';
+    const address = input.delivery?.addresses[0].address.deliveryAddress;
+    const group = address ? { id: 'tour-delivery-group', deliveryAddress: { ...address, countryCodeV2: address.countryCode },
+      deliveryOptions: [option], selectedDeliveryOption: selected ? { ...option } : null } : null;
+    if (group && state.deliveryMode === 'wrongState') group.deliveryAddress.provinceCode = 'DC';
+    if (group && state.deliveryMode === 'wrongStreet') group.deliveryAddress.address1 = '1 Other Street';
+    if (group && state.deliveryMode === 'missingZip') group.deliveryAddress.zip = null;
+    if (group && state.deliveryMode === 'extra') group.deliveryOptions.push({ ...option, handle: 'another' });
+    if (group && selected && state.deliveryMode === 'selectionMismatch') group.selectedDeliveryOption.handle = 'different-method';
+    return { id: 'gid://shopify/Cart/test', checkoutUrl: 'https://example.myshopify.com/checkouts/test',
+      attributes: input.attributes, cost: { totalAmount: { amount: '250.00', currencyCode: 'USD' } },
+      lines: { nodes: input.lines.filter((_, i) => !state.dropBoard || i === 0).map(line => ({
+        quantity: state.wrongQuantity ? 99 : line.quantity,
+        merchandise: { id: line.merchandiseId,
+          requiresShipping: line.merchandiseId === tourId ? !state.nonShippingBoard : state.shippingService,
+          price: { amount: state.wrongPrice ? '0.01' : line.merchandiseId === tourId ? '59.00' : line.merchandiseId.startsWith('tour-bus') ? '1250.00' : '125.00', currencyCode: state.wrongCurrency ? 'CAD' : 'USD' } },
+      })) }, deliveryGroups: { nodes: group && state.deliveryMode !== 'missing' ? [group] : [] } };
+  }
   const storefront = async (query, v) => {
     if (query.includes("query TourCatalogBoards"))
       return {
@@ -170,38 +203,20 @@ function fixture() {
       return { product: departure(v.handle) };
     if (query.includes("mutation CreateTourBooking")) {
       state.cartInput = v.input;
-      const nodes = v.input.lines
-        .filter((_, i) => !state.dropBoard || i === 0)
-        .map((line) => ({
-          quantity: line.quantity,
-          merchandise: {
-            id: line.merchandiseId,
-            requiresShipping:
-              state.shippingBoard && line.merchandiseId === tourId,
-            price: {
-              amount: state.wrongPrice
-                ? "0.01"
-                : line.merchandiseId === tourId
-                  ? "59.00"
-                  : line.merchandiseId.startsWith("tour-bus")
-                    ? "1250.00"
-                    : "125.00",
-              currencyCode: "USD",
-            },
-          },
-        }));
       return {
         cartCreate: {
-          cart: {
-            checkoutUrl: "https://example.myshopify.com/checkouts/test",
-            lines: { nodes },
-            attributes: v.input.attributes,
-            cost: { totalAmount: { amount: "250.00", currencyCode: "USD" } },
-          },
+          cart: cart(),
           userErrors: [],
           warnings: state.cartWarning ? [{ message: "Quantity adjusted" }] : [],
         },
       };
+    }
+    if (query.includes('query TourBookingDelivery')) return { cart: cart() };
+    if (query.includes('mutation SelectTourDelivery')) {
+      state.selectedOptions.push(v.options);
+      const result = cart(true);
+      if (state.deliveryMode === 'dropAfterSelection') result.lines.nodes.pop();
+      return { cartSelectedDeliveryOptionsUpdate: { cart: result, userErrors: [], warnings: state.deliveryMode === 'selectionWarning' ? [{ message: 'Changed' }] : [] } };
     }
     throw new Error("Unexpected storefront operation");
   };
@@ -213,6 +228,7 @@ function fixture() {
       admin,
       storefront,
       now: () => new Date("2026-11-11T20:00:00Z"),
+      tourBoardLocationId: 'gid://shopify/Location/99',
     }),
   };
 }
@@ -335,7 +351,7 @@ test("a private booking is rejected once any public seat has been sold", async (
   );
   assert.equal(state.cartInput, null);
 });
-test("catalog boards resolve to non-shipping counterparts at the normal price with no pickup preference", async () => {
+test("catalog boards use physical counterparts and select the verified free tour method", async () => {
   const { state, service } = fixture();
   await service.checkout({
     ...base,
@@ -347,11 +363,87 @@ test("catalog boards resolve to non-shipping counterparts at the normal price wi
   assert.equal(state.cartInput.lines[1].quantity, 2);
   assert.ok(state.cartInput.lines[1].attributes.some(attribute => attribute.key === 'Serves' && attribute.value === '4'));
   assert.equal(state.cartInput.buyerIdentity.preferences, undefined);
+  assert.equal(state.cartInput.buyerIdentity.billingAddress, undefined);
+  assert.equal(state.cartInput.delivery.addresses[0].oneTimeUse, true);
+  assert.equal(state.cartInput.delivery.addresses[0].selected, true);
+  assert.equal(state.cartInput.delivery.addresses[0].validationStrategy, 'STRICT');
+  assert.equal(state.cartInput.delivery.addresses[0].address.deliveryAddress.address1, TOUR_PICKUP_ADDRESSES[DEFAULT_TOUR_PICKUP].address1);
+  assert.deepEqual(state.selectedOptions, [[{ deliveryGroupId: 'tour-delivery-group', deliveryOptionHandle: 'tour-delivery' }]]);
   assert.ok(
     state.cartInput.lines[1].attributes.some(
       (a) => a.key === "Fulfillment" && a.value === "Provided on the bus",
     ),
   );
+});
+
+test('tour-only bookings never acquire a default address, including stale board input', async () => {
+  for (const pickup of ['', undefined, 'Arrange by phone', 'Ballston Metro']) {
+    const { state, service } = fixture();
+    await service.checkout({ ...base, pickup, boardVariantId: sourceId, boardQuantity: 2,
+      customPickupStreet: '1 Stale Street', customPickupCity: 'Washington', customPickupState: 'DC' });
+    assert.equal(state.cartInput.delivery, undefined);
+    assert.equal(state.cartInput.lines.length, 1);
+    assert.equal(state.selectedOptions.length, 0);
+    assert.ok(!state.cartInput.attributes.some(a => a.key === 'Tentative fulfillment address'));
+    assert.ok(!JSON.stringify(state.cartInput).includes(DEFAULT_TOUR_PICKUP));
+    assert.equal(state.cartInput.attributes.find(a => a.key === 'Pickup preference').value,
+      pickup || 'No preference');
+    assert.match(state.cartInput.lines[0].attributes.find(a => a.key === 'Pickup arrangements').value, /Tentative.*phone/);
+  }
+});
+
+test('a board without a pickup preference uses a visible tentative default without replacing the preference', async () => {
+  for (const pickup of ['', undefined, 'Arrange by phone']) {
+    const { state, service } = fixture();
+    await service.checkout({ ...base, pickup, snack: 'charcuterie', boardVariantId: sourceId, boardQuantity: 1 });
+    assert.equal(state.cartInput.attributes.find(a => a.key === 'Pickup preference').value, pickup || 'No preference');
+    for (const attributes of [state.cartInput.attributes, ...state.cartInput.lines.map(line => line.attributes)]) {
+      assert.match(attributes.find(a => a.key === 'Tentative fulfillment address').value, /NorthSide Social.*3211 Wilson Blvd/);
+      assert.match(attributes.find(a => a.key === 'Pickup arrangements').value, /No preference is fine.*phone.*default address is tentative.*not a confirmed meeting point/);
+    }
+  }
+});
+
+test('all named pickup addresses are server-owned Virginia locations, including legacy Reston drafts', () => {
+  for (const [pickup, expected] of Object.entries(TOUR_PICKUP_ADDRESSES)) {
+    const booking = validateTourRegistration({ ...base, pickup, snack: 'charcuterie', boardVariantId: sourceId, boardQuantity: 1,
+      pickupAddress: { address1: 'Forged', provinceCode: 'DC', zip: '20001' }, customPickupStreet: 'Forged' });
+    assert.deepEqual(booking.pickupAddress, expected);
+    assert.equal(booking.pickupAddress.provinceCode, 'VA');
+  }
+  const legacy = validateTourRegistration({ ...base, pickup: 'Reston Metro', snack: 'charcuterie', boardVariantId: sourceId, boardQuantity: 1 });
+  assert.equal(legacy.pickup, 'Reston Town Center Metro');
+  assert.equal(legacy.pickupAddress.address1, '12023-A Sunset Hills Rd');
+});
+
+test('private custom board pickup requires a complete Virginia address and preserves it as tentative', async () => {
+  const custom = { ...base, tourType: 'private', pickup: 'Custom pickup (private tours)', snack: 'charcuterie',
+    boardVariantId: sourceId, boardQuantity: 1, customPickupStreet: '123 Test Street', customPickupAddress2: 'Suite 4',
+    customPickupCity: 'Arlington', customPickupState: 'VA', customPickupCountry: 'US', customPickupZip: '22205' };
+  for (const change of [{ customPickupStreet: '' }, { customPickupCity: '' }, { customPickupZip: '' },
+    { customPickupZip: 'bad' }, { customPickupState: 'DC' }, { customPickupCountry: 'CA' }]) {
+    const { state, service } = fixture();
+    await assert.rejects(service.checkout({ ...custom, ...change }), /pickup/);
+    assert.equal(state.cartInput, null);
+  }
+  const { state, service } = fixture();
+  await service.checkout(custom);
+  const address = state.cartInput.delivery.addresses[0].address.deliveryAddress;
+  assert.equal(address.address1, custom.customPickupStreet);
+  assert.equal(address.address2, 'Suite 4');
+  assert.equal(address.provinceCode, 'VA');
+  assert.ok(!JSON.stringify(state.cartInput).includes(DEFAULT_TOUR_PICKUP));
+  assert.match(state.cartInput.attributes.find(a => a.key === 'Custom pickup address').value, /123 Test Street.*Arlington.*22205/);
+  assert.equal(state.cartInput.lines[1].attributes.find(a => a.key === 'Pickup arrangements').value,
+    'Your pickup preference is tentative — we’ll confirm the meeting point by phone.');
+});
+
+test('tour board checkout rejects missing, paid, extra, changed or non-tour delivery choices', async () => {
+  for (const deliveryMode of ['missing', 'paid', 'wrongTitle', 'localDelivery', 'wrongDeliveryCurrency', 'extra', 'wrongState', 'wrongStreet', 'missingZip', 'selectionMismatch', 'selectionWarning', 'dropAfterSelection']) {
+    const { state, service } = fixture(); state.deliveryMode = deliveryMode;
+    await assert.rejects(service.checkout({ ...base, snack: 'charcuterie', boardVariantId: sourceId, boardQuantity: 1 }),
+      /Tour food fulfillment is temporarily unavailable/, deliveryMode);
+  }
 });
 
 test('tour board availability carries variant counts and product fallback counts', async () => {
@@ -415,12 +507,15 @@ test("build-your-own boards enforce the same ingredient rules as normal ordering
     /Choose ingredients/,
   );
 });
-test("warnings, lost lines, changed prices and shipping board lines all block handoff", async () => {
+test("warnings, lost lines, changed prices or quantities and wrong physical line kinds block handoff", async () => {
   for (const mode of [
     "cartWarning",
     "dropBoard",
     "wrongPrice",
-    "shippingBoard",
+    "nonShippingBoard",
+    "shippingService",
+    "wrongQuantity",
+    "wrongCurrency",
   ]) {
     const { state, service } = fixture();
     state[mode] = true;

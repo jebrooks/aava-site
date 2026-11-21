@@ -5,6 +5,12 @@ import {
   SANDWICHES,
   TOUR_PREFERENCES,
   TOUR_TERMS_VERSION,
+  DEFAULT_TOUR_PICKUP,
+  TOUR_PICKUP_ADDRESSES,
+  TOUR_PICKUP_ARRANGEMENTS,
+  TOUR_BOARD_FULFILLMENT_ARRANGEMENTS,
+  TOUR_BOARD_DEFAULT_PICKUP_ARRANGEMENTS,
+  type TourPickupAddress,
   type TourSelection,
 } from "../data/tour-options.ts";
 import { validTourDate } from "./tour-schedule.ts";
@@ -15,6 +21,8 @@ export interface TourRegistration extends TourSelection {
   phone: string;
   pickup: string;
   customPickup: string;
+  pickupAddress?: TourPickupAddress;
+  pickupAddressLabel: string;
   sandwich: string;
   allergies: string;
   requests: string;
@@ -99,18 +107,45 @@ export function validateTourRegistration(
   ) {
     throw new Error("Enter a valid mobile phone number.");
   }
-  const pickup = text(input.pickup, "pickup preference", 100, true);
-  if (!PICKUP_LOCATIONS.includes(pickup as never))
+  const requestedPickup = text(input.pickup, "pickup preference", 100);
+  // Preserve existing saved drafts while giving the station its unambiguous current name.
+  const pickup = requestedPickup === "Reston Metro"
+    ? "Reston Town Center Metro" : requestedPickup || "No preference";
+  if (pickup !== "No preference" && !PICKUP_LOCATIONS.includes(pickup as never))
     throw new Error("Choose a pickup preference.");
   if (
     selection.tourType === "public" &&
     pickup === "Custom pickup (private tours)"
   )
     throw new Error("Custom pickup is available for private tours.");
-  const customPickup =
+  let customPickup =
     pickup === "Custom pickup (private tours)"
-      ? text(input.customPickup, "custom pickup address", 300, true)
+      ? text(input.customPickup, "custom pickup address", 300, selection.snack !== "charcuterie")
       : "";
+  const pickupAddressLabel = selection.snack !== "charcuterie" ? ""
+    : pickup === "No preference" || pickup === "Arrange by phone" ? DEFAULT_TOUR_PICKUP : pickup;
+  let pickupAddress: TourPickupAddress | undefined;
+  if (selection.snack === "charcuterie") {
+    if (pickup === "Custom pickup (private tours)") {
+      const address1 = text(input.customPickupStreet, "custom pickup street address", 200, true);
+      const address2 = text(input.customPickupAddress2, "custom pickup address line 2", 100);
+      const city = text(input.customPickupCity, "custom pickup city", 100, true);
+      const state = text(input.customPickupState, "custom pickup state", 2, true).toUpperCase();
+      const country = text(input.customPickupCountry, "custom pickup country", 2, true).toUpperCase();
+      const zip = text(input.customPickupZip, "custom pickup ZIP code", 10, true);
+      if (state !== "VA" || country !== "US")
+        throw new Error("On-tour boards require a Virginia pickup address.");
+      if (!/^\d{5}(?:-\d{4})?$/.test(zip) || /[\r\n]/.test(address1 + address2 + city))
+        throw new Error("Enter a complete Virginia pickup street address, city and ZIP code.");
+      pickupAddress = { address1, ...(address2 ? { address2 } : {}), city, provinceCode: "VA", zip, countryCode: "US" };
+      customPickup = formatTourPickupAddress(pickupAddress);
+    } else {
+      const address = TOUR_PICKUP_ADDRESSES[pickupAddressLabel];
+      if (!address) throw new Error("Choose a named Virginia pickup location or a complete private pickup address.");
+      // Named locations are server-owned; client-supplied address data cannot replace them.
+      pickupAddress = { ...address };
+    }
+  }
   const sandwich =
     selection.snack === "sandwich"
       ? text(input.sandwich, "sandwich preference", 100, true)
@@ -144,6 +179,8 @@ export function validateTourRegistration(
     phone,
     pickup,
     customPickup,
+    pickupAddress,
+    pickupAddressLabel,
     sandwich,
     allergies,
     requests,
@@ -152,6 +189,10 @@ export function validateTourRegistration(
     termsAccepted: true,
     damageAccepted: true,
   };
+}
+export function formatTourPickupAddress(address: TourPickupAddress) {
+  return [address.address1, address.address2, address.city, `${address.provinceCode} ${address.zip}`]
+    .filter(Boolean).join(", ");
 }
 export function tourBookingAttributes(
   booking: TourRegistration,
@@ -169,6 +210,12 @@ export function tourBookingAttributes(
     "Mobile phone": booking.phone,
     Destination: "To coordinate by phone",
     "Pickup preference": booking.pickup,
+    "Pickup arrangements": booking.pickupAddress
+      ? booking.pickup === 'No preference' || booking.pickup === 'Arrange by phone'
+        ? TOUR_BOARD_DEFAULT_PICKUP_ARRANGEMENTS : TOUR_BOARD_FULFILLMENT_ARRANGEMENTS
+      : TOUR_PICKUP_ARRANGEMENTS,
+    "Tentative fulfillment address": booking.pickupAddress
+      ? `${booking.pickupAddressLabel}: ${formatTourPickupAddress(booking.pickupAddress)}` : "",
     "Custom pickup address": booking.customPickup,
     Snack: booking.snack,
     "Sandwich preference": booking.sandwich,

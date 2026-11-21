@@ -47,9 +47,10 @@ outside Virginia does not turn food received in Virginia into an interstate deli
   products (ID `496413835418`). Its Virginia override was saved at 11% as one replacement tax
   line. Keep gift cards and tour service products out of this collection.
 - A Virginia shipping override was saved at 0%.
-- On-tour food remains an **open integration blocker**: its non-shipping fulfillment makes
-  Shopify source tax from billing. A legitimate DC billing address produces $0 tax for food
-  served on a Virginia tour, while Virginia billing produces the intended $6.49 on a $59 board.
+- The historical non-shipping on-tour flow sourced food tax from billing and failed with DC
+  billing. The physical-board correction passed the isolated native Virginia/DC/Maryland
+  matrix below; deploying compatible code and migrating the 44 existing live counterparts
+  remain rollout work, not an unresolved prototype tax calculation.
 
 ## Open delivery-area mismatch
 
@@ -63,45 +64,96 @@ has been changed pending their resolution. Do not remove `20598` with this DC se
 The unpaid estimates below all used Virginia shipping and do not verify DC delivery taxes.
 The current Virginia food override must not be described as covering the configured DC zone.
 
-## Actual unpaid checkout estimates
+## Historical unpaid estimates before physical-board correction
 
 | Scenario | Observed estimate | Result |
 | --- | --- | --- |
 | $59 delivered board + $5 delivery to Virginia, Virginia billing | $6.49 food tax; $70.49 total | Passed this case. |
 | Same Virginia delivery with DC billing | $6.49 food tax; $70.49 total | Passed this case; Virginia shipping controls delivery sourcing. |
 | Nine public tour seats ($1,125) + $59 board, Virginia billing | $6.49 tax; $1,190.49 total | Passed this case: service is exempt and the separate board is taxed. |
-| Same Virginia tour/board with DC billing | $0 tax; $1,184 total | Failed: non-shipping food is sourced from billing. |
+| Same Virginia tour/board with DC billing | $0 tax; $1,184 total | Historical failure in the non-shipping model; corrected prototype proof follows. |
 
-These were unpaid estimates, with no additional test payment. Tax acceptance is incomplete
-until on-tour food has the correct Virginia sourcing for legitimate out-of-state billing and
-the configured DC delivery area is reconciled with the intended service area.
-The owner explicitly confirmed that no public order-pickup location exists. Native pickup
-is incompatible with the operating workflow; do not enable the private warehouse or expose
-its address as a workaround. A supported alternative is still under investigation.
+These were unpaid estimates, with no additional test payment. The later isolated prototype
+proves the corrected boarding-destination approach; the live counterpart rollout and the
+separate configured DC delivery-area decision must still be completed.
+The owner confirmed that no public order-pickup location exists. Native public pickup remains
+incompatible; do not enable the private warehouse or expose its address. The approved
+physical-board correction below has isolated native checkout proof and still requires the
+ordered migration of existing live counterparts.
 Do not ask customers to falsify billing details. Keep the historical pre-change zero-tax orders
 in the results report; they do not establish correctness after configuration.
 
-## Supported resolution still required
+## Physical-board fulfillment and verified prototype
 
-Research has not identified a documented native fix for the current no-address, non-shipping
-onboard-food workflow. Manual Shopify invoices also fall back to billing for sourcing, so they
-are not a verified solution. No tax app has been installed and no provider/support message has
-been sent. Avalara or another provider must not be presented as a verified fix.
+The owner approved supplying the actual or tentative Virginia boarding destination for a
+separately sold board. The implementation makes **On tour boards physical**, keeps food
+taxable, and fulfills them through a dedicated legitimate bus location with the exact $0
+method **Provided on your tour — pickup arranged by phone**. Tour seats/whole-bus service remain
+non-shipping and exempt. The private preparation address is not a public pickup location; no
+native public warehouse pickup or home-board delivery calendar is introduced.
 
+The destination is needed **only when a separately sold board is present**. For such a booking,
+no preference/Arrange by phone uses NorthSide Social, 3211 Wilson Blvd, Arlington, VA 22201 as a
+tentative default. Every pickup remains tentative and arranged by phone, with clear reassurance
+that no final location choice is needed to book. Tour-only or included-sandwich service bookings
+keep optional pickup preference/phone coordination with no default NorthSide/delivery address.
+The owner confirmed the Reston choice as Reston Town Center; verified venue/station base
+addresses live in `src/data/tour-options.ts` and the [pickup guide](content-management.md#tour-pickup-addresses-and-phone-coordination).
+
+The new server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` is required in both Vercel Preview and
+Production. Follow the [deployment sequence](deployments.md#physical-on-tour-board-rollout):
+compatible Production checkout, cron and webhook code must be deployed before migrating
+existing On tour shipping/location flags, because the older sync can revert them. Keep all
+source IDs, prices, inventory and booking history intact. Use the real dedicated location ID;
+do not treat the example value as a configured resource.
+
+Before any synchronization write, a read-only location preflight requires the configured
+location to exist, be active, fulfill online orders and differ from the ordinary delivery
+origin. A configuration failure stops before counterpart shipping-flag/location changes.
+Using the same legitimate preparation street is compatible with a dedicated, distinct ID.
+
+The dedicated internal **On-tour board fulfillment** location was created in Shopify as
+`gid://shopify/Location/91098611866`, using the legitimate private Arlington preparation address.
+It is active and fulfills online orders; storefront visibility, public pickup and local delivery
+are off. The isolated native shipping/rate prototype passed as recorded below. The 44 existing
+On tour variants' shipping flags and inventory locations have **not** been migrated. Keep the
+private preparation street out of Git; `.env.example` retains a placeholder ID.
+
+| Isolated native unpaid case | Observed result |
+| --- | --- |
+| Nine public seats ($1,125) + $59 physical board; Virginia billing | $6.49 food tax, $0 tour-service tax, $0 dedicated handoff; total $1,190.49. |
+| Same Virginia boarding destination; genuine DC billing | Same $6.49 tax and $1,190.49 total. |
+| Same destination; genuine Maryland billing | Same $6.49 tax and $1,190.49 total. |
+| Tour-only service | Zero delivery groups and no default NorthSide/delivery address. |
+| Ordinary $59 Delivery board | Native LOCAL $5 method; the tour's free handoff was not offered. |
+
+Native checkout kept billing separate from the preset boarding destination; its billing address
+was observed blank before the genuine payer address was entered. No payment was made. These
+results resolve the prototype sourcing failure; they do not assert that the 44 active
+counterparts have migrated or that every live product has been rechecked. Retain the earlier
+failure as history and follow deployment-before-migration ordering, then verify the active
+counterparts. Selected, no-preference/phone-default, private custom Virginia and service-only
+presentation remain covered by source/fixture checks and any separately recorded browser
+observations, rather than inferred from a single prototype checkout.
+
+The rate rule uses product status ACTIVE and variant title ENDS_WITH **On tour**; no
+product-type or tag is needed. Keep the reserved Fulfillment option last. The 645-variant audit
+matched 44 live variants plus the active QA target (45), with no ordinary/service/gift matches.
+The native checkout also rejected a changed DC fulfillment destination as
+`address_undeliverable`, with no eligible handoff and no completion; restoring Virginia restored
+the valid path. The $0 tax on that undeliverable state is not a valid completed sale.
+
+Tour-only native checkout was separately observed with no Delivery section, address,
+NorthSide/default text or delivery group. Genuine DC and Maryland billing each kept the
+service-only total $125 and tax $0. The billing address remains distinct from board fulfillment.
+
+The earlier no-address/non-shipping workflow had no documented native correction; manual
+invoices also fell back to billing. No tax app was installed or provider contacted. A tax
+partner remains unverified fallback research, not the selected rollout. If reconsidered,
 Shopify's [Tax Partner Apps platform](https://shopify.dev/docs/apps/build/tax) is restricted to
-selected tax providers. A [third-party tax app](https://help.shopify.com/en/manual/taxes/tax-apps)
-replaces the store's native tax service and can fall back to the existing native settings during
-an outage. Before adopting that route, obtain explicit provider confirmation, demonstrate this
-case in a sandbox, regress all store purchase types, and resolve the outage/fallback behavior.
-
-Use this support question:
-
-> Can Shopify Basic source Virginia onboard prepared food correctly for taxable non-shipping
-> variants when the customer has a genuine out-of-state billing address and there is no public
-> pickup location or customer shipping address? Can legitimate event/fulfillment facts or line
-> properties supply that sourcing while preserving separate meals/sales-tax reporting and
-> correct refund treatment? Please confirm supported configuration, sandbox verification and
-> behavior when the tax provider is unavailable.
+selected providers; [tax apps](https://help.shopify.com/en/manual/taxes/tax-apps) replace the
+store's native tax service and can fall back to native settings during outages. Require provider
+confirmation, sandbox proof, whole-store regression and correct outage behavior before adoption.
 
 ## Routine maintenance and verification
 

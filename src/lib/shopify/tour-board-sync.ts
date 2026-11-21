@@ -19,7 +19,10 @@ export interface SyncVariant {
     tracked: boolean;
     requiresShipping: boolean;
     sku: string | null;
-    inventoryLevels?: { nodes: Array<{ location: { id: string } }> };
+    inventoryLevels?: {
+      nodes: Array<{ id?: string; location: { id: string } }>;
+      pageInfo?: { hasNextPage: boolean };
+    };
   };
   source: { value: string } | null;
   servingCount?: { value: string } | null;
@@ -35,7 +38,7 @@ export interface SyncProduct {
 const fields = `id handle options{id name} collections(first:100){nodes{handle}}
   lock:metafield(namespace:"tour",key:"variant_sync_lock"){value compareDigest}
   variants(first:100){nodes{id price compareAtPrice taxable taxCode inventoryPolicy selectedOptions{name value}
-    inventoryItem{id tracked requiresShipping sku inventoryLevels(first:5){nodes{location{id}}}} source:metafield(namespace:"tour",key:"source_variant"){value} servingCount:metafield(namespace:"custom",key:"serving_count"){value}}
+    inventoryItem{id tracked requiresShipping sku inventoryLevels(first:5){nodes{id location{id}} pageInfo{hasNextPage}}} source:metafield(namespace:"tour",key:"source_variant"){value} servingCount:metafield(namespace:"custom",key:"serving_count"){value}}
     pageInfo{hasNextPage}}`;
 function check(
   payload: { userErrors: Array<{ message: string }> },
@@ -46,7 +49,28 @@ function check(
       `${action}: ${payload.userErrors.map((e) => e.message).join("; ")}`,
     );
 }
-export function tourBoardPlan(product: SyncProduct) {
+async function assertTourBoardLocation(graphql: TourGraphql, locationId: string) {
+  if (locationId === process.env.SHOPIFY_DELIVERY_LOCATION_ID?.trim())
+    throw new Error(
+      "SHOPIFY_TOUR_BOARD_LOCATION_ID must differ from the ordinary delivery location.",
+    );
+  const { location } = await graphql<{
+    location: { id: string; isActive: boolean; fulfillsOnlineOrders: boolean } | null;
+  }>(
+    `query TourBoardFulfillmentLocation($id: ID!) {
+      location(id: $id) { id isActive fulfillsOnlineOrders }
+    }`,
+    { id: locationId },
+  );
+  if (!location || location.id !== locationId || !location.isActive || !location.fulfillsOnlineOrders)
+    throw new Error(
+      "The dedicated on-tour fulfillment location must exist, be active, and fulfill online orders.",
+    );
+}
+export function tourBoardPlan(
+  product: SyncProduct,
+  locationId = process.env.SHOPIFY_TOUR_BOARD_LOCATION_ID || "",
+) {
   if (product.variants.pageInfo.hasNextPage)
     throw new Error(
       `${product.handle}: more than 100 variants require paginated provisioning.`,
@@ -75,9 +99,20 @@ export function tourBoardPlan(product: SyncProduct) {
     }
     return target;
   });
-  if (sources.some((v) => v.inventoryItem.tracked))
+  if (
+    (sources.length || targets.length) &&
+    !/^gid:\/\/shopify\/Location\/\d+$/.test(locationId)
+  )
+    throw new Error(
+      "SHOPIFY_TOUR_BOARD_LOCATION_ID must identify the dedicated on-tour fulfillment location.",
+    );
+  if ([...sources, ...targets].some((v) => v.inventoryItem.tracked))
     throw new Error(
       `${product.handle}: tracked board inventory needs a shared-inventory design before on-tour variants can be enabled.`,
+    );
+  if (targets.some((v) => v.inventoryItem.inventoryLevels?.pageInfo?.hasNextPage))
+    throw new Error(
+      `${product.handle}: on-tour fulfillment locations require paginated reconciliation.`,
     );
   if (
     sources.length &&
@@ -110,8 +145,8 @@ export function tourBoardPlan(product: SyncProduct) {
       target.taxable !== source.taxable ||
       target.taxCode !== source.taxCode ||
       (source.servingCount?.value && target.servingCount?.value !== source.servingCount.value) ||
-      target.inventoryPolicy !== source.inventoryPolicy ||
-      target.inventoryItem.requiresShipping ||
+      target.inventoryPolicy !== "CONTINUE" ||
+      !target.inventoryItem.requiresShipping ||
       target.inventoryItem.tracked
       ? [{ source, target }]
       : [];
@@ -119,22 +154,39 @@ export function tourBoardPlan(product: SyncProduct) {
   const orphaned = targets.filter((v) => !sourceIds.has(v.source!.value));
   const activations = sources.flatMap((source) => {
     const target = bySource.get(source.id);
-    const locations =
-      source.inventoryItem.inventoryLevels?.nodes.map(
-        (level) => level.location.id,
-      ) || [];
     const active = new Set(
       target?.inventoryItem.inventoryLevels?.nodes.map(
         (level) => level.location.id,
       ) || [],
     );
-    return target
-      ? locations
-          .filter((location) => !active.has(location))
-          .map((location) => ({ source, target, location }))
+    return target && !active.has(locationId)
+      ? [{ source, target, location: locationId }]
       : [];
   });
-  return { sources, targets, missing, changes, orphaned, activations };
+  const deactivations = sources.flatMap((source) => {
+    const target = bySource.get(source.id);
+    return (target?.inventoryItem.inventoryLevels?.nodes || [])
+      .filter((level) => level.location.id !== locationId)
+      .map((level) => {
+        if (!level.id)
+          throw new Error(`${product.handle}: on-tour inventory level ID is missing.`);
+        return {
+          source,
+          target: target!,
+          location: level.location.id,
+          levelId: level.id,
+        };
+      });
+  });
+  return {
+    sources,
+    targets,
+    missing,
+    changes,
+    orphaned,
+    activations,
+    deactivations,
+  };
 }
 export async function loadSyncProduct(
   graphql: TourGraphql,
@@ -157,8 +209,8 @@ function mirrored(source: SyncVariant) {
     compareAtPrice: source.compareAtPrice,
     taxable: source.taxable,
     taxCode: source.taxCode,
-    inventoryPolicy: source.inventoryPolicy,
-    inventoryItem: { tracked: false, requiresShipping: false },
+    inventoryPolicy: "CONTINUE",
+    inventoryItem: { tracked: false, requiresShipping: true },
     metafields: [
       ...(source.servingCount?.value ? [{ namespace: 'custom', key: 'serving_count', type: 'single_line_text_field', value: source.servingCount.value }] : []),
       {
@@ -175,6 +227,7 @@ export async function syncTourBoardProduct(
   id: string,
   collectionHandle = "charcuterie",
   dryRun = false,
+  locationId = process.env.SHOPIFY_TOUR_BOARD_LOCATION_ID || "",
 ) {
   let product = await loadSyncProduct(graphql, id);
   if (
@@ -182,7 +235,9 @@ export async function syncTourBoardProduct(
     !product.collections.nodes.some((c) => c.handle === collectionHandle)
   )
     return { skipped: true };
-  let plan = tourBoardPlan(product);
+  let plan = tourBoardPlan(product, locationId);
+  if (plan.sources.length || plan.targets.length)
+    await assertTourBoardLocation(graphql, locationId);
   if (dryRun)
     return {
       handle: product.handle,
@@ -190,12 +245,14 @@ export async function syncTourBoardProduct(
       update: plan.changes.length,
       remove: plan.orphaned.length,
       activate: plan.activations.length,
+      deactivate: plan.deactivations.length,
     };
   if (
     !plan.missing.length &&
     !plan.changes.length &&
     !plan.orphaned.length &&
-    !plan.activations.length
+    !plan.activations.length &&
+    !plan.deactivations.length
   )
     return { handle: product.handle, changed: false };
   const token = randomUUID();
@@ -246,7 +303,7 @@ export async function syncTourBoardProduct(
   try {
     // Re-read after taking the lease so retries and webhook bursts see the current variants.
     product = (await loadSyncProduct(graphql, id))!;
-    plan = tourBoardPlan(product);
+    plan = tourBoardPlan(product, locationId);
     if (
       plan.missing.length &&
       !product.options.some((o) => o.name === FULFILLMENT_OPTION)
@@ -283,7 +340,7 @@ export async function syncTourBoardProduct(
       );
       check(r.productOptionsCreate, "Adding fulfillment option");
       product = (await loadSyncProduct(graphql, id))!;
-      plan = tourBoardPlan(product);
+      plan = tourBoardPlan(product, locationId);
       if (
         plan.sources.length !== before.size ||
         plan.sources.some((v) => !before.has(v.id))
@@ -370,7 +427,18 @@ export async function syncTourBoardProduct(
       check(r.productVariantsBulkDelete, "Removing orphan on-tour variants");
     }
     product = (await loadSyncProduct(graphql, id))!;
-    await activateTourLocations(graphql, tourBoardPlan(product).activations);
+    const locations = tourBoardPlan(product, locationId);
+    await reconcileTourLocations(graphql, locations);
+    product = (await loadSyncProduct(graphql, id))!;
+    const remaining = tourBoardPlan(product, locationId);
+    if (
+      remaining.missing.length ||
+      remaining.changes.length ||
+      remaining.orphaned.length ||
+      remaining.activations.length ||
+      remaining.deactivations.length
+    )
+      throw new Error(`${product.handle}: on-tour fulfillment reconciliation is incomplete.`);
     return { handle: product.handle, changed: true };
   } finally {
     const current = await loadSyncProduct(graphql, id);
@@ -380,28 +448,44 @@ export async function syncTourBoardProduct(
     }
   }
 }
-async function activateTourLocations(
+async function reconcileTourLocations(
   graphql: TourGraphql,
-  activations: ReturnType<typeof tourBoardPlan>["activations"],
+  plan: ReturnType<typeof tourBoardPlan>,
 ) {
-  for (const { target, location } of activations) {
+  // Establish the dedicated origin before removing any previous on-tour origin.
+  // Regular Delivery variants and inventory quantities are never changed here.
+  for (const { target, location } of plan.activations) {
     if (!target.inventoryItem.id)
       throw new Error("Tour board inventory item is missing.");
     const r = await graphql<{
       inventoryActivate: { userErrors: Array<{ message: string }> };
     }>(
       `
-        mutation ActivateTourBoard($item: ID!, $location: ID!) {
-          inventoryActivate(inventoryItemId: $item, locationId: $location) {
+        mutation ActivateTourBoard($item: ID!, $location: ID!, $key: String!) {
+          inventoryActivate(inventoryItemId: $item, locationId: $location) @idempotent(key: $key) {
             userErrors {
               message
             }
           }
         }
       `,
-      { item: target.inventoryItem.id, location },
+      { item: target.inventoryItem.id, location, key: randomUUID() },
     );
     check(r.inventoryActivate, "Activating tour board fulfillment location");
+  }
+  for (const { levelId } of plan.deactivations) {
+    const r = await graphql<{
+      inventoryDeactivate: { userErrors: Array<{ message: string }> };
+    }>(
+      `mutation DeactivateTourBoard($level: ID!) {
+        inventoryDeactivate(inventoryLevelId: $level) { userErrors { message } }
+      }`,
+      { level: levelId },
+    );
+    check(
+      r.inventoryDeactivate,
+      "Removing previous tour board fulfillment location",
+    );
   }
 }
 export async function syncTourBoards(
@@ -409,6 +493,7 @@ export async function syncTourBoards(
   collectionHandle = "charcuterie",
   dryRun = false,
   maxMs = Infinity,
+  locationId = process.env.SHOPIFY_TOUR_BOARD_LOCATION_ID || "",
 ) {
   const started = Date.now();
   const ids: string[] = [];
@@ -453,7 +538,7 @@ export async function syncTourBoards(
       break;
     }
     results.push(
-      await syncTourBoardProduct(graphql, id, collectionHandle, dryRun),
+      await syncTourBoardProduct(graphql, id, collectionHandle, dryRun, locationId),
     );
   }
   return results;
@@ -463,14 +548,23 @@ export async function resolveTourBoard(
   productId: string,
   sourceId: string,
   collectionHandle = "charcuterie",
+  locationId = process.env.SHOPIFY_TOUR_BOARD_LOCATION_ID || "",
 ) {
+  const fulfillmentError = "Tour board fulfillment is not yet configured. Please choose another snack or contact us.";
+  // Public checkout should not expose internal configuration names. Maintenance retains its diagnostic.
+  if (!/^gid:\/\/shopify\/Location\/\d+$/.test(locationId)) throw new Error(fulfillmentError);
+  try {
+    await assertTourBoardLocation(graphql, locationId);
+  } catch {
+    throw new Error(fulfillmentError);
+  }
   let product = await loadSyncProduct(graphql, productId);
   if (
     !product ||
     !product.collections.nodes.some((c) => c.handle === collectionHandle)
   )
     throw new Error("That board is not in the charcuterie catalog.");
-  let plan = tourBoardPlan(product);
+  let plan = tourBoardPlan(product, locationId);
   const source = plan.sources.find((v) => v.id === sourceId);
   if (!source)
     throw new Error("Choose a delivery variant from the regular catalog.");
@@ -479,6 +573,13 @@ export async function resolveTourBoard(
     throw new Error(
       "Tour fulfillment is not yet enabled for this board. Please choose another board or snack.",
     );
+  if (
+    !target.inventoryItem.requiresShipping ||
+    target.inventoryPolicy !== "CONTINUE" ||
+    plan.activations.some((a) => a.source.id === sourceId) ||
+    plan.deactivations.some((a) => a.source.id === sourceId)
+  )
+    throw new Error(fulfillmentError);
   // Existing counterparts can be repriced safely at checkout; provisioning is a deliberate setup step.
   if (plan.changes.some((change) => change.source.id === sourceId)) {
     const r = await graphql<{
@@ -500,19 +601,20 @@ export async function resolveTourBoard(
     );
     check(r.productVariantsBulkUpdate, "Matching the current catalog price");
     product = (await loadSyncProduct(graphql, productId))!;
-    plan = tourBoardPlan(product);
+    plan = tourBoardPlan(product, locationId);
     target = plan.targets.find((v) => v.source?.value === sourceId);
   }
-  await activateTourLocations(
-    graphql,
-    plan.activations.filter((a) => a.source.id === sourceId),
-  );
   const currentSource = plan.sources.find((v) => v.id === sourceId);
   if (
     !target ||
     !currentSource ||
-    target.inventoryItem.requiresShipping ||
-    Number(target.price) !== Number(currentSource.price)
+    !target.inventoryItem.requiresShipping ||
+    target.inventoryItem.tracked ||
+    target.inventoryPolicy !== "CONTINUE" ||
+    Number(target.price) !== Number(currentSource.price) ||
+    plan.activations.some((a) => a.source.id === sourceId) ||
+    plan.deactivations.some((a) => a.source.id === sourceId) ||
+    plan.changes.some((change) => change.source.id === sourceId)
   )
     throw new Error(
       "The board price changed. Refresh your selection before checkout.",

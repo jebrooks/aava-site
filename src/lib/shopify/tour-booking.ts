@@ -22,6 +22,7 @@ import {
   tourBookingAttributes,
 } from "../tour-booking.ts";
 import type { TourGraphql } from "./tours.ts";
+import { TOUR_DELIVERY_METHOD_TITLE, type TourPickupAddress } from '../../data/tour-options.ts';
 export interface BookingMoney {
   amount: string;
   currencyCode: string;
@@ -48,16 +49,41 @@ interface BookingCartLine {
   lineComponents?: Array<{ quantity: number; merchandise: { id: string } }>;
 }
 export interface BookingCart {
+  id: string;
   checkoutUrl: string;
   lines: { nodes: BookingCartLine[] };
   attributes: Array<{ key: string; value: string }>;
   cost: { totalAmount: BookingMoney };
+  deliveryGroups: { nodes: Array<{
+    id: string;
+    deliveryAddress: (Omit<TourPickupAddress, 'countryCode' | 'provinceCode'> & { countryCodeV2: string; provinceCode: string }) | null;
+    deliveryOptions: BookingDeliveryOption[];
+    selectedDeliveryOption: BookingDeliveryOption | null;
+  }> };
+}
+interface BookingDeliveryOption {
+  handle: string;
+  title: string | null;
+  deliveryMethodType: string;
+  estimatedCost: BookingMoney;
 }
 export interface TourBookingDependencies {
   admin: TourGraphql;
   storefront: TourGraphql;
   now?: () => Date;
   collectionHandle?: string;
+  tourBoardLocationId?: string;
+}
+const bookingCartFields = `id checkoutUrl attributes{key value} cost{totalAmount{amount currencyCode}}
+  lines(first:10){nodes{quantity merchandise{... on ProductVariant{id requiresShipping price{amount currencyCode}}}
+    ... on ComponentizableCartLine{lineComponents{quantity merchandise{... on ProductVariant{id}}}}}}
+  deliveryGroups(first:5){nodes{id deliveryAddress{address1 address2 city provinceCode zip countryCodeV2}
+    deliveryOptions{handle title deliveryMethodType estimatedCost{amount currencyCode}}
+    selectedDeliveryOption{handle title deliveryMethodType estimatedCost{amount currencyCode}}}}`;
+function normalizedAddress(value: string | undefined | null) {
+  const abbreviations: Record<string, string> = { avenue: 'ave', boulevard: 'blvd', drive: 'dr', road: 'rd', street: 'st' };
+  return (value || '').toLowerCase().replace(/[.,]/g, '').trim().split(/\s+/)
+    .map(word => abbreviations[word] || word).join(' ');
 }
 const variantFields = `id title availableForSale quantityAvailable requiresShipping price{amount currencyCode} selectedOptions{name value} servingCount:metafield(namespace:"custom",key:"serving_count"){value}`;
 export function tourBookingService(deps: TourBookingDependencies) {
@@ -277,9 +303,13 @@ export function tourBookingService(deps: TourBookingDependencies) {
         "Guest count",
         "Destination",
         "Snack",
+        "Pickup preference",
+        "Pickup arrangements",
+        "Tentative fulfillment address",
       ].includes(a.key),
     );
     const prices = new Map([[variant.id, Number(variant.price.amount)]]);
+    const physical = new Map([[variant.id, false]]);
     const lines = [
       { merchandiseId: variant.id, quantity, attributes: lineAttributes },
     ];
@@ -301,12 +331,14 @@ export function tourBookingService(deps: TourBookingDependencies) {
         board.id,
         addon.id,
         deps.collectionHandle || "charcuterie",
+        deps.tourBoardLocationId,
       );
       if (Number(onTour.price) !== Number(addon.price.amount))
         throw new Error(
           "The catalog price just changed. Refresh the page before checkout.",
         );
       prices.set(onTour.id, Number(onTour.price));
+      physical.set(onTour.id, true);
       lines.push({
         merchandiseId: onTour.id,
         quantity: booking.boardQuantity,
@@ -323,6 +355,8 @@ export function tourBookingService(deps: TourBookingDependencies) {
     }
     const digits = booking.phone.replace(/\D/g, "");
     const phone = "+" + (digits.length === 10 ? "1" : "") + digits;
+    const nameParts = booking.name.split(/\s+/);
+    const lastName = nameParts.pop()!;
     const created = await deps.storefront<{
       cartCreate: {
         cart: BookingCart | null;
@@ -331,10 +365,7 @@ export function tourBookingService(deps: TourBookingDependencies) {
       };
     }>(
       `mutation CreateTourBooking($input:CartInput!){cartCreate(input:$input){
-        cart{checkoutUrl attributes{key value} cost{totalAmount{amount currencyCode}} lines(first:10){nodes{
-          quantity merchandise{... on ProductVariant{id requiresShipping price{amount currencyCode}}}
-          ... on ComponentizableCartLine{lineComponents{quantity merchandise{... on ProductVariant{id}}}}
-        }}}
+        cart{${bookingCartFields}}
         userErrors{message} warnings{message}
       }}`,
       {
@@ -342,6 +373,10 @@ export function tourBookingService(deps: TourBookingDependencies) {
           lines,
           attributes,
           buyerIdentity: { email: booking.email, phone, countryCode: "US" },
+          ...(booking.pickupAddress ? { delivery: { addresses: [{
+            address: { deliveryAddress: { ...booking.pickupAddress, firstName: nameParts.join(' '), lastName, phone } },
+            selected: true, oneTimeUse: true, validationStrategy: 'STRICT',
+          }] } } : {}),
           note: `Tour booking: ${booking.date} — ${booking.tourType}. Destination and pickup details to coordinate by phone.`,
         },
       },
@@ -349,28 +384,68 @@ export function tourBookingService(deps: TourBookingDependencies) {
     const payload = created.cartCreate;
     if (payload.userErrors.length)
       throw new Error(payload.userErrors.map((e) => e.message).join("; "));
-    // Shopify can adjust or drop lines when capacity changes. Do not send a partial booking to payment.
-    if (
-      payload.warnings?.length ||
-      !payload.cart ||
-      payload.cart.lines.nodes.length !== lines.length ||
-      lines.some(
+    const validLines = (cart: BookingCart | null) => !!cart &&
+      cart.lines.nodes.length === lines.length && !lines.some(
         (expected) =>
-          !payload.cart!.lines.nodes.some(
+          !cart.lines.nodes.some(
             (actual) =>
               actual.merchandise.id === expected.merchandiseId &&
               actual.quantity === expected.quantity &&
-              !actual.merchandise.requiresShipping &&
+              actual.merchandise.requiresShipping === physical.get(expected.merchandiseId) &&
+              actual.merchandise.price.currencyCode === 'USD' &&
               Number(actual.merchandise.price.amount) ===
                 prices.get(expected.merchandiseId),
           ),
-      )
-    ) {
+      );
+    // Shopify can adjust or drop lines when capacity changes. Do not send a partial booking to payment.
+    if (payload.warnings?.length || !validLines(payload.cart)) {
       throw new Error(
         "Availability changed while preparing checkout. Please check your date and try again.",
       );
     }
-    const checkoutUrl = new URL(payload.cart.checkoutUrl);
+    let cart = payload.cart!;
+    if (booking.pickupAddress) {
+      // Fixed profile rates can become available immediately after cart creation.
+      if (!cart.deliveryGroups?.nodes.length) {
+        const refreshed = await deps.storefront<{ cart: BookingCart | null }>(
+          `query TourBookingDelivery($id:ID!){cart(id:$id){${bookingCartFields}}}`, { id: cart.id });
+        if (!validLines(refreshed.cart)) throw new Error('Availability changed while preparing checkout. Please check your date and try again.');
+        cart = refreshed.cart!;
+      }
+      const deliveryError = 'Tour food fulfillment is temporarily unavailable. Please contact us or choose a tour without a board.';
+      const validateDelivery = (candidate: BookingCart) => {
+        const groups = candidate.deliveryGroups?.nodes || [];
+        if (groups.length !== 1) throw new Error(deliveryError);
+        const group = groups[0], address = group.deliveryAddress, expected = booking.pickupAddress!;
+        if (!address || !address.city || !address.zip || address.countryCodeV2 !== 'US' || address.provinceCode !== 'VA' ||
+          address.zip.slice(0, 5) !== expected.zip.slice(0, 5) ||
+          normalizedAddress(address.address1) !== normalizedAddress(expected.address1) ||
+          normalizedAddress(address.address2) !== normalizedAddress(expected.address2)) throw new Error(deliveryError);
+        const options = group.deliveryOptions;
+        if (options.length !== 1) throw new Error(deliveryError);
+        const option = options[0];
+        if (option.title !== TOUR_DELIVERY_METHOD_TITLE || option.deliveryMethodType !== 'SHIPPING' ||
+          option.estimatedCost.currencyCode !== 'USD' || Number(option.estimatedCost.amount) !== 0) throw new Error(deliveryError);
+        return { group, option };
+      };
+      const { group, option } = validateDelivery(cart);
+      const selected = await deps.storefront<{ cartSelectedDeliveryOptionsUpdate: {
+        cart: BookingCart | null; userErrors: Array<{ message: string }>; warnings: Array<{ message: string }>;
+      } }>(`mutation SelectTourDelivery($cartId:ID!,$options:[CartSelectedDeliveryOptionInput!]!){
+        cartSelectedDeliveryOptionsUpdate(cartId:$cartId,selectedDeliveryOptions:$options){
+          cart{${bookingCartFields}} userErrors{message} warnings{message}
+        }}`, { cartId: cart.id, options: [{ deliveryGroupId: group.id, deliveryOptionHandle: option.handle }] });
+      const updated = selected.cartSelectedDeliveryOptionsUpdate;
+      if (updated.userErrors.length || updated.warnings?.length || !validLines(updated.cart)) throw new Error(deliveryError);
+      cart = updated.cart!;
+      const verified = validateDelivery(cart);
+      if (verified.group.selectedDeliveryOption?.handle !== verified.option.handle ||
+        verified.group.selectedDeliveryOption.title !== TOUR_DELIVERY_METHOD_TITLE ||
+        Number(verified.group.selectedDeliveryOption.estimatedCost.amount) !== 0 ||
+        verified.group.selectedDeliveryOption.estimatedCost.currencyCode !== 'USD' ||
+        verified.group.selectedDeliveryOption.deliveryMethodType !== 'SHIPPING') throw new Error(deliveryError);
+    }
+    const checkoutUrl = new URL(cart.checkoutUrl);
     if (checkoutUrl.protocol !== "https:")
       throw new Error("Secure checkout is temporarily unavailable.");
     return { checkoutUrl: checkoutUrl.toString() };

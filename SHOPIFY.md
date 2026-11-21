@@ -12,8 +12,9 @@ see [Virginia tax maintenance](docs/virginia-tax-maintenance.md).
 1. Create the Shopify store and complete legal business, payout, tax, notification, refund, and
    policy settings.
 2. Add the Arlington fulfillment location and configure Shopify local delivery for the approved
-   Northern Virginia ZIP codes and fees. Do not enable conventional shipping or pickup for the
-   initial charcuterie catalog.
+   Northern Virginia ZIP codes and fees. Do not enable conventional shipping or public pickup
+   for the ordinary charcuterie delivery catalog. Physical On tour counterparts use the separate
+   approved bus-location/$0 fulfillment rollout below.
 3. Create a manual collection with handle `charcuterie`. Record its GraphQL ID.
 4. Create a custom storefront/publication and a Storefront API token with product, inventory, and
    cart access. Record the publication GraphQL ID.
@@ -73,6 +74,24 @@ windows with no variant IDs and the shared-blackout marker. If all windows are c
 an eligible window exists rather than bypassing the guard. Archiving preserves orders, variant
 IDs, and inventory history. Saved carts are migrated when choosing a window or checking out;
 already-open Shopify checkouts are left untouched. Do not delete old products or reset inventory.
+
+### Physical tour-board fulfillment rollout
+
+The approved correction makes separately sold On tour boards physical at the actual/tentative
+Virginia boarding destination, using server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` and the exact
+$0 method **Provided on your tour — pickup arranged by phone**. Tour seat/bus service remains
+non-shipping/non-taxable, food remains taxable, and the customer's real billing stays separate.
+All pickup preferences are tentative and arranged by phone; only board bookings use the
+NorthSide Social tentative default when no location preference is supplied. Tour-only and
+included-sandwich service bookings must have no default address/delivery-address requirement.
+
+Configure both Vercel environments and deploy compatible Production checkout, cron and webhook
+code **before** changing existing counterparts' shipping/location flags; older sync code could
+undo the migration. See [deployment steps](docs/deployments.md#physical-on-tour-board-rollout),
+[verified pickup base addresses](docs/content-management.md#tour-pickup-addresses-and-phone-coordination)
+and [tax verification](docs/virginia-tax-maintenance.md). The isolated native prototype passed
+Virginia/DC/Maryland billing; deploy compatible Production code before migrating the 44 live
+counterparts. Do not confuse that migration prerequisite with a remaining prototype tax failure.
 
 ## 3. Normalize and import the Squarespace catalog
 

@@ -93,9 +93,9 @@ that real order properties reached either email.
 
 | ID | Scenario | Acceptance criteria |
 | --- | --- | --- |
-| T1 | Public tour for multiple guests | Correct per-person total; seat inventory decreases by guest count; date, actual guest count, pickup preference, contact information and acknowledgments are retained. The real customer and staff emails explicitly show the actual guest count, pickup preference and applicable coordination/waiver next steps. |
-| T2 | Public tour with snacks and a board | Correct options, quantities, serving counts, ingredients and totals. Separately sold food fulfilled on a Virginia tour must receive the intended Virginia tax with legitimate Virginia or out-of-state billing. Both real customer and staff emails show the selected snack/sandwich details and board serving count/customizations when supplied. No local-delivery scheduling, blank delivery labels or shipping charge is introduced. |
-| T3 | Private tour with fewer than ten guests | Charges one whole-bus booking, records actual guest count and consumes shared ten-seat capacity. Both real customer and staff emails explicitly show the actual guest count, pickup preference, included/selected sandwich details and applicable coordination/waiver next steps. Ten bundle seat components must not imply ten actual passengers. |
+| T1 | Public tour for multiple guests | Correct per-person total; seat inventory decreases by guest count; date, actual guest count, pickup preference, contact information and acknowledgments are retained. The real customer and staff emails explicitly show the actual guest count, supplied pickup preference and applicable coordination/waiver next steps. All preferences are tentative and phone-coordinated. A tour-only booking has no default NorthSide or delivery address. |
+| T2 | Public tour with snacks and a board | Correct options, quantities, serving counts, ingredients and totals. Separately sold food fulfilled on a Virginia tour must receive the intended Virginia tax with legitimate Virginia or out-of-state billing. Both real customer and staff emails show the selected snack/sandwich details and board serving count/customizations when supplied. The separately sold board is physical at the selected/tentative Virginia boarding destination with the exact $0 method Provided on your tour — pickup arranged by phone; real billing remains separate. All pickups remain tentative. No home-delivery calendar, blank delivery labels or fulfillment charge is introduced. |
+| T3 | Private tour with fewer than ten guests | Charges one whole-bus booking, records actual guest count and consumes shared ten-seat capacity. Both real customer and staff emails explicitly show the actual guest count, pickup preference, included/selected sandwich details and applicable coordination/waiver next steps. Ten bundle seat components must not imply ten actual passengers. An included sandwich without a separately sold board remains service-only: no default NorthSide or delivery address. |
 | T4 | Shared public/private availability | Buying public seats prevents a whole-bus booking on that date. Buying the bus prevents public-seat purchases on that date. |
 | T5 | Last-seat competition | Two browser sessions attempt remaining capacity. Only the permitted quantity can be purchased; the other session receives a useful error. |
 | T6 | Invalid booking | Reject zero/over-capacity guests, missing required fields or acknowledgments, blackouts, insufficient notice, and unavailable dates. |
@@ -180,14 +180,44 @@ DC billing addresses. Under the current 11% prepared-food configuration, a $59 b
 $6.49 Virginia food tax in all three cases; the tour-service fee remains exempt. Preserve each
 buyer's genuine billing address and introduce no home delivery or public-pickup requirement.
 
+### Physical tour-board rollout acceptance
+
+The isolated native prototype passed Virginia/DC/Maryland billing, tour-only delivery-group
+omission and ordinary-delivery isolation; see the results. After compatible Production
+deployment and migration of the 44 active counterparts, verify their live contract without
+another payment:
+
+- Tour-only and included-sandwich bookings retain optional pickup preference/phone coordination,
+  with no default NorthSide or delivery address and no food add-on tax.
+- Separately sold physical boards use the selected Virginia boarding base address, genuine
+  billing and the exact $0 method **Provided on your tour — pickup arranged by phone**.
+- Only board bookings with no preference/Arrange by phone use NorthSide Social, 3211 Wilson
+  Blvd, Arlington, VA 22201 as a tentative default. Booking and native checkout must clearly say
+  all pickups are tentative and arranged by phone; reassure customers they need not finalize a
+  location before booking. A default must not appear as a confirmed travel instruction.
+- The confirmed Reston option is Reston Town Center, 12023-A Sunset Hills Rd, Reston, VA 20190.
+  Verify the other full base addresses against the repository-owned list, without guessing a
+  bus curb. Private board custom pickup must be a genuine Virginia destination.
+- Virginia, Maryland and DC billing all produce the intended $6.49 on a $59 board, $0 tour-service
+  tax and $0 fulfillment. A non-Virginia billing address must remain genuine and accepted.
+- Missing dedicated location, unavailable/wrong/paid fulfillment rate, changed destination or
+  unsupported destination must fail usefully; no fallback to home delivery or public warehouse
+  pickup is acceptable. A changed DC destination must remain undeliverable rather than allow
+  completion with zero food tax. Keep Fulfillment last so ACTIVE + title ending On tour matches.
+- Recheck ordinary delivery boards and gift-card-only carts: their delivery calendar, fees,
+  recipient settings and tax/address requirements remain independent of tour fulfillment.
+
+See [rollout ordering](deployments.md#physical-on-tour-board-rollout): deploy the new Production
+checkout/sync code before changing existing On tour shipping/location flags.
+
 Tax correctness still requires the business facts and actual checkout estimates: intended
 Virginia-only delivery/tour service, Arlington preparation, registered Virginia collection,
 non-taxable tour service versus separately sold prepared food. The active DC delivery zone
 and matching schedule ZIPs conflict with the intended service area and remain unresolved.
 A displayed zero is not approval.
 See [Virginia tax maintenance](virginia-tax-maintenance.md) for saved configuration, actual
-unpaid estimates and the failed on-tour food/DC-billing case, which remains an integration
-blocker. Scheduled-send date handoff is required;
+historical failed estimates and the passed physical-board prototype. Live migration and its
+verification remain ordered rollout work. Scheduled-send date handoff is required;
 waiting for Shopify's future delivery is outside this integration gate.
 
 ## Cleanup and release gate

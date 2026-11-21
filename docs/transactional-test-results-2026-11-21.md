@@ -206,18 +206,91 @@ those liabilities separately.
 | $59 board + $5 delivery to Virginia, Virginia billing | $6.49 tax; $70.49 total | Passed the tested delivery case. |
 | Same Virginia delivery, DC billing | $6.49 tax; $70.49 total | Passed; the Virginia shipping address supplies delivery sourcing. |
 | Nine public seats ($1,125) + $59 board on a Virginia tour, Virginia billing | $6.49 tax; $1,190.49 total | Passed the tested split between exempt service and taxable food. |
-| Same Virginia tour/board, DC billing | $0 tax; $1,184 total | **Failed — open integration blocker.** Non-shipping on-tour food is sourced from billing, although fulfilled in Virginia. |
+| Same Virginia tour/board, DC billing | $0 tax; $1,184 total | Historical non-shipping failure; the later physical-board prototype below corrected this result. |
 
-No additional payment was made for these tax estimates. Full tax acceptance is not passed.
+No additional payment was made for these historical tax estimates. The later isolated physical
+prototype passed; live counterpart migration is a separate remaining rollout step.
 The owner subsequently confirmed the required behavior: on-tour boards always use Virginia
 food-tax sourcing regardless of billing. Virginia, Maryland and DC billing are the required
 unpaid regression matrix; no Maryland-specific checkout pass is claimed by the earlier DC test.
 The owner explicitly confirmed there is no public pickup location. Native pickup is therefore
 incompatible with this workflow, and the private warehouse must not be enabled or exposed as a
-shortcut. A supported alternative remains under investigation; a valid non-Virginia billing
-address must remain usable with correct Virginia food tax. Prior zero-tax orders are not tax
+shortcut. The selected physical-board approach was later proven in the isolated native
+prototype while retaining genuine non-Virginia billing. Prior zero-tax orders are not tax
 approval. See [Virginia tax maintenance](virginia-tax-maintenance.md) for source-backed treatment,
-configuration ownership, remittance allocation and the unresolved sourcing issue.
+configuration ownership, remittance allocation, historical sourcing failure and current rollout.
+
+### Physical boarding-address correction — implemented and isolated prototype verified
+
+The owner approved using the actual/tentative Virginia boarding destination **only for bookings
+with a separately sold charcuterie board**. On tour counterparts become physical,
+with a dedicated bus fulfillment location and the exact $0 method **Provided on your tour —
+pickup arranged by phone**. Tour service remains non-shipping/non-taxable; real billing remains
+separate. Only board bookings with no preference/Arrange by phone receive the tentative
+NorthSide Social default, 3211 Wilson Blvd, Arlington, VA 22201. Tour-only and included-sandwich
+service bookings must have no default NorthSide/delivery address.
+
+Every pickup choice remains tentative and final arrangements are made by phone on booking and
+native checkout; a default is not a confirmed travel instruction. The owner confirmed the
+Reston Town Center station choice; its verified WMATA base address is 12023-A Sunset Hills Rd,
+Reston, VA 20190. Verified venue/station base addresses are
+repository-owned in `src/data/tour-options.ts`; no boarding curb was invented. The private
+warehouse must not become a public pickup location, and no home-board delivery calendar is
+introduced.
+
+The dedicated internal **On-tour board fulfillment** location was created in Shopify as
+`gid://shopify/Location/91098611866`, at the real private Arlington preparation address. It is
+active/online-order-enabled with storefront visibility, public pickup and local delivery off.
+The dedicated native rate was exercised in the isolated prototype below. The 44 existing live
+On tour shipping flags/inventory locations have not been migrated. The private street is not
+retained in Git.
+
+Server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` must be configured in both Preview and Production.
+Deploy the compatible Production checkout, cron and webhook code before changing existing
+On tour shipping/location flags so older sync cannot undo the migration. The isolated native
+prototype passed the following unpaid checks; it does not establish that the 44 live
+counterparts have migrated. See [rollout steps](deployments.md#physical-on-tour-board-rollout).
+
+| Prototype case | Actual observation |
+| --- | --- |
+| Nine public seats ($1,125) plus a $59 physical board; genuine Virginia billing | Virginia food tax $6.49, exempt tour service, free dedicated handoff; total $1,190.49. |
+| Same Virginia boarding destination; genuine DC billing | Same $6.49 tax and $1,190.49 total. |
+| Same boarding destination; genuine Maryland billing | Same $6.49 tax and $1,190.49 total. |
+| Tour-only service | Zero delivery groups; no default boarding/delivery address. |
+| Ordinary $59 Delivery board | LOCAL $5 delivery; no free tour handoff offered. |
+
+Billing stayed separate from the boarding destination and was observed blank before entering
+the genuine payer address. No new payment/order was created for these checks. The original
+non-shipping billing-source defect is resolved by this isolated prototype; rollout of active
+counterparts remains a deployment prerequisite with its own live verification.
+
+The rate eligibility audit covered 645 variants and matched exactly 44 live On tour targets
+plus one active QA target (45); no ordinary, service or gift variants matched. The rule is
+product status ACTIVE plus variant title ENDS_WITH **On tour**, with no product-type/tag
+requirement. The reserved Fulfillment option must stay last; reordering that removes the
+expected rate fails closed. Routine CLI/cron planning remains broader than the initial active
+migration: 69 targets across 35 members, including 25 inactive targets.
+
+In native checkout, changing the physical board's destination to DC produced
+`address_undeliverable`, no eligible handoff and no completion. Restoring Virginia restored the
+valid path. Its zero-tax undeliverable state is not a completed tax-free sale. Tour-only native
+checkout had no Delivery section/address, NorthSide/default text or delivery group; genuine
+DC and Maryland billing each showed total $125 and tax $0.
+
+### Boarding notification update — saved and read back
+
+The buyer and staff templates were saved in Shopify, then reloaded; full clipboard contents
+exactly matched the validated private tour-pickup templates. Both native previews compiled.
+The buyer's prior live editor matched the earlier pre-findings backup, so this save also
+restored the already-authorized tour summary/payment-label fixes; the staff editor matched
+the earlier findings-fixed base. No actual email was sent for the new native checkout.
+
+Full-template LiquidJS fixtures passed default-No-preference and selected-Ballston board
+cases, service-only omission, ordinary-delivery/gift-only output equivalence, escaping,
+both-attribute gating and all pending/charged-on-fulfillment branches. Financial/tax/payment/
+gift expressions were unchanged, with rendered synthetic total $315.49, tax $6.49 and split
+$50 gift card/$265.49 Visa retained in both templates. These fixture and save/readback results
+are distinct from an actual delivered-email observation.
 
 ### Delivery-area mismatch — owner resolution pending
 
@@ -242,6 +315,9 @@ refund settlement is outside the owner-confirmed integration gate.
 | Cart regression suite | 40 tests passed; Astro/TypeScript check and production build passed for the cart change. | Uses local fixtures/mocks; does not prove same-browser post-payment recovery or notification delivery. |
 | Booking, blackout, tour and board suites | `test:booking` 22, `test:blackouts` 3, `test:tours` 14 and `test:boards` 7 passed in this continuation: 46 tests, zero failures. | Covers invalid contact/guest/date/conditional booking input and acknowledgments, ingredient constraints/forgery, shared blackout fail-closed behavior, checkout revalidation, no delivery inventory limit and schedule/catalog rules with fixtures. It does not establish a real last-seat race. |
 | Latest tour-suite rerun | `test:tours` subsequently passed 16 tests after the horizon/service-tax changes. | This later run supersedes the earlier 14-test tour run for the changed code; the earlier 46-test batch is preserved as its own observation, not added to this run. |
+| Physical-board booking/sync suite | The later implementation passed 32 booking/sync tests and the full build. | Covers conditional boarding address/default, service-only omission, exact free method/destination validation and physical counterpart sync; separate from the isolated native tax proof. |
+| Later complete source batch | At approximately 13:22, `test:booking` 32, `test:cart` 41, `test:tours` 16, `test:boards` 7 and `test:blackouts` 3 passed: 99 tests. The production build/Astro check passed with zero errors, warnings or hints. | This is its own observed batch, not added to earlier runs. A subsequent resolver configuration-error fix reran booking at 33 passing tests, superseding that batch's 32; maintenance preflight tests were still being added, so no final combined count is inferred. |
+| Final physical-board source validation | `test:booking` 35, `test:cart` 41, `test:tours` 16, `test:boards` 7 and `test:blackouts` 3: 102 passed, zero failures/skips. Production build passed; Astro/TypeScript checked 121 files with zero errors, warnings or hints. | Includes the subsequent public configuration-error and maintenance location-preflight fixes. This final batch supersedes earlier counts; native tax proof remains separate. |
 | Safe custom-request abuse checks | Empty cross-origin POSTs returned HTTP 403 locally and in Production with `Cross-origin requests are not allowed.` A same-origin Production POST without BotID verification returned HTTP 403 and a useful verify/retry error. | No email/order writes occurred. No valid local POST was attempted because the inherited email-service credentials were not conclusively isolated. Provider failures, rate limits and retry/reply handling remain separate checks. |
 | Custom-request form suite | The earlier PR #50 verification passed 16 form tests, as recorded above. | This is previous evidence, not an additional fresh run or a reason to sum historical suite totals into a new total. |
 
@@ -302,11 +378,11 @@ recorded separately from verified inventory and gift-card restoration.
 
 ## Outstanding integration acceptance work
 
-- Resolve the on-tour food tax-sourcing blocker for legitimate non-Virginia billing. The saved
-  11% food/0% shipping overrides and the tested delivery estimates passed; a Virginia tour with
-  DC billing still incorrectly shows zero food tax. No public pickup location exists, so native
-  pickup is incompatible; investigate a supported alternative without exposing the warehouse.
-  Enter the owner's real Virginia tax ID securely as account follow-up.
+- Deploy compatible Production code before migrating the 44 active On tour counterparts,
+  then verify their physical boarding destination/$0 method and conditional default/service-only
+  behavior. The isolated native Virginia/DC/Maryland tax matrix passed; do not list its historical
+  non-shipping failure as unresolved or claim the live migration is complete. Enter the owner's
+  real Virginia tax ID securely as account follow-up.
 - Resolve the mismatch between the stated Virginia-only delivery scope and the active DC zone
   plus ten matching schedule ZIPs. The audit made no configuration change and did not test DC
   delivery tax; await the owner's decision on the intended service area.

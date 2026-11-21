@@ -26,8 +26,9 @@ must not receive empty delivery labels.
 Preserve the buyer template's existing line/component property rendering. The staff template
 also needs a board-details section with the product/variant title, quantity, and nonblank
 `Serves`, `Board preference`, `Cheeses`, `Meats`, and `Accompaniments` properties. Include
-`Fulfillment` when present, such as **Provided on the bus**. On-tour boards do not require shipping,
-so a `requires_shipping` condition would incorrectly hide their preparation details.
+`Fulfillment` when present, such as **Provided on the bus**. Render board preparation fields by
+saved board properties, rather than depending on shipping flags: the approved rollout changes
+on-tour boards from non-shipping to physical fulfillment at the tentative boarding destination.
 
 Render property names and values through Liquid's `escape` filter, omit blank fields, and use
 an explicit property list rather than exposing internal gift-card or other hidden properties.
@@ -43,7 +44,8 @@ subset, and a bundle component's quantity is not a passenger count.
 The customer section uses these nonblank saved attributes:
 
 - `Booking reference`, `Tour date`, `Tour type`, `Guest count`
-- `Destination`, `Pickup preference`, `Custom pickup address`
+- `Destination`, `Pickup preference`, `Pickup arrangements`, `Custom pickup address`
+- `Tentative fulfillment address` for board bookings only
 - `Snack`, `Sandwich preference`, `Board quantity`
 
 The staff section also includes nonblank `Lead guest`, `Email`, `Mobile phone`,
@@ -71,6 +73,27 @@ and [Booking updates](https://aava-site.vercel.app/booking-updates) pages. Maint
 when the production hostname changes. Displaying a waiver link or a recorded booking
 acknowledgment does not establish signed-waiver collection; do not claim that a waiver was
 signed or that an automated signature workflow exists.
+
+### Tentative boarding destination in the physical-board rollout
+
+All pickup preferences remain tentative and arranged by phone. A booking with a separately sold
+board can show a boarding fulfillment address and the $0 method **Provided on your tour — pickup
+arranged by phone**; it must not imply home-board delivery or a confirmed meeting curb. With no
+preference/Arrange by phone, NorthSide Social is that board booking's tentative default only.
+Keep the customer informed that the final arrangement will be made by phone.
+
+Tour-only/included-sandwich service bookings must not acquire a default NorthSide or delivery
+address. The buyer's normal-paid board confirmation uses **Your board will be provided on the bus.**
+and the escaped pickup note. Its address section is **Tour board handoff address (tentative)**;
+the staff heading is **Tour board handoff (tentative)**. Gate these changes on both root order
+attributes `Tour date` and `Tentative fulfillment address` being nonblank. Service-only orders
+must not gain default address text. Preserve pending-payment/charged-on-fulfillment branches,
+all totals/tax/gift/payment loops and ordinary-delivery/gift-only output.
+
+Rendered private fixtures cover no-preference/default and chosen-board cases, service-only
+omission, ordinary delivery/gift-only equivalence, escaping and the preserved payment branches.
+Template preparation or fixture success is not an external save/readback or actual email send;
+record those observations separately after rollout.
 
 ## Payment labels
 

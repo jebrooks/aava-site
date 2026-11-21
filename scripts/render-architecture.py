@@ -142,7 +142,7 @@ def automation():
  d.path([(357,673),(357,754)],'write via Storefront API',357,717)
  d.path([(1083,673),(1083,754)],'write via Admin API',1083,717)
  d.card(52,754,610,177,'Shopify board order lines',['Date and window saved on physical board lines','Cart metadata plus visible line properties','No reservation products added at checkout'],'green','bag',20)
- d.card(778,754,610,177,'Shopify tour products + variants',['Dated seats; bus bundle uses all 10 seats','On-tour board variants mirror delivery prices','On-tour boards do not require shipping'],'green','bag',20)
+ d.card(778,754,610,177,'Shopify tour products + variants',['Dated seats; bus bundle uses all 10 seats','On-tour board variants mirror delivery prices','Physical boards: $0 VA boarding handoff'],'green','bag',20)
  d.rect(52,994,1336,247,PALE['green'],r=22)
  d.text(77,1034,'EVENT-DRIVEN SYNC · /api/shopify/webhooks',20,C['green'],700)
  d.card(77,1065,373,160,'Shopify events',['products/create, products/update','collections/update'],'green','event',18)
