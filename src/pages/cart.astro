@@ -33,8 +33,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 <button class="button button--secondary" type="button" data-load-slots>Check dates</button>
               </div>
             </label>
+            <div class="tour-calendar delivery-calendar" data-delivery-calendar hidden>
+              <div class="tour-calendar__nav">
+                <button type="button" class="tour-calendar__arrow" data-delivery-previous aria-label="Previous delivery month">←</button>
+                <h3 id="delivery-calendar-month" data-delivery-month tabindex="-1">Delivery date</h3>
+                <button type="button" class="tour-calendar__arrow" data-delivery-next aria-label="Next delivery month">→</button>
+              </div>
+              <table aria-labelledby="delivery-calendar-month">
+                <thead><tr>{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => <th scope="col">{day}</th>)}</tr></thead>
+                <tbody data-delivery-days></tbody>
+              </table>
+              <p class="tour-calendar__legend"><span aria-hidden="true"></span>Available <span class="tour-calendar__selected-key" aria-hidden="true"></span>Selected · Eastern Time</p>
+            </div>
             <label data-slot-field hidden>
-              <span>Available delivery window</span>
+              <span data-delivery-time-label>Delivery time</span>
               <select name="slot" data-slot-select required></select>
             </label>
             <p class="form-status" data-delivery-status role="status"></p>
@@ -58,6 +70,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <script>
   import type { DeliverySlot, ShopifyCart, CartLine } from '../lib/shopify/types';
   import { servingCount } from '../lib/serving-size';
+  import { deliveryCalendarMonth } from '../lib/delivery-calendar';
 
   const CART_ID_KEY = 'aava-shopify-cart-id';
   const CART_COUNT_KEY = 'aava-shopify-cart-count';
@@ -75,6 +88,86 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const selectedDelivery = document.querySelector<HTMLElement>('[data-selected-delivery]');
   const changeDelivery = document.querySelector<HTMLButtonElement>('[data-change-delivery]');
   let currentCart: ShopifyCart | null = null;
+  const deliveryCalendar = document.querySelector<HTMLElement>('[data-delivery-calendar]');
+  const deliveryMonth = document.querySelector<HTMLElement>('[data-delivery-month]');
+  const deliveryDays = document.querySelector<HTMLElement>('[data-delivery-days]');
+  const previousMonth = document.querySelector<HTMLButtonElement>('[data-delivery-previous]');
+  const nextMonth = document.querySelector<HTMLButtonElement>('[data-delivery-next]');
+  const timeLabel = document.querySelector<HTMLElement>('[data-delivery-time-label]');
+  let deliverySlots: DeliverySlot[] = [];
+  let calendarMonth = '';
+  let selectedDate = '';
+  let savingDelivery = false;
+
+  function renderDeliveryCalendar() {
+    if (!deliveryDays || !deliveryMonth || !calendarMonth) return;
+    const calendar = deliveryCalendarMonth(deliverySlots, calendarMonth, selectedDate);
+    deliveryMonth.textContent = calendar.label;
+    if (previousMonth) previousMonth.disabled = savingDelivery || !calendar.hasPrevious;
+    if (nextMonth) nextMonth.disabled = savingDelivery || !calendar.hasNext;
+    deliveryDays.replaceChildren();
+    let row = document.createElement('tr');
+    calendar.days.forEach((day, index) => {
+      if (index && index % 7 === 0) {
+        deliveryDays.append(row);
+        row = document.createElement('tr');
+      }
+      const cell = document.createElement('td');
+      if (day) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = String(Number(day.date.slice(-2)));
+        button.dataset.date = day.date;
+        button.disabled = savingDelivery || !day.available;
+        button.setAttribute('aria-pressed', String(day.selected));
+        button.setAttribute('aria-label', `${day.date} — ${day.available ? 'delivery available' : 'unavailable'}`);
+        button.addEventListener('click', () => {
+          selectedDate = day.date;
+          renderDeliveryCalendar();
+          renderDeliveryTimes();
+          deliveryDays.querySelector<HTMLButtonElement>(`[data-date="${day.date}"]`)?.focus();
+        });
+        cell.append(button);
+      }
+      row.append(cell);
+    });
+    deliveryDays.append(row);
+  }
+
+  function renderDeliveryTimes() {
+    if (!slotSelect) return;
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Choose a delivery time';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    slotSelect.replaceChildren(placeholder);
+    deliverySlots.filter(slot => slot.date === selectedDate && slot.available).forEach(slot => {
+      const option = document.createElement('option');
+      option.value = slot.key;
+      option.textContent = slot.label;
+      slotSelect.append(option);
+    });
+    if (slotField) slotField.hidden = false;
+    if (timeLabel) timeLabel.textContent = `Delivery time for ${selectedDate}`;
+    if (deliveryStatus) deliveryStatus.textContent = 'Choose a time to save your delivery window.';
+  }
+
+  for (const [button, direction] of [[previousMonth, -1], [nextMonth, 1]] as const) {
+    button?.addEventListener('click', () => {
+      const [year, month] = calendarMonth.split('-').map(Number);
+      calendarMonth = new Date(Date.UTC(year, month - 1 + direction, 1)).toISOString().slice(0, 7);
+      renderDeliveryCalendar();
+      deliveryMonth?.focus();
+    });
+  }
+
+  zipInput?.addEventListener('input', () => {
+    if (deliveryCalendar) deliveryCalendar.hidden = true;
+    if (slotField) slotField.hidden = true;
+    deliverySlots = [];
+    selectedDate = '';
+  });
 
   const money = (value: { amount: string; currencyCode: string }) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: value.currencyCode })
@@ -232,6 +325,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       changeDelivery.textContent = 'Change delivery window';
     }
     if (slotField) slotField.hidden = true;
+    if (deliveryCalendar) deliveryCalendar.hidden = true;
     if (deliveryStatus) deliveryStatus.textContent = '';
     if (hasSavedWindow && selectedDelivery && needsDelivery) {
       selectedDelivery.hidden = false;
@@ -294,6 +388,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (deliveryStatus) deliveryStatus.textContent = 'Checking available windows…';
     loadSlots.disabled = true;
     if (slotField) slotField.hidden = true;
+    if (deliveryCalendar) deliveryCalendar.hidden = true;
+    if (zipInput) zipInput.disabled = true;
+    deliverySlots = [];
+    selectedDate = '';
     try {
       const response = await fetch(`/api/delivery/availability?zip=${encodeURIComponent(zip)}`);
       const result = await response.json() as { eligible?: boolean; slots?: DeliverySlot[]; error?: string };
@@ -301,27 +399,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       if (!result.eligible) throw new Error('That ZIP code is outside our local-delivery area.');
       const open = (result.slots || []).filter((slot) => slot.available);
       if (!open.length) throw new Error('No delivery windows are currently available for that ZIP code.');
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.textContent = 'Choose a delivery window';
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      slotSelect?.replaceChildren(placeholder);
-      open.forEach((slot) => {
-        const option = document.createElement('option');
-        option.value = slot.key;
-        option.textContent = `${slot.date} — ${slot.label}`;
-        option.dataset.date = slot.date;
-        option.dataset.label = slot.label;
-        slotSelect?.append(option);
-      });
-      if (slotField) slotField.hidden = false;
-      if (deliveryStatus) deliveryStatus.textContent = 'Choose the window that works best.';
+      deliverySlots = open;
+      const savedDate = currentCart?.attributes.find(attribute => attribute.key === 'Delivery date')?.value;
+      calendarMonth = (open.find(slot => slot.date === savedDate)?.date || open[0].date).slice(0, 7);
+      renderDeliveryCalendar();
+      if (deliveryCalendar) deliveryCalendar.hidden = false;
+      if (deliveryStatus) deliveryStatus.textContent = 'Choose a delivery date, then a time.';
     } catch (error) {
       if (deliveryStatus) deliveryStatus.textContent = error instanceof Error ? error.message : 'Availability failed.';
       if (slotField) slotField.hidden = true;
     } finally {
       loadSlots.disabled = false;
+      if (zipInput) zipInput.disabled = false;
     }
   });
 
@@ -333,6 +422,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   slotSelect?.addEventListener('change', async () => {
     if (!currentCart?.id || !slotSelect?.value) return;
     const checkoutWasDisabled = checkout?.disabled ?? true;
+    savingDelivery = true;
+    renderDeliveryCalendar();
     slotSelect.disabled = true;
     if (loadSlots) loadSlots.disabled = true;
     if (zipInput) zipInput.disabled = true;
@@ -352,6 +443,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       slotSelect.value = '';
       if (checkout) checkout.disabled = checkoutWasDisabled;
     } finally {
+      savingDelivery = false;
+      renderDeliveryCalendar();
       slotSelect.disabled = false;
       if (loadSlots) loadSlots.disabled = false;
       if (zipInput) zipInput.disabled = false;

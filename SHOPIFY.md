@@ -49,8 +49,8 @@ Staff subsequently edit the schedule metaobject in Shopify Admin. Create the tou
 shared blackout entry as described in the [content guide](docs/content-management.md).
 
 Availability and checkout validate ZIP, schedule, lead time, horizon, and Shopify's shared blackouts
-directly. Choosing a window in the cart dropdown saves it immediately without a reservation
-button. The chosen delivery date/window/timezone is stored as cart metadata and visible physical
+directly. Customers choose a date in the cart calendar, then a time in the select box. Choosing the time
+saves the window immediately without a reservation button. The chosen delivery date/window/timezone is stored as cart metadata and visible physical
 board line properties in Shopify checkout and orders. Delivery does not consume inventory or need generated products or a cron job.
 The legacy `daily_capacity` metaobject field is ignored and no longer provisioned on new stores.
 

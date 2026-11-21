@@ -20,7 +20,7 @@ history and cutover verification; code coverage alone does not establish live se
 - Added a headless Shopify storefront, cart proxy, Vercel server runtime, delivery-slot inventory,
   custom-board draft orders, webhook verification, and catalog migration tooling. Delivery-slot
   inventory and its daily cron were retired on 2026-11-21; the old reservation products are archived.
-  Delivery now uses schedule/blackout validation with no order cap. The cart dropdown saves the
+  Delivery now uses schedule/blackout validation with no order cap. The cart calendar selects the date and a separate time dropdown saves the
   selected window directly; physical board line properties carry the date/time into Shopify checkout.
 
 ## Public-site inventory
