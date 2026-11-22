@@ -203,3 +203,20 @@ check before merging. Vercel production deployments should continue to track onl
 7. Verify the site's checkout handoff, inventory, emails and cart recovery; native payment
    methods/processor settlement are outside the owner-confirmed integration scope. Keep
    Squarespace reachable on a legacy hostname for the agreed 30-day rollback and reconciliation window.
+
+### Cart count after checkout
+
+The cart page records the saved cart ID in the browser's `aava-shopify-checkout-cart-id`
+marker immediately before handing off to Shopify. On the first visible return to any site
+page, the header consumes that marker and makes one read through `/api/cart`. There is no
+polling or cart request on ordinary marketing-page visits. Returning directly to `/cart`
+uses that page's existing cart load instead of an additional header request. Browser back-cache
+restoration and tab visibility returns are covered; other tabs update their badges through
+browser storage events without fetching Shopify.
+
+Only the API's confirmed `CART_NOT_FOUND` response clears the saved cart and badge. An active
+cart retains its customer-item count, excluding retired delivery reservation lines. Network,
+upstream and malformed-response failures preserve the saved cart/count and consume the single
+attempt; opening the cart provides a retry. Resuming checkout sets a fresh marker. Late header
+responses must not overwrite a replacement cart created in another tab. This is browser state,
+not an order-completion or payment-confirmation signal. `npm run test:cart` covers recovery.

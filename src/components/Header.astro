@@ -88,13 +88,36 @@ const isActive = (href: string) =>
 </script>
 
 <script>
+  import { CART_COUNT_KEY, refreshCartAfterCheckout } from '../lib/cart-session';
+
   const count = document.querySelector<HTMLElement>('[data-cart-count]');
   function setCartCount(value: number) {
     if (!count) return;
     count.textContent = String(value);
     count.hidden = value < 1;
   }
-  setCartCount(Number(localStorage.getItem('aava-shopify-cart-count') || 0));
+  const showStoredCount = () => setCartCount(Number(localStorage.getItem(CART_COUNT_KEY) || 0));
+  async function checkCheckoutReturn() {
+    showStoredCount();
+    // The cart page already loads the saved cart and updates this badge.
+    if (document.visibilityState === 'hidden' || document.querySelector('[data-cart-lines]')) return;
+    try {
+      await refreshCartAfterCheckout(localStorage);
+      showStoredCount();
+    } catch {
+      // A failed lookup is not evidence that the cart has been completed.
+    }
+  }
+  void checkCheckoutReturn();
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) void checkCheckoutReturn();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') void checkCheckoutReturn();
+  });
+  window.addEventListener('storage', event => {
+    if (event.storageArea === localStorage && (event.key === CART_COUNT_KEY || event.key === null)) showStoredCount();
+  });
   window.addEventListener('aava:cart-updated', ((event: CustomEvent) => {
     setCartCount(Number(event.detail?.totalQuantity || 0));
   }) as EventListener);
