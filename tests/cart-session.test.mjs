@@ -137,3 +137,110 @@ test('cart loading clears only a confirmed missing Shopify cart and preserves re
     assert.equal(state.mutations, 0);
   });
 });
+
+// Returning from Shopify should perform one read, including when browser lifecycle
+// events overlap, and must never interpret a network failure as a paid order.
+test('checkout returns refresh the cached count once without losing unfinished or newer carts', async t => {
+  const { CART_CHECKOUT_KEY, markCartCheckout, refreshCartAfterCheckout } = await import('../src/lib/cart-session.ts');
+  const cart = {
+    id: 'gid://shopify/Cart/completed?key=private', totalQuantity: 4,
+    lines: {nodes: [
+      {quantity: 3, merchandise: {product: {handle: 'cheers'}}},
+      {quantity: 1, merchandise: {product: {handle: 'delivery-slot-legacy'}}},
+    ]},
+  };
+  const pending = () => {
+    const storage = storageWithCart();
+    markCartCheckout(storage, storage.getItem(CART_ID_KEY));
+    return storage;
+  };
+
+  await t.test('ordinary visits do not query Shopify', async () => {
+    const storage = storageWithCart();
+    assert.equal(await refreshCartAfterCheckout(storage, () => assert.fail('Unexpected read')), undefined);
+    assert.equal(storage.getItem(CART_COUNT_KEY), '3');
+  });
+
+  await t.test('a completed cart clears the badge with exactly one request', async () => {
+    const storage = pending();
+    let reads = 0;
+    const fetcher = async () => { reads++; return Response.json({code: CART_NOT_FOUND}, {status: 404}); };
+    assert.equal(await refreshCartAfterCheckout(storage, fetcher), null);
+    assert.equal(storage.getItem(CART_ID_KEY), null);
+    assert.equal(storage.getItem(CART_COUNT_KEY), '0');
+    assert.equal(storage.getItem(CART_CHECKOUT_KEY), null);
+    assert.equal(await refreshCartAfterCheckout(storage, fetcher), undefined);
+    assert.equal(reads, 1);
+  });
+
+  await t.test('unfinished checkout retains its cart and excludes legacy delivery lines from the badge', async () => {
+    const storage = pending();
+    storage.setItem(CART_COUNT_KEY, '4');
+    const result = await refreshCartAfterCheckout(storage, async () => Response.json({cart}));
+    assert.deepEqual(result, cart);
+    assert.equal(storage.getItem(CART_ID_KEY), cart.id);
+    assert.equal(storage.getItem(CART_COUNT_KEY), '3');
+    assert.equal(storage.getItem(CART_CHECKOUT_KEY), null);
+  });
+
+  await t.test('overlapping pageshow and visibility returns share one attempt; resuming checkout allows a fresh check', async () => {
+    const storage = pending();
+    let reads = 0, release;
+    const fetcher = () => { reads++; return new Promise(resolve => { release = resolve; }); };
+    const first = refreshCartAfterCheckout(storage, fetcher);
+    assert.equal(await refreshCartAfterCheckout(storage, fetcher), undefined);
+    assert.equal(reads, 1);
+    release(Response.json({cart}));
+    await first;
+    markCartCheckout(storage, cart.id);
+    await refreshCartAfterCheckout(storage, async () => { reads++; return Response.json({cart}); });
+    assert.equal(reads, 2);
+  });
+
+  await t.test('failed checks preserve the saved cart and count, with no automatic repeated request', async () => {
+    for (const failure of [
+      async () => { throw new Error('Offline'); },
+      async () => Response.json({error:'Unavailable'}, {status:503}),
+      async () => Response.json({error:'Upstream 404'}, {status:404}),
+      async () => new Response('Not JSON', {status:502}),
+      async () => Response.json({}),
+    ]) {
+      const storage = pending();
+      await assert.rejects(refreshCartAfterCheckout(storage, failure));
+      assert.equal(storage.getItem(CART_ID_KEY), cart.id);
+      assert.equal(storage.getItem(CART_COUNT_KEY), '3');
+      assert.equal(await refreshCartAfterCheckout(storage, () => assert.fail('Unexpected retry')), undefined);
+    }
+  });
+
+  await t.test('the cart page uses its own load to consume the return check', async () => {
+    const storage = pending();
+    await loadStoredCart(storage, async () => Response.json({cart}));
+    assert.equal(await refreshCartAfterCheckout(storage, () => assert.fail('Duplicate header read')), undefined);
+  });
+
+  await t.test('a stale checkout marker cannot check or overwrite a replacement cart', async () => {
+    const storage = pending();
+    storage.setItem(CART_ID_KEY, 'gid://shopify/Cart/new');
+    storage.setItem(CART_COUNT_KEY, '2');
+    assert.equal(await refreshCartAfterCheckout(storage, () => assert.fail('Unexpected old cart read')), undefined);
+    assert.equal(storage.getItem(CART_COUNT_KEY), '2');
+    assert.equal(storage.getItem(CART_CHECKOUT_KEY), null);
+  });
+
+  await t.test('late responses cannot erase a cart created in another tab', async () => {
+    for (const response of [Response.json({cart}), Response.json({code:CART_NOT_FOUND}, {status:404})]) {
+      const storage = pending();
+      let release;
+      const checking = refreshCartAfterCheckout(storage, () => new Promise(resolve => { release = resolve; }));
+      storage.setItem(CART_ID_KEY, 'gid://shopify/Cart/new');
+      storage.setItem(CART_COUNT_KEY, '2');
+      markCartCheckout(storage, 'gid://shopify/Cart/new');
+      release(response);
+      assert.equal(await checking, undefined);
+      assert.equal(storage.getItem(CART_ID_KEY), 'gid://shopify/Cart/new');
+      assert.equal(storage.getItem(CART_COUNT_KEY), '2');
+      assert.equal(storage.getItem(CART_CHECKOUT_KEY), 'gid://shopify/Cart/new');
+    }
+  });
+});

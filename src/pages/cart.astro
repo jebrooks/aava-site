@@ -72,7 +72,7 @@ import { site } from '../data/site';
   import type { DeliverySlot, ShopifyCart, CartLine } from '../lib/shopify/types';
   import { servingCount } from '../lib/serving-size';
   import { deliveryCalendarMonth } from '../lib/delivery-calendar';
-  import { CART_ID_KEY, CART_COUNT_KEY, isMissingCartResponse, loadStoredCart } from '../lib/cart-session';
+  import { CART_ID_KEY, CART_COUNT_KEY, CART_CHECKOUT_KEY, customerCartQuantity, isMissingCartResponse, loadStoredCart, markCartCheckout } from '../lib/cart-session';
 
   const linesRoot = document.querySelector<HTMLElement>('[data-cart-lines]');
   const subtotal = document.querySelector<HTMLElement>('[data-subtotal]');
@@ -170,9 +170,6 @@ import { site } from '../data/site';
       .format(Number(value.amount));
   const isDeliveryLine = (line: CartLine) =>
     line.merchandise.product.handle.startsWith('delivery-slot-');
-  const customerQuantity = (cart: ShopifyCart) => cart.lines.nodes
-    .filter((line) => !isDeliveryLine(line))
-    .reduce((sum, line) => sum + line.quantity, 0);
 
   function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string) {
     const node = document.createElement(tag);
@@ -302,7 +299,7 @@ import { site } from '../data/site';
     currentCart = cart;
     if (cart.id) localStorage.setItem(CART_ID_KEY, cart.id);
     else localStorage.removeItem(CART_ID_KEY);
-    const quantity = customerQuantity(cart);
+    const quantity = customerCartQuantity(cart);
     localStorage.setItem(CART_COUNT_KEY, String(quantity));
     window.dispatchEvent(new CustomEvent('aava:cart-updated', { detail: { ...cart, totalQuantity: quantity } }));
     linesRoot?.replaceChildren();
@@ -473,6 +470,7 @@ import { site } from '../data/site';
         }
         if (!response.ok) throw new Error(result.error || 'Checkout is not ready.');
         renderCart(result.cart);
+        markCartCheckout(localStorage, result.cart.id);
         window.location.assign(result.checkoutUrl);
       })
       .catch((error) => {
@@ -484,9 +482,17 @@ import { site } from '../data/site';
   window.addEventListener('pageshow', event => {
     if (event.persisted) void initializeCart();
   });
-  async function initializeCart() {
-    await loadCart();
-    if (deliveryForm && !deliveryForm.hidden) await loadDeliveryCalendar();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && localStorage.getItem(CART_CHECKOUT_KEY)) void initializeCart();
+  });
+  let initializingCart: Promise<void> | undefined;
+  function initializeCart(): Promise<void> {
+    if (initializingCart) return initializingCart;
+    initializingCart = (async () => {
+      await loadCart();
+      if (deliveryForm && !deliveryForm.hidden) await loadDeliveryCalendar();
+    })().finally(() => { initializingCart = undefined; });
+    return initializingCart;
   }
   void initializeCart();
 </script>
