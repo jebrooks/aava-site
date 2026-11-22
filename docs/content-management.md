@@ -166,8 +166,7 @@ by phone**, and normalizes older **Reston Metro** drafts to **Reston Town Center
 `Tentative fulfillment address` is present only for board bookings. These values are rendered
 through explicit escaped notification fields, not interpreted as a confirmed itinerary.
 
-The board's dedicated $0 fulfillment method is **Provided on your tour — pickup arranged by
-phone**. Do not introduce home delivery, the ordinary board-delivery calendar or native public
+The board's dedicated $0 fulfillment method is **Charcuterie provided on your tour — pickup arranged by phone**. Do not introduce home delivery, the ordinary board-delivery calendar or native public
 warehouse pickup. The dedicated rate's eligibility uses **product status ACTIVE** and **variant title ENDS_WITH
 On tour**. It has no product-type or tag requirement. The reserved **Fulfillment** option must
 remain the final product option so generated variant titles end in **On tour**; merchant option

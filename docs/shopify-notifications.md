@@ -79,8 +79,7 @@ signed or that an automated signature workflow exists.
 ### Tentative boarding destination in the physical-board rollout
 
 All pickup preferences remain tentative and arranged by phone. A booking with a separately sold
-board can show a boarding fulfillment address and the $0 method **Provided on your tour — pickup
-arranged by phone**; it must not imply home-board delivery or a confirmed meeting curb. With no
+board can show a boarding fulfillment address and the $0 method **Charcuterie provided on your tour — pickup arranged by phone**; it must not imply home-board delivery or a confirmed meeting curb. With no
 preference/Arrange by phone, NorthSide Social is that board booking's tentative default only.
 Keep the customer informed that the final arrangement will be made by phone.
 

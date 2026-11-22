@@ -109,7 +109,7 @@ in the results report; they do not establish correctness after configuration.
 The owner approved supplying the actual or tentative Virginia boarding destination for a
 separately sold board. The implementation makes **On tour boards physical**, keeps food
 taxable, and fulfills them through a dedicated legitimate bus location with the exact $0
-method **Provided on your tour — pickup arranged by phone**. Tour seats/whole-bus service remain
+method **Charcuterie provided on your tour — pickup arranged by phone**. Tour seats/whole-bus service remain
 non-shipping and exempt. The private preparation address is not a public pickup location; no
 native public warehouse pickup or home-board delivery calendar is introduced.
 
