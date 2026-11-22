@@ -10,6 +10,7 @@ import {
 } from "../src/lib/tour-fulfillment.ts";
 import { tourBookingService } from "../src/lib/shopify/tour-booking.ts";
 import { DEFAULT_TOUR_PICKUP, TOUR_PICKUP_ADDRESSES, TOUR_DELIVERY_METHOD_TITLE } from '../src/data/tour-options.ts';
+import { boardAttributes, getBoardConfiguration } from '../src/lib/board-customization.ts';
 const base = {
   tourType: "public",
   guests: 2,
@@ -397,7 +398,7 @@ test('a board without a pickup preference uses a visible tentative default witho
     const { state, service } = fixture();
     await service.checkout({ ...base, pickup, snack: 'charcuterie', boardVariantId: sourceId, boardQuantity: 1 });
     assert.equal(state.cartInput.attributes.find(a => a.key === 'Pickup preference').value, pickup || 'No preference');
-    for (const attributes of [state.cartInput.attributes, ...state.cartInput.lines.map(line => line.attributes)]) {
+    for (const attributes of [state.cartInput.attributes, state.cartInput.lines[0].attributes]) {
       assert.match(attributes.find(a => a.key === 'Tentative fulfillment address').value, /NorthSide Social.*3211 Wilson Blvd/);
       assert.match(attributes.find(a => a.key === 'Pickup arrangements').value, /No preference is fine.*phone.*default address is tentative.*not a confirmed meeting point/);
     }
@@ -434,7 +435,7 @@ test('private custom board pickup requires a complete Virginia address and prese
   assert.equal(address.provinceCode, 'VA');
   assert.ok(!JSON.stringify(state.cartInput).includes(DEFAULT_TOUR_PICKUP));
   assert.match(state.cartInput.attributes.find(a => a.key === 'Custom pickup address').value, /123 Test Street.*Arlington.*22205/);
-  assert.equal(state.cartInput.lines[1].attributes.find(a => a.key === 'Pickup arrangements').value,
+  assert.equal(state.cartInput.lines[0].attributes.find(a => a.key === 'Pickup arrangements').value,
     'Your pickup preference is tentative — we’ll confirm the meeting point by phone.');
 });
 
@@ -456,7 +457,7 @@ test('tour board availability carries variant counts and product fallback counts
   const single = await service.availability('public', 2);
   assert.equal(single.addons[0].servingLabel, 'Serves 10');
 });
-test("only the tour line includes destination; board fulfillment is clear for public and private tours", async () => {
+test("tour details stay on the tour line and order; board lines contain only board details", async () => {
   for (const tourType of ["public", "private"]) {
     const { state, service } = fixture();
     await service.checkout({
@@ -468,15 +469,16 @@ test("only the tour line includes destination; board fulfillment is clear for pu
     });
     const tourAttributes = state.cartInput.lines[0].attributes;
     const boardAttributes = state.cartInput.lines[1].attributes;
-    const destination = { key: "Destination", value: "To coordinate by phone" };
-    assert.ok(tourAttributes.some(a => a.key === destination.key && a.value === destination.value));
-    assert.ok(state.cartInput.attributes.some(a => a.key === destination.key && a.value === destination.value));
-    assert.ok(!boardAttributes.some(a => a.key === "Destination"));
-    assert.ok(!boardAttributes.some(a => a.key === "Tour food fulfillment"));
-    assert.deepEqual(boardAttributes.find(a => a.key === "Fulfillment"), {
-      key: "Fulfillment", value: "Provided on the bus",
-    });
-    assert.equal(boardAttributes.find(a => a.key === "Tour date").value, base.date);
+    for (const key of ['Tour date', 'Tour type', 'Guest count', 'Destination', 'Snack',
+      'Pickup preference', 'Pickup arrangements', 'Tentative fulfillment address']) {
+      const saved = state.cartInput.attributes.find(a => a.key === key);
+      assert.ok(saved?.value, key);
+      assert.deepEqual(tourAttributes.find(a => a.key === key), saved, key);
+    }
+    assert.deepEqual(boardAttributes, [
+      { key: 'Serves', value: '4' },
+      { key: 'Fulfillment', value: 'Provided on the bus' },
+    ]);
   }
 });
 test("forged or direct On tour variant IDs cannot bypass catalog board selection", async () => {
@@ -493,8 +495,8 @@ test("forged or direct On tour variant IDs cannot bypass catalog board selection
     );
   assert.equal(state.cartInput, null);
 });
-test("build-your-own boards enforce the same ingredient rules as normal ordering", async () => {
-  const { product, syncProduct, service } = fixture();
+test("build-your-own boards retain ingredient choices without tour properties", async () => {
+  const { state, product, syncProduct, service } = fixture();
   product.handle = "build-your-own-board-small";
   syncProduct.handle = product.handle;
   await assert.rejects(
@@ -506,6 +508,18 @@ test("build-your-own boards enforce the same ingredient rules as normal ordering
     }),
     /Choose ingredients/,
   );
+  const config = getBoardConfiguration(product.handle);
+  const boardSelections = {
+    preference: 'With meat', cheeses: config.cheeses.slice(0, 2),
+    meats: config.meats.slice(0, 1), accompaniments: config.accompaniments.slice(0, 5),
+  };
+  await service.checkout({ ...base, snack: 'charcuterie', boardVariantId: sourceId,
+    boardQuantity: 1, boardSelections });
+  assert.deepEqual(state.cartInput.lines[1].attributes, [
+    ...boardAttributes(product.handle, boardSelections),
+    { key: 'Serves', value: '4' },
+    { key: 'Fulfillment', value: 'Provided on the bus' },
+  ]);
 });
 test("warnings, lost lines, changed prices or quantities and wrong physical line kinds block handoff", async () => {
   for (const mode of [

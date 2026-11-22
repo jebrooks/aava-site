@@ -39,7 +39,9 @@ Board properties are created in `src/lib/board-customization.ts`, `src/lib/servi
 
 Render one tour section when the saved order attribute `attributes['Tour date']` is nonblank.
 Use order-level attributes for the complete booking: tour line properties contain only a
-subset, and a bundle component's quantity is not a passenger count.
+subset, and a bundle component's quantity is not a passenger count. On-tour board lines carry
+serving count, fulfillment and custom ingredients; read booking details from the root attributes
+or seat/bus line rather than expecting them on the board line.
 
 The customer section uses these nonblank saved attributes:
 
