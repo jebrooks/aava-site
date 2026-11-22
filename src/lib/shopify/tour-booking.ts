@@ -303,11 +303,14 @@ export function tourBookingService(deps: TourBookingDependencies) {
         "Guest count",
         "Destination",
         "Snack",
-        "Pickup preference",
         "Pickup arrangements",
         "Tentative fulfillment address",
       ].includes(a.key),
-    );
+    ).map((attribute) => {
+      if (attribute.key !== 'Pickup arrangements' ||
+        booking.pickup === 'No preference' || booking.pickup === 'Arrange by phone') return attribute;
+      return { ...attribute, value: `${booking.customPickup || booking.pickup}: ${attribute.value}` };
+    });
     const prices = new Map([[variant.id, Number(variant.price.amount)]]);
     const physical = new Map([[variant.id, false]]);
     const lines = [

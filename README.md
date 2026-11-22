@@ -248,7 +248,9 @@ before handing the cart to Shopify; it must not fall back to home delivery or al
 
 Contact details, meal/pickup preferences, requests, passenger count, and acknowledgment timestamps
 are saved as cart attributes for Shopify order details. Tour booking details also appear on
-the dated seat/bus line; board lines retain only serving count, fulfillment and customizations.
+the dated seat/bus line; its single Pickup arrangements field includes a chosen location when supplied,
+while the raw Pickup preference stays in order attributes. Board lines retain only serving count,
+fulfillment and customizations.
 Existing carts/checkouts keep their saved metadata; create a new booking checkout to see the
 reduced board summary. Client drafts use tab-scoped session storage with a two-hour expiration; personal
 details are never put in the booking URL. The tour flow does not alter the ordinary delivery

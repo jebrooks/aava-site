@@ -435,8 +435,8 @@ test('private custom board pickup requires a complete Virginia address and prese
   assert.equal(address.provinceCode, 'VA');
   assert.ok(!JSON.stringify(state.cartInput).includes(DEFAULT_TOUR_PICKUP));
   assert.match(state.cartInput.attributes.find(a => a.key === 'Custom pickup address').value, /123 Test Street.*Arlington.*22205/);
-  assert.equal(state.cartInput.lines[0].attributes.find(a => a.key === 'Pickup arrangements').value,
-    'Your pickup preference is tentative — we’ll confirm the meeting point by phone.');
+  assert.match(state.cartInput.lines[0].attributes.find(a => a.key === 'Pickup arrangements').value,
+    /123 Test Street.*Arlington.*22205: Your pickup preference is tentative.*phone/);
 });
 
 test('tour board checkout rejects missing, paid, extra, changed or non-tour delivery choices', async () => {
@@ -470,7 +470,7 @@ test("tour details stay on the tour line and order; board lines contain only boa
     const tourAttributes = state.cartInput.lines[0].attributes;
     const boardAttributes = state.cartInput.lines[1].attributes;
     for (const key of ['Tour date', 'Tour type', 'Guest count', 'Destination', 'Snack',
-      'Pickup preference', 'Pickup arrangements', 'Tentative fulfillment address']) {
+      'Pickup arrangements', 'Tentative fulfillment address']) {
       const saved = state.cartInput.attributes.find(a => a.key === key);
       assert.ok(saved?.value, key);
       assert.deepEqual(tourAttributes.find(a => a.key === key), saved, key);
@@ -479,6 +479,24 @@ test("tour details stay on the tour line and order; board lines contain only boa
       { key: 'Serves', value: '4' },
       { key: 'Fulfillment', value: 'Provided on the bus' },
     ]);
+  }
+});
+test('one pickup arrangements line covers default, phone, and chosen locations', async () => {
+  for (const tourType of ['public', 'private']) {
+    for (const pickup of ['', 'Arrange by phone', 'Ballston Metro']) {
+      for (const snack of ['none', 'charcuterie']) {
+        const { state, service } = fixture();
+        await service.checkout({ ...base, tourType, pickup, snack,
+          ...(snack === 'charcuterie' ? { boardVariantId: sourceId, boardQuantity: 1 } : {}) });
+        const attributes = state.cartInput.lines[0].attributes;
+        assert.ok(!attributes.some(a => a.key === 'Pickup preference'));
+        const arrangements = attributes.filter(a => a.key === 'Pickup arrangements');
+        assert.equal(arrangements.length, 1);
+        assert.match(arrangements[0].value, /phone/);
+        if (pickup === 'Ballston Metro') assert.match(arrangements[0].value, /^Ballston Metro:/);
+        assert.equal(state.cartInput.attributes.find(a => a.key === 'Pickup preference').value, pickup || 'No preference');
+      }
+    }
   }
 });
 test("forged or direct On tour variant IDs cannot bypass catalog board selection", async () => {
