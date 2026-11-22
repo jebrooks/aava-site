@@ -79,7 +79,7 @@ already-open Shopify checkouts are left untouched. Do not delete old products or
 
 The approved correction makes separately sold On tour boards physical at the actual/tentative
 Virginia boarding destination, using server-only `SHOPIFY_TOUR_BOARD_LOCATION_ID` and the exact
-$0 method **Provided on your tour — pickup arranged by phone**. Tour seat/bus service remains
+$0 method **Charcuterie provided on your tour — pickup arranged by phone**. Tour seat/bus service remains
 non-shipping/non-taxable, food remains taxable, and the customer's real billing stays separate.
 All pickup preferences are tentative and arranged by phone; only board bookings use the
 NorthSide Social tentative default when no location preference is supplied. Tour-only and

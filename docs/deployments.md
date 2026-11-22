@@ -99,8 +99,7 @@ prototype and subsequent live rollout are recorded separately in the
 
 1. Create the dedicated bus/On tour board fulfillment location with the legitimate preparation
    address. Keep public pickup and local delivery disabled there. Configure the separate
-   zero-cost Virginia-only board fulfillment method with the exact title **Provided on your
-   tour — pickup arranged by phone**; it must not offer customer home delivery. Its eligibility
+   zero-cost Virginia-only board fulfillment method with the exact title **Charcuterie provided on your tour — pickup arranged by phone**; it must not offer customer home delivery. Its eligibility
    is product status ACTIVE plus variant title ENDS_WITH **On tour**, with no product-type/tag
    requirement. Preserve **Fulfillment** as the final option so titles match; fail closed if
    merchant reordering makes the intended rate unavailable.

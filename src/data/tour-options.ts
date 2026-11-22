@@ -12,7 +12,7 @@ export const PICKUP_LOCATIONS = [
 ] as const;
 export const DEFAULT_TOUR_PICKUP = "NorthSide Social, Clarendon";
 export const TOUR_DELIVERY_METHOD_TITLE =
-  "Provided on your tour — pickup arranged by phone";
+  "Charcuterie provided on your tour — pickup arranged by phone";
 export const TOUR_PICKUP_ARRANGEMENTS =
   "Tentative — we’ll contact you by phone to confirm pickup arrangements.";
 export const TOUR_BOARD_FULFILLMENT_ARRANGEMENTS =

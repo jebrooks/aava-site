@@ -200,8 +200,7 @@ prices, not a separate tour price list. Generated `Fulfillment = On tour` counte
 source options, prices, serving counts and taxability; board selections are validated when booking; normal catalog pages hide
 them and the ordinary cart API rejects them. The approved rollout makes these boards physical
 and fulfills them at the tour's actual or tentative Virginia boarding destination, using the
-dedicated bus fulfillment location and zero-cost method **Provided on your tour — pickup
-arranged by phone**. Tour seats/bus service remain non-shipping and non-taxable. The buyer's
+dedicated bus fulfillment location and zero-cost method **Charcuterie provided on your tour — pickup arranged by phone**. Tour seats/bus service remain non-shipping and non-taxable. The buyer's
 real billing address stays separate. No home-board delivery calendar or public warehouse pickup
 is introduced. The isolated native prototype passed Virginia/DC/Maryland billing with the
 same Virginia food tax and $0 fulfillment. Historical prototype observations and subsequent
