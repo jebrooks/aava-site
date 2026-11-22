@@ -4,6 +4,21 @@ Shopify owns tax registrations, product taxability, overrides and checkout calcu
 passes the correct products, fulfillment/delivery context and order properties; maintain tax
 rules in Shopify rather than hardcoding a rate in the cart.
 
+## Virginia-only delivery reconfirmed — November 22, 2026
+
+At the owner's request, the temporary restoration of DC delivery was reversed. Exactly these
+DC ZIPs were removed from `delivery_schedule/default.eligible_zips`: `20001`, `20003`, `20005`,
+`20006`, `20007`, `20008`, `20009`, `20024`, `20036`, `20037`. Only that field was patched,
+112 → 102; all remaining ZIPs and their order (including Virginia 20598), every other schedule
+field and the full shared blackout object were preserved. The native Local Delivery - D.C.
+(Zone 5) was removed, leaving the original four Virginia zones unchanged.
+
+Saved configuration readback and public read-only eligibility checks confirmed all ten DC ZIPs
+ineligible and Virginia controls 22205 and 20598 eligible. No tax settings, inventory, orders,
+payments or emails were changed. Virginia food/tour tax treatment remains as documented below.
+DC delivery is not offered; enabling DC tax collection or reinstating a DC delivery zone is
+not part of routine maintenance under the current service-area decision.
+
 ## Business facts and working treatment
 
 The owner confirmed on November 21, 2026 that the business is registered in Virginia, prepares

@@ -63,7 +63,9 @@ Local delivery → the fulfillment location**, using delivery zones. Keep those 
 with this schedule. The confirmed service area is 102 Virginia ZIPs in both native delivery
 and `delivery_schedule/default.eligible_zips`. The ten DC codes were removed from both while
 preserving Virginia 20598; the 120-day horizon and shared blackouts were unchanged. Maintain
-both ZIP lists together for future service-area edits. Keep unsupported-ZIP guidance inviting
+both ZIP lists together for future service-area edits. The owner reconfirmed Virginia-only
+delivery on November 22, 2026; the temporary restoration of the ten historical DC ZIPs was
+reversed in both settings. Saved settings and public eligibility were verified again. Keep unsupported-ZIP guidance inviting
 customers to call **714-715-9836** to ask about delivery; a phone discussion does not mark a ZIP
 eligible or bypass saving/checkout validation.
 
