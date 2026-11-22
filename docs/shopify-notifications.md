@@ -11,6 +11,26 @@ bundle handling, payment filtering, tax/discount calculations, gift-card recipie
 status links. Do not replace a current template with an older backup: Shopify can change its
 default markup and payment handling. Keep customer data and private email links out of Git.
 
+## Customer email branding
+
+The customer **Order confirmation** and **New gift card** templates use the black footer board
+logo, a faint regional-map background, burgundy `#8a1538` pill buttons, Montserrat body text and
+Marcellus headings. These styles are saved in Shopify notification HTML; deploying the site's
+CSS does not update them. Keep them aligned with `src/styles/global.css` when the brand changes.
+
+Shopify → **Content → Files** hosts `all-aboard-footer-logo-black.png` and
+`gift-card-region-background.png`. Maintain their image URLs in the templates. The map is
+already washed out in the image itself: Shopify's email formatter removes CSS transparency
+overlays. Keep order summaries and customer information on white, with a white fallback when
+the background image is unavailable. The fonts use version-pinned Fontsource files; email apps
+that block web fonts fall back to Arial for body text and Georgia for headings. Do not turn
+dynamic order details into images to force a font.
+
+Preserve delivery date/window/timezone properties, the saved tour section and tentative
+on-tour handoff wording while changing presentation. Validate ordinary delivery, on-tour food,
+tour-only, gift-only and pending-payment branches, then save, reload and compare the source.
+Shopify's generic preview uses sample data and does not prove real notification delivery.
+
 ## Saved delivery and board details
 
 Both order notifications must show these nonblank physical-board line properties:
