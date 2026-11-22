@@ -206,6 +206,10 @@ check before merging. Vercel production deployments should continue to track onl
 
 ### Cart count after checkout
 
+During checkout handoff the cart shows **Validating your cart…**, followed by
+**Opening secure checkout…** with checkout disabled until navigation. The **Resume checkout**
+button and ready-to-resume help appear only when viewing a saved, unfinished cart.
+
 The cart page records the saved cart ID in the browser's `aava-shopify-checkout-cart-id`
 marker immediately before handing off to Shopify. On the first visible return to any site
 page, the header consumes that marker and makes one read through `/api/cart`. There is no
