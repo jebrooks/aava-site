@@ -6,6 +6,8 @@ import type { ShopifyProduct } from '../../../lib/shopify/types';
 import { DEFAULT_PRODUCT_IMAGE } from '../../../lib/product-image';
 import BoardCustomizer from '../../../components/BoardCustomizer.astro';
 import GiftCardRecipient from '../../../components/GiftCardRecipient.astro';
+import FoodCare from '../../../components/FoodCare.astro';
+import GiftCardTerms from '../../../components/GiftCardTerms.astro';
 import GiftCardPriceGuide from '../../../components/GiftCardPriceGuide.astro';
 import { servingCount, variantServingLabel } from '../../../lib/serving-size';
 
@@ -84,6 +86,7 @@ const productSchema = product && initialVariant ? {
           <div class="product-description" set:html={product.descriptionHtml} />
 
           {product.isGiftCard && <GiftCardPriceGuide />}
+          {product.isGiftCard ? <GiftCardTerms /> : <FoodCare />}
 
           <form class="product-form" data-product-form data-product-handle={handle} data-product-serving-count={product.servingCount?.value || ''} data-variants={JSON.stringify(variants)}>
             {variants.length > 1 ? (
