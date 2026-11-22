@@ -48,6 +48,12 @@ without assigned product categories. Enabling ZIPs does not configure DC collect
   excludes separately stated transportation when it occurs after the sale. Confirm that the
   business's actual $20 delivery charge and sale timing qualify; the Virginia 0% override does
   not establish a DC exemption. Other service/handling charges can have different treatment.
+- Resolve Arlington meals-tax reporting/credits with the Commissioner of Revenue before choosing
+  a combined collection result. [Arlington Code 65-3(C)](https://www.arlingtonva.us/files/sharedassets/public/v/5/county-board/documents/code/ch.-65-meals-food-and-beverage-taxation.pdf)
+  provides a conditional credit for similar tax actually paid to DC, with proof and limits.
+  Do not assume DC delivery automatically eliminates Arlington liability or simply add 5% to
+  the DC 10%. Virginia state interstate-delivery exemption is separate
+  ([23VAC10-210-780](https://law.lis.virginia.gov/admincode/title23/agency10/chapter210/section780/)).
 - Verify unpaid DC delivery tax estimates after authorized tax setup, including real DC delivery
   with Virginia/DC billing, and regress Virginia delivery and Virginia on-tour food sourcing.
   Reconcile DC returns/remittances on the account's assigned filing schedule. The screen shows
