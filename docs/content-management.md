@@ -324,6 +324,13 @@ Cleaning & Damage section; booking links directly to `/experience-guide#cleaning
 Use `./scripts/fetch-assets.sh` only when refreshing migrated source images, and review resulting
 binary changes.
 
+Food storage and serving guidance appears in `src/components/FoodCare.astro` on food product
+pages, the FAQ, and the food-waiver snapshot in `src/data/policies.json`. Keep refrigeration,
+two-hour consumption (including travel time), and separately packed bread/cracker guidance aligned.
+Tour preparation and pre-departure communication copy lives in the Experience Guide and FAQ.
+Staff coordinate by phone and email details before departure; these pages do not promise an
+automated 72-hour packet or day-before SMS.
+
 ### Gift cards
 
 Manage native gift-card products, amounts, descriptions, and images in Shopify → Products.
@@ -332,6 +339,13 @@ Headless storefront. The site uses Shopify’s native `isGiftCard` flag; no tags
 are needed. The Gift Cards navigation and homepage/charcuterie links go to `/gift-certificates`,
 which redirects to the first native gift card in the collection’s manual order. If unavailable
 or unconfigured, the page offers a gift-certificate inquiry instead.
+
+Shared storefront redemption terms live in `src/components/GiftCardTerms.astro` and the FAQ:
+no expiry, code at checkout, partial redemption with the remaining balance usable later,
+non-refundable and no cash redemption. Shopify owns the actual expiry settings; the current
+no-expiry setting was confirmed during content review. Keep storefront terms aligned with any
+approved setting or policy change. Outstanding legacy certificates require staff balance
+verification and assistance; the site does not automatically import or reconcile them.
 
 Gift-card amount choices are read directly from the product's Shopify variants and sorted by
 price; add or remove denominations in Shopify, with no code change needed. The price guide on
