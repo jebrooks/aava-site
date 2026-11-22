@@ -96,6 +96,12 @@ when the production hostname changes. Displaying a waiver link or a recorded boo
 acknowledgment does not establish signed-waiver collection; do not claim that a waiver was
 signed or that an automated signature workflow exists.
 
+Tasting fees are not part of the Shopify booking payment. If notification or staff follow-up
+copy discusses them, state that customers pay wineries directly on tour day and that winery
+payment/refund policies apply. Do not promise card-on-file billing, advance collection or
+payment to wineries by All ABoard VA. Repository deployments do not update Shopify templates;
+review their current source before making a separately authorized notification edit.
+
 ### Tentative boarding destination in the physical-board rollout
 
 All pickup preferences remain tentative and arranged by phone. A booking with a separately sold

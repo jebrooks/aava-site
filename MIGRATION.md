@@ -70,7 +70,9 @@ catalog completeness, fulfillment, gift-certificate reconciliation, payments, an
 4. **Email marketing:** reconcile newsletter consent and destination lists before retiring old forms.
 5. **Content scope:** review every source route for migration, redirect, or retirement. Private-tour
    minimum and tasting-fee policy discrepancies are reconciled to the approved rules: no minimum
-   private-tour guest count (maximum 10) and a 48-hour tasting-fee refund cutoff.
+   private-tour guest count (maximum 10). The November 22, 2026 tasting-fee amendment
+   supersedes the former collection/refund rule: customers pay wineries directly on tour day
+   under each winery’s payment/refund policies.
 6. **Hosting:** verify Vercel variables for **both Preview and Production**, redeploy after changes,
    and confirm production cron security, webhooks, logs, domain assignment, and DNS cutover.
 

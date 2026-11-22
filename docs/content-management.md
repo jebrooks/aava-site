@@ -318,7 +318,11 @@ behavior tests. Keep internal links relative so reviewers stay on the preview ho
 Policies are checked-in snapshots with source provenance. Preserve approved wording unless the
 task authorizes a policy change. Approved amendments retain source/capture provenance and record
 `amendedAt` and `amendmentNote`. Private tours have no minimum guest count (maximum 10); the
-approved tasting-fee refund cutoff is 48 hours.
+tasting-fee policy approved November 22, 2026 requires customers to pay wineries directly
+on tour day. Winery payment and refund policies apply; the former All ABoard VA tasting-fee
+collection/refund cutoff is superseded. Keep the cancellation policy, FAQ, guide, booking copy
+and gift price guide aligned. New bookings record terms version `2026-11-22`; existing order
+acknowledgments and history are not rewritten.
 Policy pages display the wording; they do not independently collect signed waivers.
 The `cleaning-damage` snapshot in `src/data/policies.json` supplies the Experience Guide’s
 Cleaning & Damage section; booking links directly to `/experience-guide#cleaning-damage`.
