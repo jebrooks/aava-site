@@ -288,7 +288,7 @@ import { site } from '../data/site';
     return row;
   }
 
-  function renderCart(value: ShopifyCart | null) {
+  function renderCart(value: ShopifyCart | null, { openingCheckout = false } = {}) {
     const cart = value || {
       id: '', checkoutUrl: '', totalQuantity: 0, attributes: [], lines: { nodes: [] },
       cost: {
@@ -344,11 +344,13 @@ import { site } from '../data/site';
       selectedDelivery.hidden = true;
     }
     if (checkout) {
-      checkout.textContent = locked ? 'Resume checkout' : 'Continue to secure checkout';
-      checkout.disabled = !customerLines.length ||
+      checkout.textContent = openingCheckout ? 'Opening secure checkout…' : locked ? 'Resume checkout' : 'Continue to secure checkout';
+      checkout.disabled = openingCheckout || !customerLines.length ||
         (needsDelivery && !hasSavedWindow);
     }
-    if (cartStatus) cartStatus.textContent = customerLines.length && needsDelivery && !hasSavedWindow
+    if (cartStatus) cartStatus.textContent = openingCheckout
+      ? 'Opening secure checkout…'
+      : customerLines.length && needsDelivery && !hasSavedWindow
       ? 'Choose a delivery window before checkout.'
       : locked && customerLines.length
         ? 'Your checkout is ready to resume. Your saved delivery window will be checked again before continuing.'
@@ -469,7 +471,7 @@ import { site } from '../data/site';
           return;
         }
         if (!response.ok) throw new Error(result.error || 'Checkout is not ready.');
-        renderCart(result.cart);
+        renderCart(result.cart, { openingCheckout: true });
         markCartCheckout(localStorage, result.cart.id);
         window.location.assign(result.checkoutUrl);
       })
