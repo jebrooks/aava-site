@@ -4,65 +4,22 @@ Shopify owns tax registrations, product taxability, overrides and checkout calcu
 passes the correct products, fulfillment/delivery context and order properties; maintain tax
 rules in Shopify rather than hardcoding a rate in the cart.
 
-## DC delivery restoration — November 22, 2026
+## Virginia-only delivery reconfirmed — November 22, 2026
 
-This supersedes the earlier Virginia-only delivery scope below; Virginia tour-board handoff
-remains unchanged. The owner authorized restoring the exact historical ten DC ZIPs. The
-schedule was read before mutation and only `eligible_zips` was patched, 102 → 112, preserving
-all existing ZIP order, every other delivery field and the complete blackout object. Native
-Local Delivery - D.C. (Zone 5) was restored at its historical $20 fee and $0 minimum. Reload
-and edit-dialog readback confirmed all ten ZIPs; the four Virginia zones retain their original
-16/22/6/58 counts and $5/$15/$10/$20 fees. The exact DC list is recorded in the
-[content guide](content-management.md#delivery-schedule--delivery_scheduledefault).
+At the owner's request, the temporary restoration of DC delivery was reversed. Exactly these
+DC ZIPs were removed from `delivery_schedule/default.eligible_zips`: `20001`, `20003`, `20005`,
+`20006`, `20007`, `20008`, `20009`, `20024`, `20036`, `20037`. Only that field was patched,
+112 → 102; all remaining ZIPs and their order (including Virginia 20598), every other schedule
+field and the full shared blackout object were preserved. The native Local Delivery - D.C.
+(Zone 5) was removed, leaving the original four Virginia zones unchanged.
 
-Read-only requests to `https://aava-site.vercel.app/api/delivery/availability?zip=...` returned
-eligible with slots for each restored DC ZIP and unchanged Virginia controls 22205 and 20598.
-Unlisted DC 20002 remained ineligible. No orders, checkout completion or emails were created.
-This verifies schedule eligibility and saved native zone configuration, not DC tax calculation.
+Saved configuration readback and public read-only eligibility checks confirmed all ten DC ZIPs
+ineligible and Virginia controls 22205 and 20598 eligible. No tax settings, inventory, orders,
+payments or emails were changed. Virginia food/tour tax treatment remains as documented below.
+DC delivery is not offered; enabling DC tax collection or reinstating a DC delivery zone is
+not part of routine maintenance under the current service-area decision.
 
-### DC tax follow-up (investigation only; no tax settings changed)
-
-The current Shopify Tax screen lists only Virginia collection (Missing ID), the Virginia-only
-11% prepared-food collection override and Virginia-only 0% shipping override. No DC registration
-or override is configured. Admin API inspection found all 22 active board products taxable and
-without assigned product categories. Enabling ZIPs does not configure DC collection.
-
-- Confirm existing DC registration; if absent, register the business's Sales and Use Tax account
-  through [OTR / FR-500](https://otr.cfo.dc.gov/page/new-business-registration). Confirm the real
-  delivery model with OTR: its [FAQ](https://otr.cfo.dc.gov/page/sales-and-use-tax-faqs) states
-  delivery by employees or independent contractors creates physical presence regardless of a DC
-  location; remote-seller thresholds do not exempt those deliveries. Registration status and
-  delivery staffing are not established by the Virginia registration or the ZIP configuration.
-- DC's definition expressly includes party platters and caterers as prepared food
-  ([DC Code 47-2001(g-1)](https://code.dccouncil.gov/us/dc/council/code/sections/47-2001)).
-  The [FY2027 OTR instructions](https://otr.cfo.dc.gov/sites/default/files/dc/sites/otr/documents/2027%20FR800MQA%20instructions%20v1.0.pdf)
-  apply 10% to prepared food/caterer sales. That strongly supports 10% for these ready-to-eat
-  charcuterie platters; confirm the actual offerings with OTR or the accountant before setup.
-  Do not classify them as ordinary groceries or reuse the Virginia 11% override for DC.
-- After registration, add District of Columbia and the actual tax ID in Shopify's US collection
-  settings per [Shopify setup](https://help.shopify.com/en/manual/taxes/us/us-tax-setup).
-  Assign the appropriate prepared-food categories and verify calculation. If categories do not
-  produce the confirmed treatment, use a DC-specific manual collection override; overrides
-  take precedence over categories ([Shopify overrides](https://help.shopify.com/en/manual/taxes/tax-overrides)).
-- Determine the delivery-fee base: [DC Code 47-2001(p)(2)(E)](https://code.dccouncil.gov/us/dc/council/code/sections/47-2001)
-  excludes separately stated transportation when it occurs after the sale. Confirm that the
-  business's actual $20 delivery charge and sale timing qualify; the Virginia 0% override does
-  not establish a DC exemption. Other service/handling charges can have different treatment.
-- Resolve Arlington meals-tax reporting/credits with the Commissioner of Revenue before choosing
-  a combined collection result. [Arlington Code 65-3(C)](https://www.arlingtonva.us/files/sharedassets/public/v/5/county-board/documents/code/ch.-65-meals-food-and-beverage-taxation.pdf)
-  provides a conditional credit for similar tax actually paid to DC, with proof and limits.
-  Do not assume DC delivery automatically eliminates Arlington liability or simply add 5% to
-  the DC 10%. Virginia state interstate-delivery exemption is separate
-  ([23VAC10-210-780](https://law.lis.virginia.gov/admincode/title23/agency10/chapter210/section780/)).
-- Verify unpaid DC delivery tax estimates after authorized tax setup, including real DC delivery
-  with Virginia/DC billing, and regress Virginia delivery and Virginia on-tour food sourcing.
-  Reconcile DC returns/remittances on the account's assigned filing schedule. The screen shows
-  Shopify Tax calculation, not proof of automated filing/remittance. Shopify's
-  [Shop/managed-tax guidance](https://help.shopify.com/en/manual/taxes/us/navigating-us-tax-regulations)
-  distinguishes marketplace/managed arrangements; do not assume an Astro/Headless sale is a
-  marketplace-remitted sale merely because it uses Shopify checkout.
-
-## Business facts and working treatment (November 21 history)
+## Business facts and working treatment
 
 The owner confirmed on November 21, 2026 that the business is registered in Virginia, prepares
 ready-to-eat charcuterie platters as catering in Arlington, and intends Virginia-only delivery
@@ -141,7 +98,7 @@ does not mark an address eligible or bypass schedule/checkout validation.
 
 The unpaid estimates below all used Virginia shipping and do not verify DC delivery taxes.
 The Virginia food override is not a DC-delivery tax rule; DC destinations are now outside the
-configured delivery area at that time; the November 22 restoration above supersedes that boundary.
+configured delivery area.
 
 ## Historical unpaid estimates before physical-board correction
 

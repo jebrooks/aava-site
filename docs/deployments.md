@@ -134,9 +134,9 @@ broader than the initial active migration: its observed plan included 69 targets
 members, with 25 inactive targets; review the actual dry run before routine maintenance.
 
 Do not introduce a home-delivery calendar into booking or enable native public warehouse
-pickup. Ordinary-board delivery zones remain separate. The ten historical DC ZIPs were restored
-to native delivery and the authoritative schedule on November 22, 2026, retaining all 102 Virginia
-ZIPs including 20598. DC tax configuration remains a separate follow-up. Maintain both settings together
+pickup. Ordinary-board delivery zones remain separate; the owner authorized removing the ten
+DC ZIPs from both native delivery and the authoritative schedule while retaining Virginia 20598;
+the recorded save/readback and native checkout checks passed. Maintain both settings together
 for any future service-area change. See [tax maintenance](virginia-tax-maintenance.md) and
 [pickup ownership](content-management.md#tour-pickup-addresses-and-phone-coordination).
 

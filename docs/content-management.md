@@ -60,15 +60,12 @@ reservation product is added to the cart. The legacy `daily_capacity` field is i
 
 ZIP-based delivery fees are maintained separately in **Settings → Shipping and delivery →
 Local delivery → the fulfillment location**, using delivery zones. Keep those ZIP codes aligned
-with this schedule. On November 22, 2026 the owner restored the historical ten DC ZIPs to both
-native Local Delivery - D.C. (Zone 5), at its historical $20 fee, and
-`delivery_schedule/default.eligible_zips`: `20001`, `20003`, `20005`, `20006`, `20007`, `20008`,
-`20009`, `20024`, `20036`, `20037`. The current area is 112 ZIPs: those ten plus the unchanged
-102 Virginia ZIPs, including 20598. The 120-day horizon, 24-hour lead time, weekly windows and
-shared blackouts were preserved. Eligibility does not establish DC tax readiness; see the
-[DC restoration and tax follow-up](virginia-tax-maintenance.md#dc-delivery-restoration--november-22-2026).
-Maintain
-both ZIP lists together for future service-area edits. Keep unsupported-ZIP guidance inviting
+with this schedule. The confirmed service area is 102 Virginia ZIPs in both native delivery
+and `delivery_schedule/default.eligible_zips`. The ten DC codes were removed from both while
+preserving Virginia 20598; the 120-day horizon and shared blackouts were unchanged. Maintain
+both ZIP lists together for future service-area edits. The owner reconfirmed Virginia-only
+delivery on November 22, 2026; the temporary restoration of the ten historical DC ZIPs was
+reversed in both settings. Saved settings and public eligibility were verified again. Keep unsupported-ZIP guidance inviting
 customers to call **714-715-9836** to ask about delivery; a phone discussion does not mark a ZIP
 eligible or bypass saving/checkout validation.
 
