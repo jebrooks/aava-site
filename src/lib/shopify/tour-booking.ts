@@ -343,7 +343,6 @@ export function tourBookingService(deps: TourBookingDependencies) {
         merchandiseId: onTour.id,
         quantity: booking.boardQuantity,
         attributes: [
-          ...lineAttributes.filter((attribute) => attribute.key !== "Destination"),
           ...selections,
           ...servingAttributes(board, addon),
           {
