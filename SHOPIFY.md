@@ -12,7 +12,7 @@ see [Virginia tax maintenance](docs/virginia-tax-maintenance.md).
 1. Create the Shopify store and complete legal business, payout, tax, notification, refund, and
    policy settings.
 2. Add the Arlington fulfillment location and configure Shopify local delivery for the approved
-   Northern Virginia ZIP codes and fees. Do not enable conventional shipping or public pickup
+   Northern Virginia and selected DC ZIP codes and fees. Do not enable conventional shipping or public pickup
    for the ordinary charcuterie delivery catalog. Physical On tour counterparts use the separate
    approved bus-location/$0 fulfillment rollout below.
 3. Create a manual collection with handle `charcuterie`. Record its GraphQL ID.
