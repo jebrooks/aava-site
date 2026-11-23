@@ -328,7 +328,8 @@ Shopify checkout, and service API URLs remain external.
 are checked-in snapshots in `src/data/policies.json`, with source provenance; production does
 not fetch Squarespace. Approved amendments are recorded alongside source provenance. The
 cancellation policy now reflects no minimum private-tour guest count (maximum 10) and the
-approved 48-hour tasting-fee refund cutoff.
+approved direct payment of tasting fees to wineries on tour day. Winery payment/refund rules
+apply separately from All ABoard VA booking cancellation windows.
 
 Tour planning, custom estimates, booking help, and gift-certificate inquiries use local pages
 and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking

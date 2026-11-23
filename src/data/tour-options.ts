@@ -62,7 +62,7 @@ export const TOUR_PREFERENCES = [
   "Small boutique wineries",
   "Larger lively wineries",
 ] as const;
-export const TOUR_TERMS_VERSION = "2026-11-11";
+export const TOUR_TERMS_VERSION = "2026-11-22";
 export type TourType = (typeof TOUR_TYPES)[number];
 export type TourSnack = (typeof TOUR_SNACKS)[number];
 export interface TourSelection {
