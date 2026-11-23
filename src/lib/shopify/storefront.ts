@@ -79,6 +79,10 @@ const CART_FIELDS = `#graphql
   }
 `;
 
+export function selectSignatureBoards(products: ShopifyProduct[]) {
+  return products.filter((product) => product.tags.includes('category:signature-boards'));
+}
+
 export async function listCharcuterieProducts(pageSize = 50) {
   const products: ShopifyProduct[] = [];
   let collectionDetails: { title: string; description: string } | null = null;
