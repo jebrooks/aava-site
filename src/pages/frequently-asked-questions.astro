@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
 import PageHero from '../components/PageHero.astro';
 export const prerender = false;
 const groups = [
@@ -14,7 +15,8 @@ const groups = [
     ['Is there an age requirement?', 'All tour guests must be at least 21 and bring valid photo identification. Review the <a href="/tour-waiver-release">tour waiver</a> before booking.'],
     ['What happens after booking?', 'We’ll arrange destinations and pickup by phone, then email your itinerary, pickup details, and tasting-fee information before departure. Check your spam folder and <a href="/booking-updates">contact us about your booking</a> if those details are missing.'],
     ['Can you plan something custom?', 'Yes. <a href="/custom-tour-request-for-estimate">Send us your plans</a> and we’ll follow up about a custom outing.'],
-    ['How do I change or cancel a booking?', 'Review the <a href="/cancellation-policy">cancellation policy</a> and <a href="/booking-updates">contact us about your booking</a>. Include your reference and scheduled date so we can help.'],
+    ['How do I cancel a booking or order?', `Call <a href="${site.phoneHref}">${site.phoneDisplay}</a> to cancel a tour reservation or charcuterie order. Have your reference and scheduled date ready. Review the <a href="/cancellation-policy">cancellation policy</a> for deadlines and fees. A form submission or email does not cancel your booking or order.`],
+    ['How do I request a booking change?', 'Use <a href="/booking-updates">booking help</a> for other questions or change requests. Include your reference, scheduled date, and requested change. Changes are subject to availability.'],
   ]},
   { id: 'charcuterie', title: 'Charcuterie and gifts', questions: [
     ['Where can I see the menu and prices?', 'Browse the <a href="/charcuterie-menu">current catalog</a> for available boards, options, and prices.'],
@@ -27,6 +29,7 @@ const groups = [
     ['How do I purchase a gift card?', 'Click <a href="/gift-certificates">Gift Cards</a> in the header navigation to purchase a digital gift card. On mobile, open the menu to find the link. Gift cards can be used for both wine tours and charcuterie orders. Choose an amount, then have it emailed to yourself or sent as a gift.'],
     ['Do gift cards expire, and how do I use them?', 'Gift cards never expire. Enter your digital gift-card code at checkout for tours or charcuterie. Use part of the balance and save the rest for another order; pay any amount above the balance at checkout. Gift cards are non-refundable and not redeemable for cash.'],
     ['Can I still use a gift certificate from the previous website?', '<a href="/contact">Contact us</a> so we can verify your remaining balance and help you use your outstanding certificate.'],
+    ['How do I cancel a charcuterie order?', `Call <a href="${site.phoneHref}">${site.phoneDisplay}</a> with your order reference and delivery date. The deadlines and fees in our <a href="/cancellation-policy">cancellation policy</a> apply. Forms and email do not cancel an order.`],
     ['Where are the full policies?', 'Our <a href="/terms-conditions">Terms & Conditions page</a> links to the cancellation policy, tasting-fee terms, and tour and food waivers.'],
   ]},
 ];

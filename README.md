@@ -332,8 +332,8 @@ approved direct payment of tasting fees to wineries on tour day. Winery payment/
 apply separately from All ABoard VA booking cancellation windows.
 
 Tour planning, custom estimates, booking help, and gift-certificate inquiries use local pages
-and the existing Resend contact endpoint. These are inquiry workflows, not automatic booking
-changes. Gift links use `/gift-certificates` to find a native Shopify gift card in the catalog
+and the existing Resend contact endpoint. These are inquiry workflows for questions and change requests. Cancellations must be made
+by calling the business phone; forms and email do not cancel bookings or orders. Gift links use `/gift-certificates` to find a native Shopify gift card in the catalog
 collection and open its product page, with an inquiry fallback. The old gift-product path
 redirects there only while no matching Shopify product exists. FAQs describe the current region-free booking flow, and Press reuses
 the existing coverage with local images.

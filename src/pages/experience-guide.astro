@@ -1,4 +1,5 @@
 ---
+import CancellationNotice from '../components/CancellationNotice.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
@@ -185,6 +186,7 @@ const tours = [
         <p class="eyebrow">Before you book</p>
         <h2>Policies & waivers</h2>
         <p>Review the current details for cancellations, tastings, food, and travel.</p>
+        <CancellationNotice />
       </div>
       <ul class="policy-list">
         <li><a href={'/cancellation-policy'} target="_blank" rel="noreferrer">Cancellation Policy →</a></li>

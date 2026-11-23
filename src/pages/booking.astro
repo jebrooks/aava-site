@@ -1,4 +1,5 @@
 ---
+import CancellationNotice from '../components/CancellationNotice.astro';
 import BaseLayout from "../layouts/BaseLayout.astro";
 import {
   PICKUP_LOCATIONS,
@@ -339,6 +340,7 @@ export const prerender = false;
               Winery tasting fees are additional and paid directly to wineries on the day of your tour. A travel waiver is required
               before your tour.
             </p>
+            <CancellationNotice />
             <div class="tour-acknowledgments">
               <label>
                 <input type="checkbox" name="ageConfirmed" required />
