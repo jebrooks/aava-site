@@ -96,6 +96,11 @@ when the production hostname changes. Displaying a waiver link or a recorded boo
 acknowledgment does not establish signed-waiver collection; do not claim that a waiver was
 signed or that an automated signature workflow exists.
 
+Cancellation guidance must direct customers to call the business phone (`src/data/site.ts`).
+Booking updates may link to the site help page, which now displays the call instructions;
+forms/email do not cancel orders. Do not promise self-service cancellation. Inspect the
+live customer and staff templates before editing; a repository deployment does not update them.
+
 Tasting fees are not part of the Shopify booking payment. If notification or staff follow-up
 copy discusses them, state that customers pay wineries directly on tour day and that winery
 payment/refund policies apply. Do not promise card-on-file billing, advance collection or

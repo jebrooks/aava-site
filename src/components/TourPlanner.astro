@@ -1,4 +1,5 @@
 ---
+import CancellationNotice from "./CancellationNotice.astro";
 
 interface Props {
   source?: string;
@@ -108,6 +109,7 @@ const { source = "tour-preview" } = Astro.props;
         </button>
       </div>
     </form>
+    <CancellationNotice />
     <p class="tour-custom-link">
       Dreaming up something different?{" "}
       <a href={"/custom-tour-request-for-estimate"}>

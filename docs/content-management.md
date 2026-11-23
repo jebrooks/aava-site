@@ -321,8 +321,13 @@ task authorizes a policy change. Approved amendments retain source/capture prove
 tasting-fee policy approved November 22, 2026 requires customers to pay wineries directly
 on tour day. Winery payment and refund policies apply; the former All ABoard VA tasting-fee
 collection/refund cutoff is superseded. Keep the cancellation policy, FAQ, guide, booking copy
-and gift price guide aligned. New bookings record terms version `2026-11-22`; existing order
+and gift price guide aligned. New bookings record terms version `2026-11-23`; existing order
 acknowledgments and history are not rewritten.
+Cancellations are made by calling the current business phone in `src/data/site.ts`. Shared
+call guidance lives in `src/components/CancellationNotice.astro` (including the shared tour planner); keep the policy snapshot and
+FAQ aligned. Booking-help forms and email handle other questions/change requests and do not
+cancel reservations or orders. The November 23, 2026 channel amendment leaves deadlines/fees
+unchanged; no business hours, voicemail or receipt-time rules are defined here.
 Policy pages display the wording; they do not independently collect signed waivers.
 The `cleaning-damage` snapshot in `src/data/policies.json` supplies the Experience Guide’s
 Cleaning & Damage section; booking links directly to `/experience-guide#cleaning-damage`.
