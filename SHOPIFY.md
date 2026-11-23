@@ -15,7 +15,9 @@ see [Virginia tax maintenance](docs/virginia-tax-maintenance.md).
    Northern Virginia ZIP codes and fees. Do not enable conventional shipping or public pickup
    for the ordinary charcuterie delivery catalog. Physical On tour counterparts use the separate
    approved bus-location/$0 fulfillment rollout below.
-3. Create a manual collection with handle `charcuterie`. Record its GraphQL ID.
+3. Create a manual collection with handle `charcuterie`. Record its GraphQL ID. For the
+   Signature Boards showcase, add the exact product tag `category:signature-boards` to matching
+   products in Charcuterie, published to Headless; see [membership maintenance](docs/content-management.md#signature-boards).
 4. Create a custom storefront/publication and a Storefront API token with product, inventory, and
    cart access. Record the publication GraphQL ID.
 5. Create a Dev Dashboard Admin API app with the minimum scopes needed for products, inventory,

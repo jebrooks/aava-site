@@ -13,12 +13,13 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Tour operating days, notice, horizon, enabled state, prices | Shopify → Content → Metaobjects → Tour schedule, handle `default` | No; reconcile generated date products after edits |
 | Business closures for both tours and delivery | Shopify → Content → Metaobjects → Blackout dates → Business blackout dates | No; availability checks use the list directly; catalog reconciliation follows |
 | Products, descriptions, product images, variants, prices, inventory | Shopify → Products; charcuterie collection and Headless publication | No; verify storefront visibility |
+| Signature Boards section membership and order | Shopify → Products, tag `category:signature-boards`; order follows Charcuterie | No; keep products in Charcuterie and Headless |
 | Serving counts | Shopify product/variant `custom.serving_count`; see Serving sizes below | No |
 | Ingredients, allergens, dietary labels, preparation hours | Shopify product metafields under `custom` | No |
 | Order confirmation and staff new-order email templates | Shopify → Settings → Notifications | No; verify actual received emails |
 | Custom-board request recipient and staff email content | `src/data/site.ts` and `src/lib/custom-board-request.ts`; Resend sender in server environment | Yes for code; redeploy after environment edits |
 | Marketing copy, FAQs, inquiry prompts, page-specific SEO | Matching files in `src/pages/`; shared components in `src/components/` | Yes |
-| Company contact details, navigation, social links, featured boards | `src/data/site.ts` | Yes |
+| Company contact details, navigation, social links | `src/data/site.ts` | Yes |
 | Build-your-own ingredient options and size limits | `src/data/board-customizations.json` | Yes |
 | Tour pickup venue/station names and full base addresses, sandwiches, preferences, terms version | `src/data/tour-options.ts` | Yes |
 | Policy and waiver wording | `src/data/policies.json`, rendered by policy pages | Yes |
@@ -27,8 +28,29 @@ Repository changes go through the [PR and deployment workflow](deployments.md).
 | Local images | `public/images/` and their component/page references | Yes |
 
 Product metafields are fields attached to products, distinct from the four metaobject types below.
-Featured-board links and images are curated in code even though the linked product is managed in
-Shopify. Editing a product does not automatically update that curated showcase.
+The Signature Boards showcase uses the same Shopify products as the full menu, including their
+links, images, prices and serving counts.
+
+## Signature Boards
+
+The `/charcuterie#signature` section displays every storefront-visible **Charcuterie** product
+with the exact tag **`category:signature-boards`**. Add/remove that tag in Shopify Products to
+maintain membership, preserving other tags. Keep products in Charcuterie and published to the
+configured Headless storefront. Card order follows the Charcuterie collection order; there is
+no separate Signature Boards collection or duplicate product/variant/inventory record.
+
+Current membership was verified from the live legacy `/charcuterie#signature-boards` section on
+November 23, 2026: Great American Graze; Bright & Bold; Meadow & Mediterranean; Touch of Gold;
+Bright & Lovely Brunch Board; Holy Smoke; Plant-Based Perfection. Brunch gained the category tag
+and Dessert Board lost it; Dessert remains in the full menu. Future approved assortment changes
+belong in Shopify tags, not a hardcoded website list.
+
+The site loads the paginated Charcuterie catalog and filters its tags without an eight-card limit.
+The existing delivery-product projection hides On tour counterparts. An empty or unavailable
+catalog, or no matching tagged products, shows an unavailable notice with full-menu/contact links;
+it never substitutes arbitrary products or static recipes. `npm run test:catalog` covers exact
+tag selection, more than eight matches and empty results. Verify `/charcuterie#signature` and
+`/charcuterie-menu` after tag/publication edits.
 
 ## Shopify metaobjects
 

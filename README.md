@@ -92,7 +92,7 @@ scripts/
   fetch-assets.sh      Asset refresh helper
 src/
   components/          Shared header, footer, buttons, and page hero
-  data/site.ts         Contact details, navigation, social links, featured boards
+  data/site.ts         Contact details, navigation, social links
   lib/shopify/         Storefront/Admin clients, carts, scheduling, and synchronization
   lib/custom-board-request.ts  Custom-board request email and staff invoice link
   layouts/             SEO and document shell
@@ -125,6 +125,9 @@ payment readiness, or DNS cutover; use [MIGRATION.md](MIGRATION.md) for the rema
 Use [Content management](docs/content-management.md) as the authoritative editing guide. It maps
 Shopify announcements, delivery schedules, tour schedules, shared blackouts, products/metafields,
 and repository-owned content to their editing locations and verification steps.
+
+The Signature Boards showcase filters the Charcuterie catalog by Shopify product tag `category:signature-boards`. Keep those products in Charcuterie and Headless; see
+[tag maintenance](docs/content-management.md#signature-boards).
 
 Shopify-managed content generally needs no redeployment, but schedule changes require catalog
 reconciliation. Repository content changes go through a PR and Vercel preview. Do not rerun setup

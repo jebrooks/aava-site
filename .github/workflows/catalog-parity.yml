@@ -59,6 +59,8 @@ jobs:
       - name: Test relative links
         run: npm run test:links
 
+      - name: Test signature tag selection
+        run: npm run test:catalog
       - name: Build the site
         run: npm run build
 

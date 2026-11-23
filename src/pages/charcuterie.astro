@@ -3,9 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
 import Button from '../components/Button.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { featuredBoards } from '../data/site';
 import { isShopifyConfigured } from '../lib/shopify/config';
-import { listCharcuterieProducts } from '../lib/shopify/storefront';
+import { listCharcuterieProducts, selectSignatureBoards } from '../lib/shopify/storefront';
 import type { ShopifyProduct } from '../lib/shopify/types';
 
 let shopifyProducts: ShopifyProduct[] = [];
@@ -16,6 +15,7 @@ if (isShopifyConfigured()) {
     console.error('Unable to load the Shopify charcuterie collection.', error);
   }
 }
+const signatureProducts = selectSignatureBoards(shopifyProducts);
 const quickPick = shopifyProducts.find((product) =>
   product.handle === 'chefs-choice-charcuterie' || product.tags.includes('quick-pick'));
 ---
@@ -82,28 +82,16 @@ const quickPick = shopifyProducts.find((product) =>
           board or one with meat, in sizes made for sharing.
         </p>
       </div>
-      {shopifyProducts.length ? (
+      {signatureProducts.length ? (
         <div class="product-grid">
-          {shopifyProducts.slice(0, 8).map((product) => <ProductCard product={product} />)}
+          {signatureProducts.map((product) => <ProductCard product={product} />)}
         </div>
       ) : (
-        <div class="product-grid">
-          {featuredBoards.map((board) => (
-            <a class="product-card" href={board.href}>
-              <img src={board.image} alt={board.name} width="1000" height="1000" loading="lazy" />
-              <div class="product-card__body">
-                <h3>{board.name}</h3>
-                <p>View board →</p>
-              </div>
-            </a>
-          ))}
-        </div>
+        <p class="note">Signature boards are currently unavailable. Explore the full menu or <a href="/contact">contact us</a> for help choosing a board.</p>
       )}
-      {shopifyProducts.length > 0 && (
-        <div class="button-row button-row--center catalog-cta">
-          <Button href="/charcuterie-menu">Shop the full menu</Button>
-        </div>
-      )}
+      <div class="button-row button-row--center catalog-cta">
+        <Button href="/charcuterie-menu">Shop the full menu</Button>
+      </div>
     </div>
   </section>
 
