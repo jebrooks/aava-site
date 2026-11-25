@@ -76,10 +76,28 @@ const isActive = (href: string) =>
   });
 
   menu?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+  const menuIsOpen = () => toggle?.getAttribute('aria-expanded') === 'true';
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && toggle?.getAttribute('aria-expanded') === 'true') {
+    if (!menuIsOpen() || !toggle || !menu) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
       closeMenu();
       toggle.focus();
+    } else if (event.key === 'Tab') {
+      const lastLink = [...menu.querySelectorAll<HTMLAnchorElement>('a[href]')].at(-1);
+      if (event.shiftKey && document.activeElement === toggle && lastLink) {
+        event.preventDefault();
+        lastLink.focus();
+      } else if (!event.shiftKey && document.activeElement === lastLink) {
+        event.preventDefault();
+        toggle.focus();
+      }
+    }
+  });
+  // Also contain focus moved by assistive technology or other page scripts.
+  document.addEventListener('focusin', (event) => {
+    if (menuIsOpen() && event.target instanceof Node && event.target !== toggle && !menu?.contains(event.target)) {
+      toggle?.focus();
     }
   });
   window.addEventListener('resize', () => {
