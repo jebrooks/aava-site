@@ -8,6 +8,7 @@ import { press } from '../data/press';
 <BaseLayout>
   <PageHero
     image="/images/hero-home.webp"
+    cropped
     title="Wine tours. Tasty boards. Lasting memories."
     description="Thoughtfully curated experiences made for slowing down, connecting, and savoring Virginia."
   >
@@ -138,3 +139,10 @@ import { press } from '../data/press';
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  :global(.page-hero__content h1) {
+    font-size: clamp(2rem, 5.4vw, 4.5rem);
+  }
+
+</style>
